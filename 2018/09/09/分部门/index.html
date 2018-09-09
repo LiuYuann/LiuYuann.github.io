@@ -108,17 +108,18 @@
 
 
 
-  <meta name="description" content="tags:  - 测试题 - 字节跳动  12345678910111213141516171819202122232425262728293031323334353637import sysa = int(sys.stdin.readline().strip())data = []for i in range(a):	l = sys.stdin.readline().strip().split(">
+  <meta name="description" content="上下左右相邻为一个部门，输出部门数量12345678910111213141516171819202122232425262728293031323334353637import sysa = int(sys.stdin.readline().strip())data = []for i in range(a):	l = sys.stdin.readline().strip().split(&amp;ap">
+<meta name="keywords" content="测试题 字节跳动">
 <meta property="og:type" content="article">
 <meta property="og:title" content="分部门">
 <meta property="og:url" content="http://yoursite.com/2018/09/09/分部门/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="tags:  - 测试题 - 字节跳动  12345678910111213141516171819202122232425262728293031323334353637import sysa = int(sys.stdin.readline().strip())data = []for i in range(a):	l = sys.stdin.readline().strip().split(">
+<meta property="og:description" content="上下左右相邻为一个部门，输出部门数量12345678910111213141516171819202122232425262728293031323334353637import sysa = int(sys.stdin.readline().strip())data = []for i in range(a):	l = sys.stdin.readline().strip().split(&amp;ap">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-09-09T05:11:22.979Z">
+<meta property="og:updated_time" content="2018-09-09T05:17:21.629Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="分部门">
-<meta name="twitter:description" content="tags:  - 测试题 - 字节跳动  12345678910111213141516171819202122232425262728293031323334353637import sysa = int(sys.stdin.readline().strip())data = []for i in range(a):	l = sys.stdin.readline().strip().split(">
+<meta name="twitter:description" content="上下左右相邻为一个部门，输出部门数量12345678910111213141516171819202122232425262728293031323334353637import sysa = int(sys.stdin.readline().strip())data = []for i in range(a):	l = sys.stdin.readline().strip().split(&amp;ap">
 
 
 
@@ -373,7 +374,7 @@
                 
               
 
-              <time title="创建时间：2018-09-09 12:50:30 / 修改时间：13:11:22" itemprop="dateCreated datePublished" datetime="2018-09-09T12:50:30+08:00">2018-09-09</time>
+              <time title="创建时间：2018-09-09 12:50:30 / 修改时间：13:17:21" itemprop="dateCreated datePublished" datetime="2018-09-09T12:50:30+08:00">2018-09-09</time>
             
 
             
@@ -411,11 +412,7 @@
       
 
       
-        <p>tags: </p>
-<pre><code>- 测试题
-- 字节跳动
-</code></pre><hr>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line">a = int(sys.stdin.readline().strip())</span><br><span class="line">data = []</span><br><span class="line">for i in range(a):</span><br><span class="line">	l = sys.stdin.readline().strip().split(&apos; &apos;)</span><br><span class="line">	data.append(l)</span><br><span class="line">d = []</span><br><span class="line">i = 0</span><br><span class="line">print(data)</span><br><span class="line">while i &lt; a:</span><br><span class="line">	j = 0</span><br><span class="line">	while j &lt; a:</span><br><span class="line">		if data[i][j] == &apos;1&apos;:</span><br><span class="line">			print(data[i][j])</span><br><span class="line">			if d != []:</span><br><span class="line">				k = 0</span><br><span class="line">				while k &lt; len(d):</span><br><span class="line">					if (i - 1, j) in d[k]:</span><br><span class="line">						d[k].append((i, j))</span><br><span class="line">						break</span><br><span class="line">					elif (i, j - 1) in d[k]:</span><br><span class="line">						d[k].append((i, j))</span><br><span class="line">						break</span><br><span class="line">					elif (i, j + 1) in d[k]:</span><br><span class="line">						d[k].append((i, j))</span><br><span class="line">						break</span><br><span class="line">					elif (i + 1, j) in d[k]:</span><br><span class="line">						d[k].append((i, j))</span><br><span class="line">						break</span><br><span class="line">					k += 1</span><br><span class="line">				if k==len(d):</span><br><span class="line">					d.append([(i, j)])</span><br><span class="line">			else:</span><br><span class="line">				d.append([(i, j)])</span><br><span class="line">		j += 1</span><br><span class="line">	i += 1</span><br><span class="line">print(len(d))</span><br></pre></td></tr></table></figure>
+        <p>上下左右相邻为一个部门，输出部门数量<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line">a = int(sys.stdin.readline().strip())</span><br><span class="line">data = []</span><br><span class="line">for i in range(a):</span><br><span class="line">	l = sys.stdin.readline().strip().split(&apos; &apos;)</span><br><span class="line">	data.append(l)</span><br><span class="line">d = []</span><br><span class="line">i = 0</span><br><span class="line">print(data)</span><br><span class="line">while i &lt; a:</span><br><span class="line">	j = 0</span><br><span class="line">	while j &lt; a:</span><br><span class="line">		if data[i][j] == &apos;1&apos;:</span><br><span class="line">			print(data[i][j])</span><br><span class="line">			if d != []:</span><br><span class="line">				k = 0</span><br><span class="line">				while k &lt; len(d):</span><br><span class="line">					if (i - 1, j) in d[k]:</span><br><span class="line">						d[k].append((i, j))</span><br><span class="line">						break</span><br><span class="line">					elif (i, j - 1) in d[k]:</span><br><span class="line">						d[k].append((i, j))</span><br><span class="line">						break</span><br><span class="line">					elif (i, j + 1) in d[k]:</span><br><span class="line">						d[k].append((i, j))</span><br><span class="line">						break</span><br><span class="line">					elif (i + 1, j) in d[k]:</span><br><span class="line">						d[k].append((i, j))</span><br><span class="line">						break</span><br><span class="line">					k += 1</span><br><span class="line">				if k==len(d):</span><br><span class="line">					d.append([(i, j)])</span><br><span class="line">			else:</span><br><span class="line">				d.append([(i, j)])</span><br><span class="line">		j += 1</span><br><span class="line">	i += 1</span><br><span class="line">print(len(d))</span><br></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -433,6 +430,12 @@
     
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/测试题-字节跳动/" rel="tag"># 测试题 字节跳动</a>
+          
+        </div>
       
 
       
@@ -452,6 +455,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/09/最长不重复字符串/" rel="prev" title="最长不重复字符串">
+                最长不重复字符串 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -516,7 +523,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -524,6 +531,19 @@
 
               
 
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">标签</span>
+                  
+                </div>
               
             </nav>
           
