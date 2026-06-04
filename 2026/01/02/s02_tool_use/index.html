@@ -1,0 +1,330 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>s02: Tool Use — 多加一个工具，只加一行 | 刘元的技术博客</title><meta name="author" content="刘元"><meta name="copyright" content="刘元"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="中文 · English · 日本語 s01 → s02 → s03 → s04 → … → s20  “加一个工具, 只加一个 handler” — 循环不用动, 新工具注册进 dispatch map 就行。 Harness 层: 工具分发 — 扩展模型能触达的边界。   只有 bash 一个工具s01 的 Agent 只有一个 bash 工具。读文件要 cat，写文件要 echo &amp;quot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="s02: Tool Use — 多加一个工具，只加一行">
+<meta property="og:url" content="https://liuyuann.github.io/2026/01/02/s02_tool_use/index.html">
+<meta property="og:site_name" content="刘元的技术博客">
+<meta property="og:description" content="中文 · English · 日本語 s01 → s02 → s03 → s04 → … → s20  “加一个工具, 只加一个 handler” — 循环不用动, 新工具注册进 dispatch map 就行。 Harness 层: 工具分发 — 扩展模型能触达的边界。   只有 bash 一个工具s01 的 Agent 只有一个 bash 工具。读文件要 cat，写文件要 echo &amp;quot">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80">
+<meta property="article:published_time" content="2026-01-02T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-04T08:51:18.845Z">
+<meta property="article:author" content="刘元">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Claude Code">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "s02: Tool Use — 多加一个工具，只加一行",
+  "url": "https://liuyuann.github.io/2026/01/02/s02_tool_use/",
+  "image": "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80",
+  "datePublished": "2026-01-02T02:00:00.000Z",
+  "dateModified": "2026-06-04T08:51:18.845Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "刘元",
+      "url": "https://liuyuann.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://liuyuann.github.io/2026/01/02/s02_tool_use/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 's02: Tool Use — 多加一个工具，只加一行',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">刘元的技术博客</span></a><a class="nav-page-title" href="/"><span class="site-name">s02: Tool Use — 多加一个工具，只加一行</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">s02: Tool Use — 多加一个工具，只加一行</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-01-02T02:00:00.000Z" title="发表于 2026-01-02 10:00:00">2026-01-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-04T08:51:18.845Z" title="更新于 2026-06-04 16:51:18">2026-06-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/learn-claude-code/">learn-claude-code</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>6分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p><a href="README.md">中文</a> · <a href="README.en.md">English</a> · <a href="README.ja.md">日本語</a></p>
+<p>s01 → <code>s02</code> → <a href="../s03_permission/">s03</a> → s04 → … → s20</p>
+<blockquote>
+<p><em>“加一个工具, 只加一个 handler”</em> — 循环不用动, 新工具注册进 dispatch map 就行。</p>
+<p><strong>Harness 层</strong>: 工具分发 — 扩展模型能触达的边界。</p>
+</blockquote>
+<hr>
+<h2 id="只有-bash-一个工具"><a href="#只有-bash-一个工具" class="headerlink" title="只有 bash 一个工具"></a>只有 bash 一个工具</h2><p>s01 的 Agent 只有一个 bash 工具。读文件要 <code>cat</code>，写文件要 <code>echo &quot;...&quot; &gt; file.py</code>，改文件要 <code>sed</code>。</p>
+<p>模型想的是”读这个文件”，却要拼出 <code>cat path/to/file</code>。多了一层翻译，浪费 token，还容易拼错。</p>
+<hr>
+<h2 id="全局视角：工具分发"><a href="#全局视角：工具分发" class="headerlink" title="全局视角：工具分发"></a>全局视角：工具分发</h2><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/tool-dispatch.svg" alt="Tool Dispatch"></p>
+<p>s01 的循环完全保留（LLM 调用、stop_reason 判断、消息追加）。唯一的变动在工具执行那 1 行：<code>run_bash()</code> 替换为 <code>TOOL_HANDLERS[block.name]()</code> 查表分发。</p>
+<p>给 Agent 加一个工具只需要做两件事：</p>
+<ol>
+<li><strong>定义工具</strong>：在 <code>TOOLS</code> 数组里加一条描述</li>
+<li><strong>注册处理函数</strong>：在 <code>TOOL_HANDLERS</code> 字典里加一个映射</li>
+</ol>
+<hr>
+<h2 id="从-1-个工具到-5-个工具"><a href="#从-1-个工具到-5-个工具" class="headerlink" title="从 1 个工具到 5 个工具"></a>从 1 个工具到 5 个工具</h2><p>s01 只有一个 bash：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TOOLS = [&#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;bash&quot;</span>, ...&#125;]</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run_bash</span>(<span class="params">command</span>): ...</span><br></pre></td></tr></table></figure>
+
+<p>s02 加到 5 个，每个工具都是独立定义：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">TOOLS = [</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;bash&quot;</span>,       <span class="string">&quot;description&quot;</span>: <span class="string">&quot;Run a shell command.&quot;</span>, ...&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;read_file&quot;</span>,  <span class="string">&quot;description&quot;</span>: <span class="string">&quot;Read file contents.&quot;</span>,  ...&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;write_file&quot;</span>, <span class="string">&quot;description&quot;</span>: <span class="string">&quot;Write content to file.&quot;</span>, ...&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;edit_file&quot;</span>,  <span class="string">&quot;description&quot;</span>: <span class="string">&quot;Replace text in file once.&quot;</span>, ...&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;glob&quot;</span>,       <span class="string">&quot;description&quot;</span>: <span class="string">&quot;Find files by pattern.&quot;</span>, ...&#125;,</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>每个工具有自己的实现函数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">run_read</span>(<span class="params">path, limit=<span class="literal">None</span></span>):</span><br><span class="line">    lines = safe_path(path).read_text().splitlines()</span><br><span class="line">    <span class="keyword">if</span> limit:</span><br><span class="line">        lines = lines[:limit]</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;\n&quot;</span>.join(lines)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run_write</span>(<span class="params">path, content</span>):</span><br><span class="line">    safe_path(path).write_text(content)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">f&quot;Wrote <span class="subst">&#123;<span class="built_in">len</span>(content)&#125;</span> bytes to <span class="subst">&#123;path&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run_edit</span>(<span class="params">path, old_text, new_text</span>):</span><br><span class="line">    text = safe_path(path).read_text()</span><br><span class="line">    <span class="keyword">if</span> old_text <span class="keyword">not</span> <span class="keyword">in</span> text:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Error: text not found&quot;</span></span><br><span class="line">    safe_path(path).write_text(text.replace(old_text, new_text, <span class="number">1</span>))</span><br><span class="line">    <span class="keyword">return</span> <span class="string">f&quot;Edited <span class="subst">&#123;path&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run_glob</span>(<span class="params">pattern</span>):</span><br><span class="line">    <span class="keyword">import</span> glob <span class="keyword">as</span> g</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;\n&quot;</span>.join(g.glob(pattern, root_dir=WORKDIR))</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="工具分发"><a href="#工具分发" class="headerlink" title="工具分发"></a>工具分发</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">TOOL_HANDLERS = &#123;</span><br><span class="line">    <span class="string">&quot;bash&quot;</span>:       run_bash,</span><br><span class="line">    <span class="string">&quot;read_file&quot;</span>:  run_read,</span><br><span class="line">    <span class="string">&quot;write_file&quot;</span>: run_write,</span><br><span class="line">    <span class="string">&quot;edit_file&quot;</span>:  run_edit,</span><br><span class="line">    <span class="string">&quot;glob&quot;</span>:       run_glob,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 循环里只改了一行——从硬编码 run_bash 变成查表：</span></span><br><span class="line"><span class="keyword">for</span> block <span class="keyword">in</span> response.content:</span><br><span class="line">    <span class="keyword">if</span> block.<span class="built_in">type</span> == <span class="string">&quot;tool_use&quot;</span>:</span><br><span class="line">        handler = TOOL_HANDLERS[block.name]    <span class="comment"># 查表</span></span><br><span class="line">        output = handler(**block.<span class="built_in">input</span>)         <span class="comment"># 调用</span></span><br><span class="line">        results.append(...)</span><br></pre></td></tr></table></figure>
+
+<p>加一个工具 &#x3D; 在 <code>TOOLS</code> 数组加一条 + 在 <code>TOOL_HANDLERS</code> 字典加一行。循环不变。</p>
+<hr>
+<h2 id="多个工具调用"><a href="#多个工具调用" class="headerlink" title="多个工具调用"></a>多个工具调用</h2><p>模型经常一次返回多个 tool_use：”读一下 a.py 和 b.py，然后列出所有 .py 文件”。</p>
+<p>教学版按 <code>response.content</code> 原始顺序逐个执行。CC 的做法更复杂：按原始顺序切成连续 batch，batch 内并发安全的工具并行执行，batch 间严格顺序（见附录）。</p>
+<hr>
+<h2 id="速查"><a href="#速查" class="headerlink" title="速查"></a>速查</h2><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>一句话</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TOOL_HANDLERS</td>
+<td>工具名 → 处理函数的字典。加工具 &#x3D; 加一行映射</td>
+</tr>
+<tr>
+<td>工具定义</td>
+<td>告诉模型”我能做什么”的 JSON schema</td>
+</tr>
+<tr>
+<td>多工具调用</td>
+<td>模型可一次返回多个 tool_use，教学版按原始顺序逐个执行</td>
+</tr>
+<tr>
+<td>循环不变</td>
+<td>s01 的 <code>while True</code> 循环一行都没改</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="相对-s01-的变更"><a href="#相对-s01-的变更" class="headerlink" title="相对 s01 的变更"></a>相对 s01 的变更</h2><table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s01)</th>
+<th>之后 (s02)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>工具数量</td>
+<td>1 (bash)</td>
+<td>5 (+read, write, edit, glob)</td>
+</tr>
+<tr>
+<td>工具执行</td>
+<td>硬编码 <code>run_bash()</code></td>
+<td>TOOL_HANDLERS 查表分发</td>
+</tr>
+<tr>
+<td>路径安全</td>
+<td>无</td>
+<td>safe_path 校验（仅 file tools）</td>
+</tr>
+<tr>
+<td>循环</td>
+<td><code>while True</code> + <code>stop_reason</code></td>
+<td>与 s01 完全一致</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="试一下"><a href="#试一下" class="headerlink" title="试一下"></a>试一下</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> learn-claude-code</span><br><span class="line">python s02_tool_use/code.py</span><br></pre></td></tr></table></figure>
+
+<p>试试这些 prompt：</p>
+<ol>
+<li><code>Read the file README.md and tell me what this project is about</code></li>
+<li><code>Create a file called test.py that prints &quot;hello&quot;, then read it back</code></li>
+<li><code>Find all Python files in this directory</code></li>
+<li><code>Read both README.md and requirements.txt, then create a summary file</code></li>
+</ol>
+<p>观察重点：模型什么时候只调一个工具，什么时候一次调多个？多个工具调用的顺序和结果是否正确？</p>
+<hr>
+<h2 id="接下来"><a href="#接下来" class="headerlink" title="接下来"></a>接下来</h2><p>现在 Agent 有 5 个专用工具。file tools 受 <code>safe_path</code> 保护，但 bash 不受限制，<code>rm -rf /</code> 还是能跑。</p>
+<p>s03 Permission → 在工具执行之前加一道门：这个操作安全吗？需要用户批准吗？</p>
+<details>
+<summary>深入 CC 源码</summary>
+
+<blockquote>
+<p>以下基于 CC 源码 <code>Tool.ts</code>、<code>tools.ts</code>、<code>toolOrchestration.ts</code>、<code>toolExecution.ts</code>、<code>StreamingToolExecutor.ts</code> 的核查。</p>
+</blockquote>
+<h3 id="一、工具定义方式"><a href="#一、工具定义方式" class="headerlink" title="一、工具定义方式"></a>一、工具定义方式</h3><p><strong>教学版</strong>：<code>TOOLS</code> 数组 + <code>TOOL_HANDLERS</code> 字典。定义和实现分开。<br><strong>CC</strong>：每个工具是 <code>buildTool()</code> 创建的独立对象，包含 schema、验证、权限、执行。<code>getAllBaseTools()</code> 汇总所有工具。</p>
+<p>教学版的分离方式对教学更清晰——读者一眼看到”加一个工具 &#x3D; 两条定义”。</p>
+<h3 id="二、并发安全判断：isConcurrencySafe"><a href="#二、并发安全判断：isConcurrencySafe" class="headerlink" title="二、并发安全判断：isConcurrencySafe()"></a>二、并发安全判断：isConcurrencySafe()</h3><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/concurrency-comparison.svg" alt="Tool Concurrency"></p>
+<p>教学版按原始顺序逐个执行，不做并发。CC 用 <code>isConcurrencySafe(input)</code> 判断能否并发——注意这不是简单的”只读 vs 写”，而是按具体输入判断：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>isReadOnly</th>
+<th>isConcurrencySafe</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FileRead</td>
+<td>true</td>
+<td>true</td>
+</tr>
+<tr>
+<td>Glob</td>
+<td>true</td>
+<td>true</td>
+</tr>
+<tr>
+<td>Bash <code>ls</code></td>
+<td>true</td>
+<td><strong>true</strong> ← 关键差异</td>
+</tr>
+<tr>
+<td>Bash <code>rm</code></td>
+<td>false</td>
+<td>false</td>
+</tr>
+<tr>
+<td>TaskCreate</td>
+<td>false</td>
+<td><strong>true</strong> ← 改状态但可并发（TaskCreate 在 s12 介绍）</td>
+</tr>
+</tbody></table>
+<p>CC 的 Bash tool 的 <code>isConcurrencySafe</code> 等于 <code>isReadOnly</code>——只读命令可并发，写命令不可。TaskCreate 虽然改了任务文件，但每次都写不同的文件，所以可以并发。</p>
+<h3 id="三、分区算法"><a href="#三、分区算法" class="headerlink" title="三、分区算法"></a>三、分区算法</h3><p>CC 的 <code>partitionToolCalls()</code>（<code>toolOrchestration.ts:91-115</code>）不是分两组，而是把工具调用<strong>按连续块分批</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[read A, read B, glob *.py, bash &quot;rm x&quot;, read C]</span><br><span class="line">  → batch1(并发): [read A, read B, glob *.py]</span><br><span class="line">  → batch2(串行): [bash &quot;rm x&quot;]</span><br><span class="line">  → batch3(并发): [read C]</span><br></pre></td></tr></table></figure>
+
+<p>并发安全的连续块编入同一个 batch，batch 内真正并发执行（<code>toolOrchestration.ts:152-176</code>，有并发上限）。遇到非并发安全的就开新 batch 串行执行。batch 之间严格顺序。</p>
+<h3 id="四、验证管线"><a href="#四、验证管线" class="headerlink" title="四、验证管线"></a>四、验证管线</h3><p>CC 的每个工具调用经过严格的 5 步验证（<code>toolExecution.ts</code>）：</p>
+<ol>
+<li><strong>Zod schema 验证</strong>（<code>614-680</code>，教学版用 JSON Schema 替代）：参数类型&#x2F;结构检查</li>
+<li><strong>工具级 validateInput()</strong>（<code>682-733</code>）：参数值验证（如路径是否在工作区内）</li>
+<li><strong>PreToolUse hooks</strong>（<code>800-862</code>，s04 详细介绍）：钩子可以返回消息、修改输入、阻止执行</li>
+<li><strong>权限检查</strong>（<code>921-931</code>，s03 的核心内容）：canUseTool + checkPermissions → allow&#x2F;deny&#x2F;ask</li>
+<li><strong>执行 tool.call()</strong>（<code>1207-1222</code>）</li>
+</ol>
+<p>教学版省略了 Zod（用 JSON Schema）、省略了 validateInput（用安全函数）、保留了权限检查和钩子概念。</p>
+<h3 id="五、流式工具执行"><a href="#五、流式工具执行" class="headerlink" title="五、流式工具执行"></a>五、流式工具执行</h3><p>CC 的 <code>StreamingToolExecutor</code>（<code>StreamingToolExecutor.ts</code>）让工具在模型还在生成时就启动——不等模型说完。<code>read_file</code> 可能在模型还在输出”我来分析”的时候就跑完了。教学版不实现这个，目标和 s01 一致——概念清晰，不追求性能极致。</p>
+<h3 id="六、工具结果持久化"><a href="#六、工具结果持久化" class="headerlink" title="六、工具结果持久化"></a>六、工具结果持久化</h3><p>每个工具有一个 <code>maxResultSizeChars</code> 字段。结果超过这个值就落盘，模型看到的是预览 + 文件路径。FileRead 特殊——设为 <code>Infinity</code>，防止读文件的输出又被当成文件落盘。具体来说，如果 FileRead 的结果超过阈值被落盘，模型下次读那个落盘文件时又会触发落盘 → 无限循环（读文件 → 落盘 → 再读 → 再落盘 → …）。</p>
+</details>
+
+<!-- translation-sync: zh@v1, en@v0, ja@v0 -->
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io">刘元</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io/2026/01/02/s02_tool_use/">https://liuyuann.github.io/2026/01/02/s02_tool_use/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://liuyuann.github.io" target="_blank">刘元的技术博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Claude-Code/">Claude Code</a><a class="post-meta__tags" href="/tags/AI-Agent/">AI Agent</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a></div><div class="post-share"><div class="social-share" data-image="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/01/03/s03_permission/" title="s03: Permission — 执行前做权限判断"><img class="cover" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="onerror=null;src='/'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">s03: Permission — 执行前做权限判断</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → … → s20  “工具执行前先做权限判断” — 权限管线决定哪些操作需要审批。 Harness 层: 权限 — 在工具执行前加一道门。   问题s02 的 Agent 有 5 个工具。file tools 受 safe_path 保护，但 bash 不受限制。让它”清理一下项目”，可能执行 rm -rf /。 安全不能靠信任模型，要靠代码——在工具执行之前做判断。  解决方案 s02 的循环完全保留。唯一的变动在工具执行前插入 check_permission()——每个工具调用经过三道闸门，顺序固定：硬拒绝优先，软询问次之，都没命中就放行。 三道闸门对应三种决策：    闸门 作用 命中后    1. 拒绝列表 永远禁止的操作（rm -rf /、sudo） 直接拒绝，不执行   2. 规则匹配 取决于上下文的操作（写工作区外、rm 文件） 交给闸门 3   3. 用户审批 闸门 2 命中后，暂停等用户确认 用户决定允许或拒绝   三道都没命中 → 直接执行。大部分日常操作走这条路...</div></div></div></a><a class="pagination-related" href="/2026/01/01/s01_agent_loop/" title="s01: Agent Loop — 一个循环就够了"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&amp;q=80" onerror="onerror=null;src='/'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">s01: Agent Loop — 一个循环就够了</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → … → s20  “One loop &amp; Bash is all you need” — 一个工具 + 一个循环 &#x3D; 一个 Agent。 Harness 层: 循环 — 模型与真实世界的第一道连接。   问题你提出了一个问题给大模型：“帮我读取下我的目录下有哪些文件，并且执行XXX.py”。 模型能输出一条 bash 命令，但输出完了就停了，它不会自己跑，也不会看到结果后继续推理。 你可以手动跑一遍，把输出粘贴回对话框，让它接着干。下一个命令出来，你再跑一遍、再贴回去。 每一个来回，你都在做中间层。而把它自动化，就是这一章要做的事。  解决方案 一个 while True 循环，模型调用工具就继续，不调用就停。整个过程只有两个信号：    信号 含义 循环动作    stop_reason == &quot;tool_use&quot; 模型举手说”我要用工具” 执行 → 结果喂回去 → 继续   stop_reason != &quot;tool_use&quot; 模型说”...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/01/09/s09_memory/" title="s09: Memory — 压缩会丢细节，要有一层不丢的"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-09</div><div class="info-item-2">s09: Memory — 压缩会丢细节，要有一层不丢的</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s07 → s08 → s09 → s10 → s11 → … → s20  “压缩会丢细节, 要有一层不丢的” — 文件仓库 + 索引 + 按需加载，跨压缩、跨会话。 Harness 层: 记忆 — 跨压缩、跨会话的知识积累。   问题s08 的 autoCompact 会把当前目标、剩余工作、用户约束写进摘要，但细节会丢失：”用 tab 缩进不要用空格”可能被简化成”用户有代码风格偏好”。而且新开一个会话，连摘要也没了。 LLM 没有持久状态，所有信息都在上下文窗口里。上下文满了要压缩，压缩就有损。需要一层不参与压缩、跨会话保留的存储。  解决方案 s08 的压缩管线保留，聚焦记忆。存储选文件系统：.memory/ 目录下，每个记忆一个 .md 文件，带 YAML frontmatter（name &#x2F; description &#x2F; type）。文件多了需要索引：MEMORY.md 一行一个链接，注入 SYSTEM。 关键设计：索引常驻 SYSTEM prompt（可被 prompt cache 缓存）...</div></div></div></a><a class="pagination-related" href="/2026/01/18/s18_worktree_isolation/" title="s18: Worktree Isolation — 各干各的，互不干扰"><img class="cover" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-18</div><div class="info-item-2">s18: Worktree Isolation — 各干各的，互不干扰</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s16 → s17 → s18 → s19 → s20  “各干各的目录, 互不干扰” — 任务管目标, worktree 管目录, 按 ID 绑定。 Harness 层: 隔离 — 并行执行的目录隔离。   问题s17 中，Alice 和 Bob 都在同一个目录下工作。Alice 的任务是”重构认证模块”，Bob 的任务是”重构 UI 登录页”。 Alice write_file(&quot;config.py&quot;, ...)。Bob 也 write_file(&quot;config.py&quot;, ...)。两个人改同一个文件，互相覆盖。而且无法干净地回滚——分不清哪些改动是谁的。 s15-s17 解决了”谁干什么”（任务系统）和”怎么通信”（消息总线），但没解决”在哪干”。  解决方案 Git worktree 让你在同一仓库中创建多个独立的工作目录，每个有自己的分支。Alice 在 .worktrees/auth-refactor/ 下工作，Bob 在 .worktrees/ui-login/ 下工作...</div></div></div></a><a class="pagination-related" href="/2026/01/08/s08_context_compact/" title="s08: Context Compact — 上下文总会满"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-08</div><div class="info-item-2">s08: Context Compact — 上下文总会满</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → s06 → s07 → s08 → s09 → s10 → … → s20  “上下文总会满, 要有办法腾地方” — 四层压缩策略, 便宜的先跑贵的后跑。 Harness 层: 压缩 — 干净的记忆, 无限的会话。   问题Agent 跑着跑着，不动了。 手里有 bash、有 read、有 write，能力是够的。但它读了一个 1000 行的文件（~4000 token），又读了 30 个文件，跑了 20 条命令。每条命令的输出、每个文件的内容，全都堆在 messages 列表里。 上下文窗口是有限的。满了之后，API 直接拒绝：prompt_too_long。 不压缩，Agent 根本没法在大项目里干活。  解决方案 保留 s07 的 hook 结构、技能加载、子 Agent 等骨架，省略部分工具细节以聚焦压缩。核心变动：每轮 LLM 调用前插入三层预处理器（0 API），token 仍超阈值时触发 LLM 摘要（1 API），API 报错时应急裁剪。 核心设计：便宜的先跑，贵的后...</div></div></div></a><a class="pagination-related" href="/2026/01/12/s12_task_system/" title="s12: Task System — 目标太大，拆成小任务"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-12</div><div class="info-item-2">s12: Task System — 目标太大，拆成小任务</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s10 → s11 → s12 → s13 → s14 → … → s20  “大目标拆成小任务, 排好序, 持久化” — 文件持久化的任务图, 多 agent 协作的基础。 Harness 层: 任务 — 持久化的目标, 可恢复的进度。   问题Agent 接到一个项目：搭数据库、写 API、加测试。它用 s05 的 TodoWrite 列了一张清单，然后开始写 API，写到一半发现没数据库表，回头补；加测试时发现 API 接口签名又变了… 盖房子不能先盖屋顶再打地基。任务之间有先后。任务依赖应该形成有向无环图（DAG）；教学版只演示 blockedBy 检查，没有实现环检测。 s05 的 TodoWrite 是当前任务的执行清单，保存在会话内存中。这里需要的是任务系统：每个任务是一个 JSON 文件，任务之间有 blockedBy 依赖，跨会话持久化在磁盘上。  解决方案 教学代码保留基础 agent loop，为聚焦任务系统省略了 S11 的完整错误恢复（RecoveryState、退避、升级、reactive co...</div></div></div></a><a class="pagination-related" href="/2026/01/13/s13_background_tasks/" title="s13: Background Tasks — 慢操作放后台"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-13</div><div class="info-item-2">s13: Background Tasks — 慢操作放后台</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s11 → s12 → s13 → s14 → s15 → … → s20  “慢操作丢后台, agent 继续处理” — 后台线程跑命令, 完成后注入通知。 Harness 层: 后台 — 异步执行, 不阻塞主循环。   问题你用过洗衣机吗？把衣服扔进去，按下启动，然后去干别的——做饭、回消息、看论文。30 分钟后洗衣机”滴滴滴”提醒你：好了。你不会站在洗衣机前面干等 30 分钟。 Agent 的 bash 工具也一样。pip install torch 要 10 分钟，npm run build 要 3 分钟。这些命令一跑，Agent 就在等 bash 工具返回，没法利用这段时间处理别的任务。 读文件是毫秒级，不等。git status 一秒内返回，不等。但 npm install？分钟级。Agent 等 10 分钟什么都不做，而 LLM 按 token 计费，空转就是浪费。  解决方案 教学代码沿用 S12 的简化任务系统和 prompt 组装；为了聚焦后台任务，省略完整错误恢复、记忆和技能系统。唯一的变动：慢操作扔...</div></div></div></a><a class="pagination-related" href="/2026/01/20/s20_comprehensive/" title="s20: Comprehensive Agent — 全部机制归一循环"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-20</div><div class="info-item-2">s20: Comprehensive Agent — 全部机制归一循环</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s18 → s19 → s20  “机制很多，循环一个” — 工具、权限、记忆、任务、团队、插件都挂在同一个 while True 上。 Harness 层: 综合 — 把前 19 章的机制放回同一个可运行系统。   问题前 19 章每章只加一个机制。这样适合学习，但真实 Agent 不会只带一个机制运行。 一个能长期工作的 coding agent 需要同时拥有：  工具分发和权限边界 hooks 扩展点 todo 计划和任务图 技能、记忆、系统 prompt 组装 压缩和错误恢复 后台任务和 cron 调度 团队、协议、自治认领 worktree 隔离 MCP 外部工具接入  难点不是把功能堆起来，而是看清楚它们都挂在循环的哪个位置。S20 就是终点章：把所有组件归位。  解决方案 S20 不是再发明一个新机制，而是把前面的教学组件合成一个完整 harness： 12345678910111213用户输入  → UserPromptSubmit hooks  → cron/background 通知注入  → cont...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="author-info-name">刘元</div><div class="author-info-description">高通 AI 工程师 | LLM Agent 开发者</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" href="/atom.xml"><i class="fas fa-rss"></i><span>订阅</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/LiuYuann" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1903554839@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%AA%E6%9C%89-bash-%E4%B8%80%E4%B8%AA%E5%B7%A5%E5%85%B7"><span class="toc-number">1.</span> <span class="toc-text">只有 bash 一个工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E8%A7%86%E8%A7%92%EF%BC%9A%E5%B7%A5%E5%85%B7%E5%88%86%E5%8F%91"><span class="toc-number">2.</span> <span class="toc-text">全局视角：工具分发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E-1-%E4%B8%AA%E5%B7%A5%E5%85%B7%E5%88%B0-5-%E4%B8%AA%E5%B7%A5%E5%85%B7"><span class="toc-number">3.</span> <span class="toc-text">从 1 个工具到 5 个工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E5%88%86%E5%8F%91"><span class="toc-number">4.</span> <span class="toc-text">工具分发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E4%B8%AA%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">多个工具调用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9F%E6%9F%A5"><span class="toc-number">6.</span> <span class="toc-text">速查</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%AF%B9-s01-%E7%9A%84%E5%8F%98%E6%9B%B4"><span class="toc-number">7.</span> <span class="toc-text">相对 s01 的变更</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%95%E4%B8%80%E4%B8%8B"><span class="toc-number">8.</span> <span class="toc-text">试一下</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E4%B8%8B%E6%9D%A5"><span class="toc-number">9.</span> <span class="toc-text">接下来</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%B7%A5%E5%85%B7%E5%AE%9A%E4%B9%89%E6%96%B9%E5%BC%8F"><span class="toc-number">9.1.</span> <span class="toc-text">一、工具定义方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%B9%B6%E5%8F%91%E5%AE%89%E5%85%A8%E5%88%A4%E6%96%AD%EF%BC%9AisConcurrencySafe"><span class="toc-number">9.2.</span> <span class="toc-text">二、并发安全判断：isConcurrencySafe()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%88%86%E5%8C%BA%E7%AE%97%E6%B3%95"><span class="toc-number">9.3.</span> <span class="toc-text">三、分区算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E9%AA%8C%E8%AF%81%E7%AE%A1%E7%BA%BF"><span class="toc-number">9.4.</span> <span class="toc-text">四、验证管线</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%B5%81%E5%BC%8F%E5%B7%A5%E5%85%B7%E6%89%A7%E8%A1%8C"><span class="toc-number">9.5.</span> <span class="toc-text">五、流式工具执行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%B7%A5%E5%85%B7%E7%BB%93%E6%9E%9C%E6%8C%81%E4%B9%85%E5%8C%96"><span class="toc-number">9.6.</span> <span class="toc-text">六、工具结果持久化</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="大模型（LLMs）面试题全集精选"/></a><div class="content"><a class="title" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选">大模型（LLMs）面试题全集精选</a><time datetime="2026-06-04T12:00:00.000Z" title="发表于 2026-06-04 20:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集"><img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="互联网公司面试题合集"/></a><div class="content"><a class="title" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集">互联网公司面试题合集</a><time datetime="2026-06-04T08:00:00.000Z" title="发表于 2026-06-04 16:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/llm-interview-questions-wiki/" title="大模型（LLMs）面试题全集 — 225 题精解"><img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="大模型（LLMs）面试题全集 — 225 题精解"/></a><div class="content"><a class="title" href="/2026/06/04/llm-interview-questions-wiki/" title="大模型（LLMs）面试题全集 — 225 题精解">大模型（LLMs）面试题全集 — 225 题精解</a><time datetime="2026-06-04T02:00:00.000Z" title="发表于 2026-06-04 10:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/20/s20_comprehensive/" title="s20: Comprehensive Agent — 全部机制归一循环"><img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="s20: Comprehensive Agent — 全部机制归一循环"/></a><div class="content"><a class="title" href="/2026/01/20/s20_comprehensive/" title="s20: Comprehensive Agent — 全部机制归一循环">s20: Comprehensive Agent — 全部机制归一循环</a><time datetime="2026-01-20T02:00:00.000Z" title="发表于 2026-01-20 10:00:00">2026-01-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="s19: MCP Tools — 外接工具，标准协议"/></a><div class="content"><a class="title" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议">s19: MCP Tools — 外接工具，标准协议</a><time datetime="2026-01-19T02:00:00.000Z" title="发表于 2026-01-19 10:00:00">2026-01-19</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2018 - 2026 By 刘元</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

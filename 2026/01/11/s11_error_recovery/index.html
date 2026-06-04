@@ -1,0 +1,417 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>s11: Error Recovery — 错误不是结束 | 刘元的技术博客</title><meta name="author" content="刘元"><meta name="copyright" content="刘元"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="中文 · English · 日本語 s01 → … → s09 → s10 → s11 → s12 → s13 → … → s20  “错误不是终点, 是重试的起点” — 升级 token、压缩上下文、切换模型。 Harness 层: 韧性 — 主循环遇到错误时分类并恢复。   问题Agent 跑着跑着报错了： 1Error: 529 overloaded  Agent 崩溃了。它没有重试，没有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="s11: Error Recovery — 错误不是结束">
+<meta property="og:url" content="https://liuyuann.github.io/2026/01/11/s11_error_recovery/index.html">
+<meta property="og:site_name" content="刘元的技术博客">
+<meta property="og:description" content="中文 · English · 日本語 s01 → … → s09 → s10 → s11 → s12 → s13 → … → s20  “错误不是终点, 是重试的起点” — 升级 token、压缩上下文、切换模型。 Harness 层: 韧性 — 主循环遇到错误时分类并恢复。   问题Agent 跑着跑着报错了： 1Error: 529 overloaded  Agent 崩溃了。它没有重试，没有">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80">
+<meta property="article:published_time" content="2026-01-11T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-04T08:52:07.485Z">
+<meta property="article:author" content="刘元">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Claude Code">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "s11: Error Recovery — 错误不是结束",
+  "url": "https://liuyuann.github.io/2026/01/11/s11_error_recovery/",
+  "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80",
+  "datePublished": "2026-01-11T02:00:00.000Z",
+  "dateModified": "2026-06-04T08:52:07.485Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "刘元",
+      "url": "https://liuyuann.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://liuyuann.github.io/2026/01/11/s11_error_recovery/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 's11: Error Recovery — 错误不是结束',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">刘元的技术博客</span></a><a class="nav-page-title" href="/"><span class="site-name">s11: Error Recovery — 错误不是结束</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">s11: Error Recovery — 错误不是结束</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-01-11T02:00:00.000Z" title="发表于 2026-01-11 10:00:00">2026-01-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-04T08:52:07.485Z" title="更新于 2026-06-04 16:52:07">2026-06-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/learn-claude-code/">learn-claude-code</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>8分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p><a href="README.md">中文</a> · <a href="README.en.md">English</a> · <a href="README.ja.md">日本語</a></p>
+<p>s01 → … → s09 → s10 → <code>s11</code> → <a href="../s12_task_system/">s12</a> → s13 → … → s20</p>
+<blockquote>
+<p><em>“错误不是终点, 是重试的起点”</em> — 升级 token、压缩上下文、切换模型。</p>
+<p><strong>Harness 层</strong>: 韧性 — 主循环遇到错误时分类并恢复。</p>
+</blockquote>
+<hr>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>Agent 跑着跑着报错了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error: 529 overloaded</span><br></pre></td></tr></table></figure>
+
+<p>Agent 崩溃了。它没有重试，没有换模型，没有减少上下文——直接崩溃。</p>
+<p>生产环境中 API 错误是常态。三种最常见的故障模式：<strong>输出被截断</strong>（模型话说一半 token 用完了）、<strong>上下文超限</strong>（压缩后还是太长）、<strong>临时故障</strong>（429 限流 &#x2F; 529 过载）。一个不处理错误的 Agent 就像一个一碰就熄火的车。</p>
+<hr>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/error-recovery-overview.svg" alt="Error Recovery Overview"></p>
+<p>s10 的循环、prompt 组装全部保留。唯一的变动：LLM 调用包裹在 try&#x2F;except 里，根据错误类型走不同的恢复路径。恢复后 <code>continue</code> 回到循环开头重新调用 LLM。</p>
+<p>三种最常见的恢复模式（教学版只处理 429&#x2F;529；真实系统还覆盖连接错误、超时、云厂商认证缓存等。CC 实际有 13+ reason code，其余见 Deep dive）：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>触发</th>
+<th>恢复动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>输出截断</td>
+<td><code>max_tokens</code></td>
+<td>升级 8K→64K &#x2F; 续写提示</td>
+</tr>
+<tr>
+<td>上下文超限</td>
+<td><code>prompt_too_long</code></td>
+<td>reactive compact → 重试</td>
+</tr>
+<tr>
+<td>临时故障</td>
+<td>429 &#x2F; 529</td>
+<td>指数退避 + 抖动，连续 529 可切换备用模型</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><h3 id="路径-1-输出被截断"><a href="#路径-1-输出被截断" class="headerlink" title="路径 1: 输出被截断"></a>路径 1: 输出被截断</h3><p>模型话说一半，<code>max_tokens</code> 用完了。默认 8000 token 不够它输出完整回答。</p>
+<p>第一次发生时，直接把 <code>max_tokens</code> 从 8K 升级到 64K（8 倍空间），重试同一请求——此时不追加截断输出到 messages，保持原始请求不变。如果 64K 还是不够，才保存截断输出并注入续写提示让模型接着刚才的话继续说，最多 3 次：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> response.stop_reason == <span class="string">&quot;max_tokens&quot;</span>:</span><br><span class="line">    <span class="comment"># First escalation: don&#x27;t append truncated output, retry same request</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> state.has_escalated:</span><br><span class="line">        max_tokens = ESCALATED_MAX_TOKENS</span><br><span class="line">        state.has_escalated = <span class="literal">True</span></span><br><span class="line">        <span class="keyword">continue</span>  <span class="comment"># messages unchanged, same request with more tokens</span></span><br><span class="line">    <span class="comment"># 64K still truncated: save output + continuation prompt</span></span><br><span class="line">    messages.append(&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;assistant&quot;</span>, <span class="string">&quot;content&quot;</span>: response.content&#125;)</span><br><span class="line">    <span class="keyword">if</span> state.recovery_count &lt; MAX_RECOVERY_RETRIES:</span><br><span class="line">        messages.append(&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>:</span><br><span class="line">            <span class="string">&quot;Output token limit hit. Resume directly — &quot;</span></span><br><span class="line">            <span class="string">&quot;no apology, no recap. Pick up mid-thought.&quot;</span>&#125;)</span><br><span class="line">        state.recovery_count += <span class="number">1</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">return</span>  <span class="comment"># still truncated after 3 continuations</span></span><br><span class="line"><span class="comment"># Normal: append after max_tokens check</span></span><br><span class="line">messages.append(&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;assistant&quot;</span>, <span class="string">&quot;content&quot;</span>: response.content&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>升级只有一次机会，续写最多 3 次。超过就退出——继续续写也不会有实质产出。</p>
+<h3 id="路径-2-上下文超限"><a href="#路径-2-上下文超限" class="headerlink" title="路径 2: 上下文超限"></a>路径 2: 上下文超限</h3><p>LLM 说”你的上下文太长了”（<code>prompt_too_long</code>）。s08 的四层压缩全跑过了，还是超。</p>
+<p>触发 reactive compact——比 auto compact 更激进。教学版只保留最后 5 条消息模拟压缩效果；真实实现会调用 LLM 生成 compact 摘要再重试。压缩后重试。但如果压缩过一次还是超限，只能退出——再压缩也不会变小：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">except</span> PromptTooLongError:</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> state.has_attempted_reactive_compact:</span><br><span class="line">        messages[:] = reactive_compact(messages)</span><br><span class="line">        state.has_attempted_reactive_compact = <span class="literal">True</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">return</span>  <span class="comment"># 压缩过了还是超限，只能退出</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="路径-3-临时故障"><a href="#路径-3-临时故障" class="headerlink" title="路径 3: 临时故障"></a>路径 3: 临时故障</h3><p>网络抖动、429 限流、529 过载——这些不是 bug，是分布式系统的常态。</p>
+<p>429 和 529 统一走指数退避 + 抖动：第一次等 0.5 秒，第二次等 1 秒，第三次等 2 秒，最多 10 次。加随机抖动让并发请求不在同一时刻重试。连续 3 次 529 过载 → 切换到备用模型（若配置了 <code>FALLBACK_MODEL_ID</code> 环境变量）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">retry_delay</span>(<span class="params">attempt, retry_after=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="keyword">if</span> retry_after:</span><br><span class="line">        <span class="keyword">return</span> retry_after</span><br><span class="line">    base = <span class="built_in">min</span>(<span class="number">500</span> * (<span class="number">2</span> ** attempt), <span class="number">32000</span>) / <span class="number">1000</span></span><br><span class="line">    <span class="keyword">return</span> base + random.uniform(<span class="number">0</span>, base * <span class="number">0.25</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">with_retry</span>(<span class="params">fn, state, max_retries=<span class="number">10</span></span>):</span><br><span class="line">    <span class="keyword">for</span> attempt <span class="keyword">in</span> <span class="built_in">range</span>(max_retries):</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">return</span> fn()</span><br><span class="line">        <span class="keyword">except</span> (RateLimitError, OverloadedError):</span><br><span class="line">            delay = retry_delay(attempt)</span><br><span class="line">            time.sleep(delay)</span><br><span class="line">            <span class="keyword">if</span> is_overloaded:</span><br><span class="line">                state.consecutive_529 += <span class="number">1</span></span><br><span class="line">                <span class="keyword">if</span> state.consecutive_529 &gt;= <span class="number">3</span> <span class="keyword">and</span> FALLBACK_MODEL:</span><br><span class="line">                    state.current_model = FALLBACK_MODEL</span><br><span class="line">    <span class="keyword">raise</span> MaxRetriesExceeded()</span><br></pre></td></tr></table></figure>
+
+<p>退避公式：<code>min(500 × 2^attempt, 32000) + random(0~25%)</code>。如果服务器返回 <code>Retry-After</code> header，优先用那个值。</p>
+<h3 id="合起来跑"><a href="#合起来跑" class="headerlink" title="合起来跑"></a>合起来跑</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">agent_loop</span>(<span class="params">messages, context</span>):</span><br><span class="line">    system = get_system_prompt(context)</span><br><span class="line">    state = RecoveryState()</span><br><span class="line">    max_tokens = <span class="number">8000</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            response = with_retry(</span><br><span class="line">                <span class="keyword">lambda</span>: client.messages.create(</span><br><span class="line">                    model=state.current_model, system=system,</span><br><span class="line">                    messages=messages, tools=TOOLS,</span><br><span class="line">                    max_tokens=max_tokens),</span><br><span class="line">                state)</span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">            <span class="keyword">if</span> is_prompt_too_long_error(e):</span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">not</span> state.has_attempted_reactive_compact:</span><br><span class="line">                    messages[:] = reactive_compact(messages)</span><br><span class="line">                    state.has_attempted_reactive_compact = <span class="literal">True</span></span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">            log_error(e)</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># max_tokens check BEFORE appending to messages</span></span><br><span class="line">        <span class="keyword">if</span> response.stop_reason == <span class="string">&quot;max_tokens&quot;</span>:</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> state.has_escalated:</span><br><span class="line">                max_tokens = <span class="number">64000</span></span><br><span class="line">                state.has_escalated = <span class="literal">True</span></span><br><span class="line">                <span class="keyword">continue</span>  <span class="comment"># retry same request, messages unchanged</span></span><br><span class="line">            <span class="comment"># save truncated output + continuation prompt</span></span><br><span class="line">            messages.append(&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;assistant&quot;</span>, <span class="string">&quot;content&quot;</span>: response.content&#125;)</span><br><span class="line">            messages.append(&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: CONTINUATION_PROMPT&#125;)</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        <span class="comment"># Normal completion</span></span><br><span class="line">        messages.append(&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;assistant&quot;</span>, <span class="string">&quot;content&quot;</span>: response.content&#125;)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> response.stop_reason != <span class="string">&quot;tool_use&quot;</span>:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        <span class="comment"># ... tool execution ...</span></span><br></pre></td></tr></table></figure>
+
+<p>外层 try&#x2F;except 捕获 API 异常（prompt_too_long 等），<code>with_retry</code> 处理瞬态错误（429&#x2F;529），<code>stop_reason</code> 检查处理截断。三种恢复机制各管各的错误类型。</p>
+<hr>
+<h2 id="相对-s10-的变更"><a href="#相对-s10-的变更" class="headerlink" title="相对 s10 的变更"></a>相对 s10 的变更</h2><table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s10)</th>
+<th>之后 (s11)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>错误处理</td>
+<td>无（一碰就崩溃）</td>
+<td>三种恢复模式 + 指数退避</td>
+</tr>
+<tr>
+<td>新常量</td>
+<td>—</td>
+<td>ESCALATED_MAX_TOKENS&#x3D;64000, MAX_RETRIES&#x3D;10, BASE_DELAY_MS&#x3D;500, FALLBACK_MODEL</td>
+</tr>
+<tr>
+<td>新函数</td>
+<td>—</td>
+<td>with_retry, retry_delay, reactive_compact, is_prompt_too_long_error, RecoveryState</td>
+</tr>
+<tr>
+<td>工具</td>
+<td>bash, read_file, write_file (3)</td>
+<td>bash, read_file, write_file (3) — 不变</td>
+</tr>
+<tr>
+<td>循环</td>
+<td>裸调用 LLM</td>
+<td>try&#x2F;except 包裹 + continue 重试</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="试一下"><a href="#试一下" class="headerlink" title="试一下"></a>试一下</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> learn-claude-code</span><br><span class="line">python s11_error_recovery/code.py</span><br></pre></td></tr></table></figure>
+
+<p>试试这些 prompt：</p>
+<ol>
+<li>让 Agent 生成一段很长的代码，观察截断后是否自动续写（看 <code>[max_tokens] escalating</code> 日志）</li>
+<li>连续读取大量文件撑大上下文，观察 reactive compact</li>
+<li>如果遇到 429&#x2F;529，观察指数退避的日志输出</li>
+</ol>
+<hr>
+<h2 id="接下来"><a href="#接下来" class="headerlink" title="接下来"></a>接下来</h2><p>Agent 现在能在错误中自动恢复了。但它处理的任务仍然是”一次性”的——你给它一个任务，它做完，结束。</p>
+<p>能不能让 Agent 管理一个<strong>任务列表</strong>——有依赖关系、持久化到磁盘、跨会话能恢复？TODO 列表不是任务系统。</p>
+<p>s12 Task System → 任务是有依赖、有状态、持久化的图。这是多 Agent 协作的基础。</p>
+<details>
+<summary>深入 CC 源码</summary>
+
+<blockquote>
+<p>以下基于 CC 源码 <code>query.ts</code>（1729 行）、<code>services/api/withRetry.ts</code>（822 行）、<code>query/tokenBudget.ts</code>（93 行）、<code>utils/tokenBudget.ts</code>（73 行）的分析。</p>
+</blockquote>
+<h3 id="一、十几种-reason-transition（不只是-3-条）"><a href="#一、十几种-reason-transition（不只是-3-条）" class="headerlink" title="一、十几种 reason&#x2F;transition（不只是 3 条）"></a>一、十几种 reason&#x2F;transition（不只是 3 条）</h3><p>教学版讲了 3 种最常见的恢复模式。CC 实际有十几种 reason&#x2F;transition，每轮 LLM 调用后都会判断：</p>
+<table>
+<thead>
+<tr>
+<th>reason&#x2F;transition</th>
+<th>教学版对应</th>
+<th>CC 行为</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>completed</code></td>
+<td>正常完成</td>
+<td>返回结果</td>
+</tr>
+<tr>
+<td><code>next_turn</code></td>
+<td>正常工具调用</td>
+<td>继续下一轮工具执行</td>
+</tr>
+<tr>
+<td><code>max_output_tokens_escalate</code></td>
+<td>路径 1</td>
+<td>8K→64K 升级</td>
+</tr>
+<tr>
+<td><code>max_output_tokens_recovery</code></td>
+<td>路径 1 续写</td>
+<td>续写提示（最多 3 次）</td>
+</tr>
+<tr>
+<td><code>reactive_compact_retry</code></td>
+<td>路径 2</td>
+<td>reactive compact → 重试</td>
+</tr>
+<tr>
+<td><code>prompt_too_long</code></td>
+<td>路径 2</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><code>collapse_drain_retry</code></td>
+<td>未展开</td>
+<td>context collapse 先提交暂存</td>
+</tr>
+<tr>
+<td><code>model_error</code></td>
+<td>未展开</td>
+<td>重试</td>
+</tr>
+<tr>
+<td><code>image_error</code></td>
+<td>未展开</td>
+<td><code>ImageSizeError</code> &#x2F; <code>ImageResizeError</code> 专门处理</td>
+</tr>
+<tr>
+<td><code>aborted_streaming</code></td>
+<td>未展开</td>
+<td>流式中止恢复</td>
+</tr>
+<tr>
+<td><code>aborted_tools</code></td>
+<td>未展开</td>
+<td>工具中止</td>
+</tr>
+<tr>
+<td><code>stop_hook_blocking</code></td>
+<td>未展开</td>
+<td>注入 blocking error → 模型自纠</td>
+</tr>
+<tr>
+<td><code>stop_hook_prevented</code></td>
+<td>未展开</td>
+<td>hooks 阻止</td>
+</tr>
+<tr>
+<td><code>hook_stopped</code></td>
+<td>未展开</td>
+<td>hook 停止执行</td>
+</tr>
+<tr>
+<td><code>token_budget_continuation</code></td>
+<td>未展开</td>
+<td>token 用量 &lt; 90% 时继续</td>
+</tr>
+<tr>
+<td><code>blocking_limit</code></td>
+<td>未展开</td>
+<td>阻塞限制</td>
+</tr>
+<tr>
+<td><code>max_turns</code></td>
+<td>未展开</td>
+<td>达到最大轮次</td>
+</tr>
+</tbody></table>
+<p>教学版只展开了前 5 种（最常见的），其余各有专门处理逻辑。</p>
+<h3 id="二、指数退避的精确公式"><a href="#二、指数退避的精确公式" class="headerlink" title="二、指数退避的精确公式"></a>二、指数退避的精确公式</h3><p>CC 的退避延迟（<code>withRetry.ts:530-548</code>）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">delay = min(500 × 2^(attempt-1), 32000) + random(0~25%)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>尝试</th>
+<th>基础延迟</th>
+<th>+ 抖动</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>500ms</td>
+<td>0-125ms</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1000ms</td>
+<td>0-250ms</td>
+</tr>
+<tr>
+<td>4</td>
+<td>4000ms</td>
+<td>0-1000ms</td>
+</tr>
+<tr>
+<td>7+</td>
+<td>32000ms（上限）</td>
+<td>0-8000ms</td>
+</tr>
+</tbody></table>
+<p>如果服务器返回 <code>Retry-After</code> header，优先用那个值。</p>
+<h3 id="三、CONTINUATION-提示原文"><a href="#三、CONTINUATION-提示原文" class="headerlink" title="三、CONTINUATION 提示原文"></a>三、CONTINUATION 提示原文</h3><p>CC 的续写提示（<code>query.ts:1225-1227</code>）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Output token limit hit. Resume directly — no apology, no recap of what</span><br><span class="line">you were doing. Pick up mid-thought if that is where the cut happened.</span><br><span class="line">Break remaining work into smaller pieces.</span><br></pre></td></tr></table></figure>
+
+<p>Token budget 的 nudge 提示（<code>tokenBudget.ts:72</code>）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stopped at &#123;pct&#125;% of token target. Keep working — do not summarize.</span><br></pre></td></tr></table></figure>
+
+<h3 id="四、流式错误处理"><a href="#四、流式错误处理" class="headerlink" title="四、流式错误处理"></a>四、流式错误处理</h3><p>CC 的流式路径中，可恢复的错误（413、max_tokens、media error）在 streaming 期间<strong>被暂扣不展示</strong>（<code>query.ts:788-822</code>）——SDK 消费者看不到，只有恢复逻辑能看到。等 streaming 结束后才判断是否需要恢复。</p>
+<h3 id="五、529-→-Fallback-Model-切换"><a href="#五、529-→-Fallback-Model-切换" class="headerlink" title="五、529 → Fallback Model 切换"></a>五、529 → Fallback Model 切换</h3><p>连续 3 次 529 过载错误后（<code>MAX_529_RETRIES = 3</code>），CC 自动切换到 fallback model（如 Opus → Sonnet）。切换时清除所有 pending 消息和 tool 结果，给用户展示 “Switched to {model} due to high demand”。</p>
+<h3 id="六、Diminishing-Returns-检测"><a href="#六、Diminishing-Returns-检测" class="headerlink" title="六、Diminishing Returns 检测"></a>六、Diminishing Returns 检测</h3><p>Token budget 的”继续”不是无限的。当连续 3 次 continuation 且 token 增量 &lt; 500 时，系统判断”继续也没有实质性产出”，停止 continuation（<code>tokenBudget.ts:60-62</code>）。</p>
+</details>
+
+<!-- translation-sync: zh@v1, en@v1, ja@v1 -->
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io">刘元</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io/2026/01/11/s11_error_recovery/">https://liuyuann.github.io/2026/01/11/s11_error_recovery/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://liuyuann.github.io" target="_blank">刘元的技术博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Claude-Code/">Claude Code</a><a class="post-meta__tags" href="/tags/AI-Agent/">AI Agent</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a></div><div class="post-share"><div class="social-share" data-image="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/01/12/s12_task_system/" title="s12: Task System — 目标太大，拆成小任务"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&amp;q=80" onerror="onerror=null;src='/'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">s12: Task System — 目标太大，拆成小任务</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s10 → s11 → s12 → s13 → s14 → … → s20  “大目标拆成小任务, 排好序, 持久化” — 文件持久化的任务图, 多 agent 协作的基础。 Harness 层: 任务 — 持久化的目标, 可恢复的进度。   问题Agent 接到一个项目：搭数据库、写 API、加测试。它用 s05 的 TodoWrite 列了一张清单，然后开始写 API，写到一半发现没数据库表，回头补；加测试时发现 API 接口签名又变了… 盖房子不能先盖屋顶再打地基。任务之间有先后。任务依赖应该形成有向无环图（DAG）；教学版只演示 blockedBy 检查，没有实现环检测。 s05 的 TodoWrite 是当前任务的执行清单，保存在会话内存中。这里需要的是任务系统：每个任务是一个 JSON 文件，任务之间有 blockedBy 依赖，跨会话持久化在磁盘上。  解决方案 教学代码保留基础 agent loop，为聚焦任务系统省略了 S11 的完整错误恢复（RecoveryState、退避、升级、reactive co...</div></div></div></a><a class="pagination-related" href="/2026/01/10/s10_system_prompt/" title="s10: System Prompt — 运行时组装，不硬编码"><img class="cover" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80" onerror="onerror=null;src='/'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">s10: System Prompt — 运行时组装，不硬编码</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s08 → s09 → s10 → s11 → s12 → … → s20  “prompt 是组装出来的, 不是写死的” — 分段 + 按需拼接 + 缓存。 Harness 层: 提示 — 运行时组装, 不硬编码。   问题从 s01 到 s09，system prompt 都是一行硬编码： 1SYSTEM = f&quot;You are a coding agent at &#123;WORKDIR&#125;. Use tools to solve tasks.&quot;  s01 够用，只有 bash、read、write 三个工具。但到 s09，Agent 已经有记忆、有压缩、有技能加载。prompt 该提的能力越来越多： 12345678SYSTEM = (    f&quot;You are a coding agent at &#123;WORKDIR&#125;. &quot;    &quot;Use tools to solve tasks. Act, don&#x27;t explain. &q...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/01/01/s01_agent_loop/" title="s01: Agent Loop — 一个循环就够了"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-01</div><div class="info-item-2">s01: Agent Loop — 一个循环就够了</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → … → s20  “One loop &amp; Bash is all you need” — 一个工具 + 一个循环 &#x3D; 一个 Agent。 Harness 层: 循环 — 模型与真实世界的第一道连接。   问题你提出了一个问题给大模型：“帮我读取下我的目录下有哪些文件，并且执行XXX.py”。 模型能输出一条 bash 命令，但输出完了就停了，它不会自己跑，也不会看到结果后继续推理。 你可以手动跑一遍，把输出粘贴回对话框，让它接着干。下一个命令出来，你再跑一遍、再贴回去。 每一个来回，你都在做中间层。而把它自动化，就是这一章要做的事。  解决方案 一个 while True 循环，模型调用工具就继续，不调用就停。整个过程只有两个信号：    信号 含义 循环动作    stop_reason == &quot;tool_use&quot; 模型举手说”我要用工具” 执行 → 结果喂回去 → 继续   stop_reason != &quot;tool_use&quot; 模型说”...</div></div></div></a><a class="pagination-related" href="/2026/01/18/s18_worktree_isolation/" title="s18: Worktree Isolation — 各干各的，互不干扰"><img class="cover" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-18</div><div class="info-item-2">s18: Worktree Isolation — 各干各的，互不干扰</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s16 → s17 → s18 → s19 → s20  “各干各的目录, 互不干扰” — 任务管目标, worktree 管目录, 按 ID 绑定。 Harness 层: 隔离 — 并行执行的目录隔离。   问题s17 中，Alice 和 Bob 都在同一个目录下工作。Alice 的任务是”重构认证模块”，Bob 的任务是”重构 UI 登录页”。 Alice write_file(&quot;config.py&quot;, ...)。Bob 也 write_file(&quot;config.py&quot;, ...)。两个人改同一个文件，互相覆盖。而且无法干净地回滚——分不清哪些改动是谁的。 s15-s17 解决了”谁干什么”（任务系统）和”怎么通信”（消息总线），但没解决”在哪干”。  解决方案 Git worktree 让你在同一仓库中创建多个独立的工作目录，每个有自己的分支。Alice 在 .worktrees/auth-refactor/ 下工作，Bob 在 .worktrees/ui-login/ 下工作...</div></div></div></a><a class="pagination-related" href="/2026/01/04/s04_hooks/" title="s04: Hooks — 挂在循环上，不写进循环里"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-04</div><div class="info-item-2">s04: Hooks — 挂在循环上，不写进循环里</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → s06 → … → s20  “挂在循环上, 不写进循环里” — hook 在工具执行前后注入扩展逻辑。 Harness 层: hook — 扩展点不侵入循环。   问题s03 的 Agent 有权限检查了。但每次加一个新检查，比如”记录每次 bash 调用”、”操作后自动 git add”，都要修改 agent_loop 函数。 循环很快就变成了这样： 123456789101112def agent_loop(messages):    while True:        # ... LLM call ...        for block in response.content:            if block.type != &quot;tool_use&quot;:                continue            log_to_file(block)          # 加一行            check_permission(bl...</div></div></div></a><a class="pagination-related" href="/2026/01/13/s13_background_tasks/" title="s13: Background Tasks — 慢操作放后台"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-13</div><div class="info-item-2">s13: Background Tasks — 慢操作放后台</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s11 → s12 → s13 → s14 → s15 → … → s20  “慢操作丢后台, agent 继续处理” — 后台线程跑命令, 完成后注入通知。 Harness 层: 后台 — 异步执行, 不阻塞主循环。   问题你用过洗衣机吗？把衣服扔进去，按下启动，然后去干别的——做饭、回消息、看论文。30 分钟后洗衣机”滴滴滴”提醒你：好了。你不会站在洗衣机前面干等 30 分钟。 Agent 的 bash 工具也一样。pip install torch 要 10 分钟，npm run build 要 3 分钟。这些命令一跑，Agent 就在等 bash 工具返回，没法利用这段时间处理别的任务。 读文件是毫秒级，不等。git status 一秒内返回，不等。但 npm install？分钟级。Agent 等 10 分钟什么都不做，而 LLM 按 token 计费，空转就是浪费。  解决方案 教学代码沿用 S12 的简化任务系统和 prompt 组装；为了聚焦后台任务，省略完整错误恢复、记忆和技能系统。唯一的变动：慢操作扔...</div></div></div></a><a class="pagination-related" href="/2026/01/17/s17_autonomous_agents/" title="s17: Autonomous Agents — 自己看板，自己认领"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-17</div><div class="info-item-2">s17: Autonomous Agents — 自己看板，自己认领</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s15 → s16 → s17 → s18 → s19 → s20  “自己看板，自己认领” — 空闲时轮询，有活就干。 Harness 层: 自治 — 队友自组织，不依赖 Lead 分配。   问题s16 的队友能通信、能握手关机。但每个队友等 Lead 分配任务——如果任务看板上有 10 个未认领任务，Lead 得手动 assign 10 次。这不能扩展。队友应该自己看任务看板，发现没人做的任务就认领，做完再找下一个。  解决方案 沿用 S16 的教学版 MessageBus 和协议工具。本章新增：idle_poll（空闲时每 5 秒轮询一次）、scan_unclaimed_tasks（扫描看板上可认领的任务）、自动认领（找到任务就 claim，不用 Lead 操心）。 队友生命周期从两阶段变成三阶段：    阶段 行为 退出条件    WORK inbox → LLM → 工具循环 stop_reason != tool_use   IDLE 每 5s 轮询 inbox + 任务板 60s 超时   SHUTDOWN...</div></div></div></a><a class="pagination-related" href="/2026/01/05/s05_todo_write/" title="s05: TodoWrite — 没有计划的 Agent 就会偏"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-05</div><div class="info-item-2">s05: TodoWrite — 没有计划的 Agent 就会偏</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → s06 → s07 → … → s20  “没有计划的 agent 走哪算哪” — 先列步骤再动手，长任务更不容易漏项。 Harness 层: 规划 — 让 Agent 在动手之前先想清楚。   问题给 Agent 一个复杂任务：”把所有 Python 文件改成 snake_case 命名，然后跑测试，修好失败。” Agent 开始干活，改了 3 个文件，跑了个测试，发现 2 个失败，开始修。修着修着，它忘了最初是”改成 snake_case”，测试失败把注意力全吸走了。 对话越长越严重：工具结果不断填满上下文，系统提示的影响力被稀释。一个 10 步重构，做完 1-3 步就开始即兴发挥，因为 4-10 步已经被挤出注意力了。  解决方案 保留上一章的最小 hook 结构，重点看新增的 todo_write 工具和 reminder 机制。todo_write 本身不做任何实际工作，不能读文件、不能跑命令，只是让 Agent 在动手之前先理清思路。 dispatch 机制不变，新工具仍...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="author-info-name">刘元</div><div class="author-info-description">高通 AI 工程师 | LLM Agent 开发者</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" href="/atom.xml"><i class="fas fa-rss"></i><span>订阅</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/LiuYuann" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1903554839@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">2.</span> <span class="toc-text">解决方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text">工作原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E5%BE%84-1-%E8%BE%93%E5%87%BA%E8%A2%AB%E6%88%AA%E6%96%AD"><span class="toc-number">3.1.</span> <span class="toc-text">路径 1: 输出被截断</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E5%BE%84-2-%E4%B8%8A%E4%B8%8B%E6%96%87%E8%B6%85%E9%99%90"><span class="toc-number">3.2.</span> <span class="toc-text">路径 2: 上下文超限</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E5%BE%84-3-%E4%B8%B4%E6%97%B6%E6%95%85%E9%9A%9C"><span class="toc-number">3.3.</span> <span class="toc-text">路径 3: 临时故障</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%88%E8%B5%B7%E6%9D%A5%E8%B7%91"><span class="toc-number">3.4.</span> <span class="toc-text">合起来跑</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%AF%B9-s10-%E7%9A%84%E5%8F%98%E6%9B%B4"><span class="toc-number">4.</span> <span class="toc-text">相对 s10 的变更</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%95%E4%B8%80%E4%B8%8B"><span class="toc-number">5.</span> <span class="toc-text">试一下</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E4%B8%8B%E6%9D%A5"><span class="toc-number">6.</span> <span class="toc-text">接下来</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%8D%81%E5%87%A0%E7%A7%8D-reason-transition%EF%BC%88%E4%B8%8D%E5%8F%AA%E6%98%AF-3-%E6%9D%A1%EF%BC%89"><span class="toc-number">6.1.</span> <span class="toc-text">一、十几种 reason&#x2F;transition（不只是 3 条）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%8C%87%E6%95%B0%E9%80%80%E9%81%BF%E7%9A%84%E7%B2%BE%E7%A1%AE%E5%85%AC%E5%BC%8F"><span class="toc-number">6.2.</span> <span class="toc-text">二、指数退避的精确公式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81CONTINUATION-%E6%8F%90%E7%A4%BA%E5%8E%9F%E6%96%87"><span class="toc-number">6.3.</span> <span class="toc-text">三、CONTINUATION 提示原文</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%B5%81%E5%BC%8F%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86"><span class="toc-number">6.4.</span> <span class="toc-text">四、流式错误处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E3%80%81529-%E2%86%92-Fallback-Model-%E5%88%87%E6%8D%A2"><span class="toc-number">6.5.</span> <span class="toc-text">五、529 → Fallback Model 切换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AD%E3%80%81Diminishing-Returns-%E6%A3%80%E6%B5%8B"><span class="toc-number">6.6.</span> <span class="toc-text">六、Diminishing Returns 检测</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="大模型（LLMs）面试题全集精选"/></a><div class="content"><a class="title" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选">大模型（LLMs）面试题全集精选</a><time datetime="2026-06-04T12:00:00.000Z" title="发表于 2026-06-04 20:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集"><img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="互联网公司面试题合集"/></a><div class="content"><a class="title" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集">互联网公司面试题合集</a><time datetime="2026-06-04T08:00:00.000Z" title="发表于 2026-06-04 16:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/llm-interview-questions-wiki/" title="大模型（LLMs）面试题全集 — 225 题精解"><img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="大模型（LLMs）面试题全集 — 225 题精解"/></a><div class="content"><a class="title" href="/2026/06/04/llm-interview-questions-wiki/" title="大模型（LLMs）面试题全集 — 225 题精解">大模型（LLMs）面试题全集 — 225 题精解</a><time datetime="2026-06-04T02:00:00.000Z" title="发表于 2026-06-04 10:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/20/s20_comprehensive/" title="s20: Comprehensive Agent — 全部机制归一循环"><img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="s20: Comprehensive Agent — 全部机制归一循环"/></a><div class="content"><a class="title" href="/2026/01/20/s20_comprehensive/" title="s20: Comprehensive Agent — 全部机制归一循环">s20: Comprehensive Agent — 全部机制归一循环</a><time datetime="2026-01-20T02:00:00.000Z" title="发表于 2026-01-20 10:00:00">2026-01-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="s19: MCP Tools — 外接工具，标准协议"/></a><div class="content"><a class="title" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议">s19: MCP Tools — 外接工具，标准协议</a><time datetime="2026-01-19T02:00:00.000Z" title="发表于 2026-01-19 10:00:00">2026-01-19</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2018 - 2026 By 刘元</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>s03: Permission — 执行前做权限判断 | 刘元的技术博客</title><meta name="author" content="刘元"><meta name="copyright" content="刘元"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → … → s20  “工具执行前先做权限判断” — 权限管线决定哪些操作需要审批。 Harness 层: 权限 — 在工具执行前加一道门。   问题s02 的 Agent 有 5 个工具。file tools 受 safe_path 保护，但 bash 不受限制。让它”清理一下项目”，可能执行 rm -">
+<meta property="og:type" content="article">
+<meta property="og:title" content="s03: Permission — 执行前做权限判断">
+<meta property="og:url" content="https://liuyuann.github.io/2026/01/03/s03_permission/index.html">
+<meta property="og:site_name" content="刘元的技术博客">
+<meta property="og:description" content="中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → … → s20  “工具执行前先做权限判断” — 权限管线决定哪些操作需要审批。 Harness 层: 权限 — 在工具执行前加一道门。   问题s02 的 Agent 有 5 个工具。file tools 受 safe_path 保护，但 bash 不受限制。让它”清理一下项目”，可能执行 rm -">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80">
+<meta property="article:published_time" content="2026-01-03T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-04T08:51:22.611Z">
+<meta property="article:author" content="刘元">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Claude Code">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "s03: Permission — 执行前做权限判断",
+  "url": "https://liuyuann.github.io/2026/01/03/s03_permission/",
+  "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80",
+  "datePublished": "2026-01-03T02:00:00.000Z",
+  "dateModified": "2026-06-04T08:51:22.611Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "刘元",
+      "url": "https://liuyuann.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://liuyuann.github.io/2026/01/03/s03_permission/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 's03: Permission — 执行前做权限判断',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">刘元的技术博客</span></a><a class="nav-page-title" href="/"><span class="site-name">s03: Permission — 执行前做权限判断</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">s03: Permission — 执行前做权限判断</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-01-03T02:00:00.000Z" title="发表于 2026-01-03 10:00:00">2026-01-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-04T08:51:22.611Z" title="更新于 2026-06-04 16:51:22">2026-06-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/learn-claude-code/">learn-claude-code</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p><a href="README.md">中文</a> · <a href="README.en.md">English</a> · <a href="README.ja.md">日本語</a></p>
+<p>s01 → s02 → <code>s03</code> → <a href="../s04_hooks/">s04</a> → s05 → … → s20</p>
+<blockquote>
+<p><em>“工具执行前先做权限判断”</em> — 权限管线决定哪些操作需要审批。</p>
+<p><strong>Harness 层</strong>: 权限 — 在工具执行前加一道门。</p>
+</blockquote>
+<hr>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>s02 的 Agent 有 5 个工具。file tools 受 <code>safe_path</code> 保护，但 bash 不受限制。让它”清理一下项目”，可能执行 <code>rm -rf /</code>。</p>
+<p>安全不能靠信任模型，要靠代码——在工具执行之前做判断。</p>
+<hr>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/permission-overview.svg" alt="Permission Overview"></p>
+<p>s02 的循环完全保留。唯一的变动在工具执行前插入 <code>check_permission()</code>——每个工具调用经过三道闸门，顺序固定：硬拒绝优先，软询问次之，都没命中就放行。</p>
+<p>三道闸门对应三种决策：</p>
+<table>
+<thead>
+<tr>
+<th>闸门</th>
+<th>作用</th>
+<th>命中后</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. 拒绝列表</td>
+<td>永远禁止的操作（<code>rm -rf /</code>、<code>sudo</code>）</td>
+<td>直接拒绝，不执行</td>
+</tr>
+<tr>
+<td>2. 规则匹配</td>
+<td>取决于上下文的操作（写工作区外、<code>rm</code> 文件）</td>
+<td>交给闸门 3</td>
+</tr>
+<tr>
+<td>3. 用户审批</td>
+<td>闸门 2 命中后，暂停等用户确认</td>
+<td>用户决定允许或拒绝</td>
+</tr>
+</tbody></table>
+<p>三道都没命中 → 直接执行。大部分日常操作走这条路。</p>
+<hr>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/permission-pipeline.svg" alt="Permission Pipeline"></p>
+<p><strong>闸门 1</strong>：一张硬拒绝表，先查，命中就返回阻止信息。（教学示意：简单字符串匹配不是可靠安全机制，命令变体和 shell 展开可能绕过。CC 的做法见附录。）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">DENY_LIST = [</span><br><span class="line">    <span class="string">&quot;rm -rf /&quot;</span>, <span class="string">&quot;sudo&quot;</span>, <span class="string">&quot;shutdown&quot;</span>, <span class="string">&quot;reboot&quot;</span>,</span><br><span class="line">    <span class="string">&quot;mkfs&quot;</span>, <span class="string">&quot;dd if=&quot;</span>, <span class="string">&quot;&gt; /dev/sda&quot;</span>,</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">check_deny_list</span>(<span class="params">command: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span> | <span class="literal">None</span>:</span><br><span class="line">    <span class="keyword">for</span> pattern <span class="keyword">in</span> DENY_LIST:</span><br><span class="line">        <span class="keyword">if</span> pattern <span class="keyword">in</span> command:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">f&quot;Blocked: &#x27;<span class="subst">&#123;pattern&#125;</span>&#x27; is on the deny list&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>闸门 2</strong>：规则匹配——描述”什么时候需要问用户”。每条规则指定工具和检查条件。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">PERMISSION_RULES = [</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">&quot;tools&quot;</span>: [<span class="string">&quot;write_file&quot;</span>, <span class="string">&quot;edit_file&quot;</span>],</span><br><span class="line">        <span class="string">&quot;check&quot;</span>: <span class="keyword">lambda</span> args: <span class="keyword">not</span> (WORKDIR / args.get(<span class="string">&quot;path&quot;</span>, <span class="string">&quot;&quot;</span>)).resolve().is_relative_to(WORKDIR),</span><br><span class="line">        <span class="string">&quot;message&quot;</span>: <span class="string">&quot;Writing outside workspace&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">&quot;tools&quot;</span>: [<span class="string">&quot;bash&quot;</span>],</span><br><span class="line">        <span class="string">&quot;check&quot;</span>: <span class="keyword">lambda</span> args: <span class="built_in">any</span>(kw <span class="keyword">in</span> args.get(<span class="string">&quot;command&quot;</span>, <span class="string">&quot;&quot;</span>) <span class="keyword">for</span> kw <span class="keyword">in</span> [<span class="string">&quot;rm &quot;</span>, <span class="string">&quot;&gt; /etc/&quot;</span>, <span class="string">&quot;chmod 777&quot;</span>]),</span><br><span class="line">        <span class="string">&quot;message&quot;</span>: <span class="string">&quot;Potentially destructive command&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">check_rules</span>(<span class="params">tool_name: <span class="built_in">str</span>, args: <span class="built_in">dict</span></span>) -&gt; <span class="built_in">str</span> | <span class="literal">None</span>:</span><br><span class="line">    <span class="keyword">for</span> rule <span class="keyword">in</span> PERMISSION_RULES:</span><br><span class="line">        <span class="keyword">if</span> tool_name <span class="keyword">in</span> rule[<span class="string">&quot;tools&quot;</span>] <span class="keyword">and</span> rule[<span class="string">&quot;check&quot;</span>](args):</span><br><span class="line">            <span class="keyword">return</span> rule[<span class="string">&quot;message&quot;</span>]</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>闸门 3</strong>：规则命中后，暂停等用户输入。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">ask_user</span>(<span class="params">tool_name: <span class="built_in">str</span>, args: <span class="built_in">dict</span>, reason: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;\n⚠  <span class="subst">&#123;reason&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;   Tool: <span class="subst">&#123;tool_name&#125;</span>(<span class="subst">&#123;args&#125;</span>)&quot;</span>)</span><br><span class="line">    choice = <span class="built_in">input</span>(<span class="string">&quot;   Allow? [y/N] &quot;</span>).strip().lower()</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;allow&quot;</span> <span class="keyword">if</span> choice <span class="keyword">in</span> (<span class="string">&quot;y&quot;</span>, <span class="string">&quot;yes&quot;</span>) <span class="keyword">else</span> <span class="string">&quot;deny&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>三道闸门串在一起</strong>，插在工具执行之前：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">check_permission</span>(<span class="params">block</span>) -&gt; <span class="built_in">bool</span>:</span><br><span class="line">    <span class="comment"># 闸门 1: 硬拒绝</span></span><br><span class="line">    <span class="keyword">if</span> block.name == <span class="string">&quot;bash&quot;</span>:</span><br><span class="line">        reason = check_deny_list(block.<span class="built_in">input</span>.get(<span class="string">&quot;command&quot;</span>, <span class="string">&quot;&quot;</span>))</span><br><span class="line">        <span class="keyword">if</span> reason:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;\n⛔ <span class="subst">&#123;reason&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 闸门 2 + 3: 规则匹配 → 用户审批</span></span><br><span class="line">    reason = check_rules(block.name, block.<span class="built_in">input</span>)</span><br><span class="line">    <span class="keyword">if</span> reason:</span><br><span class="line">        decision = ask_user(block.name, block.<span class="built_in">input</span>, reason)</span><br><span class="line">        <span class="keyword">if</span> decision == <span class="string">&quot;deny&quot;</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 agent_loop 中——s02 的循环只加了一行：</span></span><br><span class="line"><span class="keyword">for</span> block <span class="keyword">in</span> response.content:</span><br><span class="line">    <span class="keyword">if</span> block.<span class="built_in">type</span> == <span class="string">&quot;tool_use&quot;</span>:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> check_permission(block):           <span class="comment"># ← 新增</span></span><br><span class="line">            results.append(&#123;... <span class="string">&quot;content&quot;</span>: <span class="string">&quot;Permission denied.&quot;</span>&#125;)</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        output = TOOL_HANDLERS[block.name](**block.<span class="built_in">input</span>)  <span class="comment"># s02 原有</span></span><br><span class="line">        results.append(...)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="相对-s02-的变更"><a href="#相对-s02-的变更" class="headerlink" title="相对 s02 的变更"></a>相对 s02 的变更</h2><table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s02)</th>
+<th>之后 (s03)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>安全模型</td>
+<td>无（信任模型）</td>
+<td>三道闸门权限管线</td>
+</tr>
+<tr>
+<td>新函数</td>
+<td>—</td>
+<td>check_deny_list, check_rules, ask_user, check_permission</td>
+</tr>
+<tr>
+<td>循环</td>
+<td>直接执行所有工具</td>
+<td>执行前插入 check_permission()</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="试一下"><a href="#试一下" class="headerlink" title="试一下"></a>试一下</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> learn-claude-code</span><br><span class="line">python s03_permission/code.py</span><br></pre></td></tr></table></figure>
+
+<p>试试这些 prompt：</p>
+<ol>
+<li><code>Create a file called test.txt in the current directory</code>（应该直接通过）</li>
+<li><code>Delete all temporary files in /tmp</code>（bash + rm 会触发闸门 2）</li>
+<li><code>What files are in the current directory?</code>（只读，全部通过）</li>
+<li><code>Try to write a file to /etc/something</code>（写工作区外，触发闸门 2）</li>
+</ol>
+<p>观察重点：哪些操作直接通过？哪些需要你确认？哪些被直接拒绝？</p>
+<hr>
+<h2 id="接下来"><a href="#接下来" class="headerlink" title="接下来"></a>接下来</h2><p>权限检查做了——但每次都在循环里硬编码 <code>check_permission()</code>。如果我想在每次工具执行前后加日志？如果想在某些操作后自动触发 git commit？这些扩展逻辑散落在 loop 里，循环很快就会膨胀。</p>
+<p>s04 Hooks → 给循环加钩子，扩展逻辑挂在钩子上，循环保持干净。</p>
+<details>
+<summary>深入 CC 源码</summary>
+
+<blockquote>
+<p>以下基于 CC 源码 <code>types/permissions.ts</code>、<code>utils/permissions/permissions.ts</code>、<code>toolExecution.ts</code>、<code>utils/permissions/yoloClassifier.ts</code>、<code>tools/AgentTool/forkSubagent.ts</code> 的核查。</p>
+</blockquote>
+<h3 id="一、PermissionResult：不是-3-种，是-4-种"><a href="#一、PermissionResult：不是-3-种，是-4-种" class="headerlink" title="一、PermissionResult：不是 3 种，是 4 种"></a>一、PermissionResult：不是 3 种，是 4 种</h3><p>教学版的三道闸门（deny → ask → allow）和 CC 不完全对应。CC 的 <code>PermissionResult</code> 有 4 个 behavior（<code>types/permissions.ts:241-266</code>）：</p>
+<table>
+<thead>
+<tr>
+<th>behavior</th>
+<th>含义</th>
+<th>教学版对应</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>allow</code></td>
+<td>直接允许</td>
+<td>闸门 3 通过</td>
+</tr>
+<tr>
+<td><code>deny</code></td>
+<td>直接拒绝</td>
+<td>闸门 1 命中</td>
+</tr>
+<tr>
+<td><code>ask</code></td>
+<td>弹出对话框问用户</td>
+<td>闸门 2 命中</td>
+</tr>
+<tr>
+<td><code>passthrough</code></td>
+<td>工具不表态，交给通用管线决定</td>
+<td>教学版无</td>
+</tr>
+</tbody></table>
+<h3 id="二、生产版的验证阶段"><a href="#二、生产版的验证阶段" class="headerlink" title="二、生产版的验证阶段"></a>二、生产版的验证阶段</h3><p>CC 的工具调用不是经过三道闸门，而是经过多个阶段，分布在 <code>checkPermissionsAndCallTool()</code>（<code>toolExecution.ts:599-1745</code>）、hooks、<code>hasPermissionsToUseToolInner()</code>（<code>utils/permissions/permissions.ts:1158-1310</code>）和 classifier 逻辑里：</p>
+<ol>
+<li><strong>Zod schema 验证</strong>（<code>toolExecution.ts:614-680</code>）— 参数类型检查</li>
+<li><strong>validateInput()</strong>（<code>toolExecution.ts:682-733</code>）— 工具级语义验证</li>
+<li><strong>backfillObservableInput()</strong>（<code>toolExecution.ts:784</code>）— 补全遗留字段</li>
+<li><strong>PreToolUse hooks</strong>（<code>toolExecution.ts:800-862</code>）— 钩子可以返回 allow&#x2F;deny&#x2F;ask</li>
+<li><strong>resolveHookPermissionDecision()</strong>（<code>toolExecution.ts:921-931</code>）— 协调钩子+管线决策</li>
+<li><strong>hasPermissionsToUseToolInner()</strong>（<code>permissions.ts:1158-1310</code>）— 多层规则检查：<ul>
+<li>整个工具被 deny rule 禁用 → <code>deny</code></li>
+<li>整个工具被 ask rule 标记 → <code>ask</code></li>
+<li><code>tool.checkPermissions()</code> 工具自己的判断</li>
+<li>工具自己返回 deny → <code>deny</code></li>
+<li><code>requiresUserInteraction()</code> → <code>ask</code></li>
+<li>内容相关的 ask 规则 → <code>ask</code>（不可绕过）</li>
+<li>安全检查违规 → <code>ask</code>（不可绕过）</li>
+<li>bypassPermissions 模式 → <code>allow</code></li>
+<li>整个工具被 allow rule 放行 → <code>allow</code></li>
+<li>passthrough → 转为 <code>ask</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="三、拒绝列表：不是一个文件，是-8-个来源"><a href="#三、拒绝列表：不是一个文件，是-8-个来源" class="headerlink" title="三、拒绝列表：不是一个文件，是 8 个来源"></a>三、拒绝列表：不是一个文件，是 8 个来源</h3><p>CC 没有单一的 deny list。权限规则来自 8 个来源（<code>types/permissions.ts:54-62</code>）：</p>
+<table>
+<thead>
+<tr>
+<th>来源</th>
+<th>配置位置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>userSettings</code></td>
+<td><code>~/.claude/settings.json</code></td>
+</tr>
+<tr>
+<td><code>projectSettings</code></td>
+<td><code>.claude/settings.json</code></td>
+</tr>
+<tr>
+<td><code>localSettings</code></td>
+<td><code>settings.local.json</code></td>
+</tr>
+<tr>
+<td><code>flagSettings</code></td>
+<td>Feature flags</td>
+</tr>
+<tr>
+<td><code>policySettings</code></td>
+<td>企业管理策略</td>
+</tr>
+<tr>
+<td><code>cliArg</code></td>
+<td><code>--allowedTools</code> &#x2F; <code>--deniedTools</code></td>
+</tr>
+<tr>
+<td><code>command</code></td>
+<td>内联命令</td>
+</tr>
+<tr>
+<td><code>session</code></td>
+<td>会话内临时授权</td>
+</tr>
+</tbody></table>
+<p>每条规则格式：<code>{ toolName: &quot;Bash&quot;, ruleBehavior: &quot;deny&quot;, ruleContent: &quot;npm publish:*&quot; }</code>。多个来源的规则合并，高优先级来源覆盖低优先级（从低到高：user &lt; project &lt; local &lt; flag &lt; policy，加上 cliArg、command、session）。</p>
+<h3 id="四、isDestructive-是什么"><a href="#四、isDestructive-是什么" class="headerlink" title="四、isDestructive() 是什么"></a>四、isDestructive() 是什么</h3><p>CC 中 <code>isDestructive</code>（<code>Tool.ts:405-406</code>）<strong>纯粹是 UI 展示用的</strong>——在工具列表里显示 <code>[destructive]</code> 标签。它不参与权限决策。默认所有工具都返回 <code>false</code>。只有 ExitWorktree（remove 时）和 MCP 工具（依赖 <code>annotations.destructiveHint</code>）覆写了它。</p>
+<h3 id="五、YoloClassifier（自动审批）"><a href="#五、YoloClassifier（自动审批）" class="headerlink" title="五、YoloClassifier（自动审批）"></a>五、YoloClassifier（自动审批）</h3><p>CC 的 auto 模式下，不会每次都弹对话框。<code>classifyYoloAction</code>（<code>utils/permissions/yoloClassifier.ts:1012</code>）把工具调用 + 对话上下文发给一个分类器 LLM 判断是否安全。先尝试 acceptEdits 模式模拟（<code>permissions.ts:620-656</code>，如果 acceptEdits 允许 → 直接批准），再查安全工具白名单（<code>permissions.ts:658-686</code>），最后才调分类器。分类器连续拒绝太多次 → 回退到人工审批。</p>
+<h3 id="六、权限冒泡"><a href="#六、权限冒泡" class="headerlink" title="六、权限冒泡"></a>六、权限冒泡</h3><p>子 Agent（通过 AgentTool fork 出来的）的 <code>permissionMode</code> 设为 <code>&#39;bubble&#39;</code>（<code>forkSubagent.ts:50</code>）。意思是权限弹窗<strong>冒泡到父 Agent 的终端</strong>，而不是在子 Agent 里静默拒绝。Bash 分类器在这个过程中继续跑——给权限对话框显示的同时在后台判断是否可以自动批准。</p>
+<h3 id="教学版的简化是刻意的"><a href="#教学版的简化是刻意的" class="headerlink" title="教学版的简化是刻意的"></a>教学版的简化是刻意的</h3><ul>
+<li>多阶段管线 → 3 道闸门：理解门槛大幅降低</li>
+<li>8 个规则来源 → 1 个本地 DENY_LIST：概念量可控</li>
+<li>isDestructive → 忽略（教学版没有 UI 层，CC 里它也不参与权限决策）</li>
+<li>YoloClassifier → 省略（依赖于额外的 LLM 调用和遥测系统）</li>
+<li>权限冒泡 → 省略（s15 才涉及多 Agent）</li>
+</ul>
+</details>
+
+<!-- translation-sync: zh@v1, en@v1, ja@v1 -->
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io">刘元</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io/2026/01/03/s03_permission/">https://liuyuann.github.io/2026/01/03/s03_permission/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://liuyuann.github.io" target="_blank">刘元的技术博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Claude-Code/">Claude Code</a><a class="post-meta__tags" href="/tags/AI-Agent/">AI Agent</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a></div><div class="post-share"><div class="social-share" data-image="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/01/04/s04_hooks/" title="s04: Hooks — 挂在循环上，不写进循环里"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&amp;q=80" onerror="onerror=null;src='/'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">s04: Hooks — 挂在循环上，不写进循环里</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → s06 → … → s20  “挂在循环上, 不写进循环里” — hook 在工具执行前后注入扩展逻辑。 Harness 层: hook — 扩展点不侵入循环。   问题s03 的 Agent 有权限检查了。但每次加一个新检查，比如”记录每次 bash 调用”、”操作后自动 git add”，都要修改 agent_loop 函数。 循环很快就变成了这样： 123456789101112def agent_loop(messages):    while True:        # ... LLM call ...        for block in response.content:            if block.type != &quot;tool_use&quot;:                continue            log_to_file(block)          # 加一行            check_permission(bl...</div></div></div></a><a class="pagination-related" href="/2026/01/02/s02_tool_use/" title="s02: Tool Use — 多加一个工具，只加一行"><img class="cover" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80" onerror="onerror=null;src='/'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">s02: Tool Use — 多加一个工具，只加一行</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → … → s20  “加一个工具, 只加一个 handler” — 循环不用动, 新工具注册进 dispatch map 就行。 Harness 层: 工具分发 — 扩展模型能触达的边界。   只有 bash 一个工具s01 的 Agent 只有一个 bash 工具。读文件要 cat，写文件要 echo &quot;...&quot; &gt; file.py，改文件要 sed。 模型想的是”读这个文件”，却要拼出 cat path/to/file。多了一层翻译，浪费 token，还容易拼错。  全局视角：工具分发 s01 的循环完全保留（LLM 调用、stop_reason 判断、消息追加）。唯一的变动在工具执行那 1 行：run_bash() 替换为 TOOL_HANDLERS[block.name]() 查表分发。 给 Agent 加一个工具只需要做两件事：  定义工具：在 TOOLS 数组里加一条描述 注册处理函数：在 TOOL_HANDLERS 字典里加一个映射   从 1 个工具到 5...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/01/08/s08_context_compact/" title="s08: Context Compact — 上下文总会满"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-08</div><div class="info-item-2">s08: Context Compact — 上下文总会满</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → s06 → s07 → s08 → s09 → s10 → … → s20  “上下文总会满, 要有办法腾地方” — 四层压缩策略, 便宜的先跑贵的后跑。 Harness 层: 压缩 — 干净的记忆, 无限的会话。   问题Agent 跑着跑着，不动了。 手里有 bash、有 read、有 write，能力是够的。但它读了一个 1000 行的文件（~4000 token），又读了 30 个文件，跑了 20 条命令。每条命令的输出、每个文件的内容，全都堆在 messages 列表里。 上下文窗口是有限的。满了之后，API 直接拒绝：prompt_too_long。 不压缩，Agent 根本没法在大项目里干活。  解决方案 保留 s07 的 hook 结构、技能加载、子 Agent 等骨架，省略部分工具细节以聚焦压缩。核心变动：每轮 LLM 调用前插入三层预处理器（0 API），token 仍超阈值时触发 LLM 摘要（1 API），API 报错时应急裁剪。 核心设计：便宜的先跑，贵的后...</div></div></div></a><a class="pagination-related" href="/2026/01/04/s04_hooks/" title="s04: Hooks — 挂在循环上，不写进循环里"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-04</div><div class="info-item-2">s04: Hooks — 挂在循环上，不写进循环里</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → s06 → … → s20  “挂在循环上, 不写进循环里” — hook 在工具执行前后注入扩展逻辑。 Harness 层: hook — 扩展点不侵入循环。   问题s03 的 Agent 有权限检查了。但每次加一个新检查，比如”记录每次 bash 调用”、”操作后自动 git add”，都要修改 agent_loop 函数。 循环很快就变成了这样： 123456789101112def agent_loop(messages):    while True:        # ... LLM call ...        for block in response.content:            if block.type != &quot;tool_use&quot;:                continue            log_to_file(block)          # 加一行            check_permission(bl...</div></div></div></a><a class="pagination-related" href="/2026/01/13/s13_background_tasks/" title="s13: Background Tasks — 慢操作放后台"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-13</div><div class="info-item-2">s13: Background Tasks — 慢操作放后台</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s11 → s12 → s13 → s14 → s15 → … → s20  “慢操作丢后台, agent 继续处理” — 后台线程跑命令, 完成后注入通知。 Harness 层: 后台 — 异步执行, 不阻塞主循环。   问题你用过洗衣机吗？把衣服扔进去，按下启动，然后去干别的——做饭、回消息、看论文。30 分钟后洗衣机”滴滴滴”提醒你：好了。你不会站在洗衣机前面干等 30 分钟。 Agent 的 bash 工具也一样。pip install torch 要 10 分钟，npm run build 要 3 分钟。这些命令一跑，Agent 就在等 bash 工具返回，没法利用这段时间处理别的任务。 读文件是毫秒级，不等。git status 一秒内返回，不等。但 npm install？分钟级。Agent 等 10 分钟什么都不做，而 LLM 按 token 计费，空转就是浪费。  解决方案 教学代码沿用 S12 的简化任务系统和 prompt 组装；为了聚焦后台任务，省略完整错误恢复、记忆和技能系统。唯一的变动：慢操作扔...</div></div></div></a><a class="pagination-related" href="/2026/01/16/s16_team_protocols/" title="s16: Team Protocols — 队友之间要有约定"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-16</div><div class="info-item-2">s16: Team Protocols — 队友之间要有约定</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s14 → s15 → s16 → s17 → s18 → s19 → s20  “队友之间要有约定” — request-response 模式驱动协商。 Harness 层: 协议 — Agent 之间的结构化握手。   问题s15 的队友能干活了，但协调是松散的：Lead 发消息，队友回复，没有结构化的协议。两个场景暴露了问题： 关机：Lead 想让 Alice 关机。直接杀线程，Alice 写了一半的文件留在磁盘上。需要握手：Lead 发请求，Alice 确认收尾后关机。 计划审批：Bob 想重构认证模块，属于高风险操作。应该先让 Lead 看 Bob 的计划，审批通过后再动手。 这两个场景结构完全一样：一方发请求，另一方给回复，请求和回复通过同一个 ID 关联。有状态机追踪：pending → approved &#x2F; rejected。  解决方案 教学代码承接前面章节的 Agent 能力脉络，在 S15 团队通信基础上加入结构化协议。为了聚焦协议机制，省略了完整错误恢复、记忆和技能系统。新增三样：Pro...</div></div></div></a><a class="pagination-related" href="/2026/01/10/s10_system_prompt/" title="s10: System Prompt — 运行时组装，不硬编码"><img class="cover" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-10</div><div class="info-item-2">s10: System Prompt — 运行时组装，不硬编码</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s08 → s09 → s10 → s11 → s12 → … → s20  “prompt 是组装出来的, 不是写死的” — 分段 + 按需拼接 + 缓存。 Harness 层: 提示 — 运行时组装, 不硬编码。   问题从 s01 到 s09，system prompt 都是一行硬编码： 1SYSTEM = f&quot;You are a coding agent at &#123;WORKDIR&#125;. Use tools to solve tasks.&quot;  s01 够用，只有 bash、read、write 三个工具。但到 s09，Agent 已经有记忆、有压缩、有技能加载。prompt 该提的能力越来越多： 12345678SYSTEM = (    f&quot;You are a coding agent at &#123;WORKDIR&#125;. &quot;    &quot;Use tools to solve tasks. Act, don&#x27;t explain. &q...</div></div></div></a><a class="pagination-related" href="/2026/01/15/s15_agent_teams/" title="s15: Agent Teams — 一个搞不定，组队来"><img class="cover" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-15</div><div class="info-item-2">s15: Agent Teams — 一个搞不定，组队来</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s13 → s14 → s15 → s16 → s17 → s18 → s19 → s20  “一个搞不定, 组队来” — 文件收件箱 + 队友线程。 Harness 层: 团队 — 多 Agent 协作, 消息总线。   问题“重构整个后端”涉及认证模块、数据库层、API 路由、测试。一个 Agent 在修 API 路由时，认证模块的细节已经不在上下文里了。上下文窗口就那么大，单个 Agent 的注意力覆盖不了所有模块。 s06 的子 Agent 是临时工，叫来干一件事就走了。但有些任务需要能通信、能协作的队友。  解决方案 教学代码沿用 S14 的能力（prompt 组装、任务系统、后台执行、cron 调度）。为了聚焦团队机制，省略了完整错误恢复、记忆和技能系统。新增三样：MessageBus（文件收件箱）、spawn_teammate_thread（启动队友线程）、inbox 注入（Lead 接收队友消息并注入 history）。 子 Agent vs 队友：     s06 子 Agent s15 队友    生命...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="author-info-name">刘元</div><div class="author-info-description">高通 AI 工程师 | LLM Agent 开发者</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" href="/atom.xml"><i class="fas fa-rss"></i><span>订阅</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/LiuYuann" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1903554839@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">2.</span> <span class="toc-text">解决方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text">工作原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%AF%B9-s02-%E7%9A%84%E5%8F%98%E6%9B%B4"><span class="toc-number">4.</span> <span class="toc-text">相对 s02 的变更</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%95%E4%B8%80%E4%B8%8B"><span class="toc-number">5.</span> <span class="toc-text">试一下</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E4%B8%8B%E6%9D%A5"><span class="toc-number">6.</span> <span class="toc-text">接下来</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81PermissionResult%EF%BC%9A%E4%B8%8D%E6%98%AF-3-%E7%A7%8D%EF%BC%8C%E6%98%AF-4-%E7%A7%8D"><span class="toc-number">6.1.</span> <span class="toc-text">一、PermissionResult：不是 3 种，是 4 种</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%94%9F%E4%BA%A7%E7%89%88%E7%9A%84%E9%AA%8C%E8%AF%81%E9%98%B6%E6%AE%B5"><span class="toc-number">6.2.</span> <span class="toc-text">二、生产版的验证阶段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%8B%92%E7%BB%9D%E5%88%97%E8%A1%A8%EF%BC%9A%E4%B8%8D%E6%98%AF%E4%B8%80%E4%B8%AA%E6%96%87%E4%BB%B6%EF%BC%8C%E6%98%AF-8-%E4%B8%AA%E6%9D%A5%E6%BA%90"><span class="toc-number">6.3.</span> <span class="toc-text">三、拒绝列表：不是一个文件，是 8 个来源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81isDestructive-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">6.4.</span> <span class="toc-text">四、isDestructive() 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E3%80%81YoloClassifier%EF%BC%88%E8%87%AA%E5%8A%A8%E5%AE%A1%E6%89%B9%EF%BC%89"><span class="toc-number">6.5.</span> <span class="toc-text">五、YoloClassifier（自动审批）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%9D%83%E9%99%90%E5%86%92%E6%B3%A1"><span class="toc-number">6.6.</span> <span class="toc-text">六、权限冒泡</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%99%E5%AD%A6%E7%89%88%E7%9A%84%E7%AE%80%E5%8C%96%E6%98%AF%E5%88%BB%E6%84%8F%E7%9A%84"><span class="toc-number">6.7.</span> <span class="toc-text">教学版的简化是刻意的</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="大模型（LLMs）面试题全集精选"/></a><div class="content"><a class="title" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选">大模型（LLMs）面试题全集精选</a><time datetime="2026-06-04T12:00:00.000Z" title="发表于 2026-06-04 20:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集"><img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="互联网公司面试题合集"/></a><div class="content"><a class="title" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集">互联网公司面试题合集</a><time datetime="2026-06-04T08:00:00.000Z" title="发表于 2026-06-04 16:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/llm-interview-questions-wiki/" title="大模型（LLMs）面试题全集 — 225 题精解"><img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="大模型（LLMs）面试题全集 — 225 题精解"/></a><div class="content"><a class="title" href="/2026/06/04/llm-interview-questions-wiki/" title="大模型（LLMs）面试题全集 — 225 题精解">大模型（LLMs）面试题全集 — 225 题精解</a><time datetime="2026-06-04T02:00:00.000Z" title="发表于 2026-06-04 10:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/20/s20_comprehensive/" title="s20: Comprehensive Agent — 全部机制归一循环"><img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="s20: Comprehensive Agent — 全部机制归一循环"/></a><div class="content"><a class="title" href="/2026/01/20/s20_comprehensive/" title="s20: Comprehensive Agent — 全部机制归一循环">s20: Comprehensive Agent — 全部机制归一循环</a><time datetime="2026-01-20T02:00:00.000Z" title="发表于 2026-01-20 10:00:00">2026-01-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="s19: MCP Tools — 外接工具，标准协议"/></a><div class="content"><a class="title" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议">s19: MCP Tools — 外接工具，标准协议</a><time datetime="2026-01-19T02:00:00.000Z" title="发表于 2026-01-19 10:00:00">2026-01-19</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2018 - 2026 By 刘元</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

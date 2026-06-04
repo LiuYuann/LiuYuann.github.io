@@ -1,0 +1,419 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>s08: Context Compact — 上下文总会满 | 刘元的技术博客</title><meta name="author" content="刘元"><meta name="copyright" content="刘元"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → s06 → s07 → s08 → s09 → s10 → … → s20  “上下文总会满, 要有办法腾地方” — 四层压缩策略, 便宜的先跑贵的后跑。 Harness 层: 压缩 — 干净的记忆, 无限的会话。   问题Agent 跑着跑着，不动了。 手里有 bash、有 read、有 write">
+<meta property="og:type" content="article">
+<meta property="og:title" content="s08: Context Compact — 上下文总会满">
+<meta property="og:url" content="https://liuyuann.github.io/2026/01/08/s08_context_compact/index.html">
+<meta property="og:site_name" content="刘元的技术博客">
+<meta property="og:description" content="中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → s06 → s07 → s08 → s09 → s10 → … → s20  “上下文总会满, 要有办法腾地方” — 四层压缩策略, 便宜的先跑贵的后跑。 Harness 层: 压缩 — 干净的记忆, 无限的会话。   问题Agent 跑着跑着，不动了。 手里有 bash、有 read、有 write">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80">
+<meta property="article:published_time" content="2026-01-08T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-04T08:51:49.896Z">
+<meta property="article:author" content="刘元">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Claude Code">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "s08: Context Compact — 上下文总会满",
+  "url": "https://liuyuann.github.io/2026/01/08/s08_context_compact/",
+  "image": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80",
+  "datePublished": "2026-01-08T02:00:00.000Z",
+  "dateModified": "2026-06-04T08:51:49.896Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "刘元",
+      "url": "https://liuyuann.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://liuyuann.github.io/2026/01/08/s08_context_compact/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 's08: Context Compact — 上下文总会满',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&amp;q=80);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">刘元的技术博客</span></a><a class="nav-page-title" href="/"><span class="site-name">s08: Context Compact — 上下文总会满</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">s08: Context Compact — 上下文总会满</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-01-08T02:00:00.000Z" title="发表于 2026-01-08 10:00:00">2026-01-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-04T08:51:49.896Z" title="更新于 2026-06-04 16:51:49">2026-06-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/learn-claude-code/">learn-claude-code</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>9分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p><a href="README.md">中文</a> · <a href="README.en.md">English</a> · <a href="README.ja.md">日本語</a></p>
+<p>s01 → s02 → s03 → s04 → s05 → s06 → s07 → <code>s08</code> → <a href="../s09_memory/">s09</a> → s10 → … → s20</p>
+<blockquote>
+<p><em>“上下文总会满, 要有办法腾地方”</em> — 四层压缩策略, 便宜的先跑贵的后跑。</p>
+<p><strong>Harness 层</strong>: 压缩 — 干净的记忆, 无限的会话。</p>
+</blockquote>
+<hr>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>Agent 跑着跑着，不动了。</p>
+<p>手里有 bash、有 read、有 write，能力是够的。但它读了一个 1000 行的文件（~4000 token），又读了 30 个文件，跑了 20 条命令。每条命令的输出、每个文件的内容，全都堆在 <code>messages</code> 列表里。</p>
+<p>上下文窗口是有限的。满了之后，API 直接拒绝：<code>prompt_too_long</code>。</p>
+<p>不压缩，Agent 根本没法在大项目里干活。</p>
+<hr>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/compact-overview.svg" alt="Compact Overview"></p>
+<p>保留 s07 的 hook 结构、技能加载、子 Agent 等骨架，省略部分工具细节以聚焦压缩。核心变动：每轮 LLM 调用前插入三层预处理器（0 API），token 仍超阈值时触发 LLM 摘要（1 API），API 报错时应急裁剪。</p>
+<p>核心设计：便宜的先跑，贵的后跑。</p>
+<hr>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/compaction-layers.svg" alt="四层压缩管线"></p>
+<h3 id="L1-snip-compact-—-裁掉无关的旧对话"><a href="#L1-snip-compact-—-裁掉无关的旧对话" class="headerlink" title="L1: snip_compact — 裁掉无关的旧对话"></a>L1: snip_compact — 裁掉无关的旧对话</h3><p>Agent 跑了 80 轮对话，<code>messages</code> 攒了 160 条。最前面的”帮我创建 hello.py”和当前工作几乎无关了，但全占着位置。</p>
+<p>消息数超过 50 条 → 保留头部 3 条（初始上下文）和尾部 47 条（当前工作），中间裁掉：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">snip_compact</span>(<span class="params">messages, max_messages=<span class="number">50</span></span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(messages) &lt;= max_messages:</span><br><span class="line">        <span class="keyword">return</span> messages</span><br><span class="line">    keep_head, keep_tail = <span class="number">3</span>, max_messages - <span class="number">3</span></span><br><span class="line">    snipped = <span class="built_in">len</span>(messages) - keep_head - keep_tail</span><br><span class="line">    placeholder = &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>,</span><br><span class="line">                   <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;[snipped <span class="subst">&#123;snipped&#125;</span> messages from conversation middle]&quot;</span>&#125;</span><br><span class="line">    <span class="keyword">return</span> messages[:keep_head] + [placeholder] + messages[-keep_tail:]</span><br></pre></td></tr></table></figure>
+
+<p>裁掉了整条消息，但剩下的消息里 <code>tool_result</code> 内容仍在累积——第 34 条消息里可能躺着 30KB 的旧文件内容。→ L2。</p>
+<h3 id="L2-micro-compact-—-旧工具结果占位"><a href="#L2-micro-compact-—-旧工具结果占位" class="headerlink" title="L2: micro_compact — 旧工具结果占位"></a>L2: micro_compact — 旧工具结果占位</h3><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/micro-compact.svg" alt="旧结果占位"></p>
+<p>Agent 连续读了 10 个文件。第 1-7 次的完整内容还躺在上下文里，早就不需要了，但占着大量空间。</p>
+<p>只保留最近 3 条 <code>tool_result</code> 的完整内容，更旧的替换为一行占位符：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">KEEP_RECENT_TOOL_RESULTS = <span class="number">3</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">micro_compact</span>(<span class="params">messages</span>):</span><br><span class="line">    tool_results = collect_tool_result_blocks(messages)</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(tool_results) &lt;= KEEP_RECENT_TOOL_RESULTS:</span><br><span class="line">        <span class="keyword">return</span> messages</span><br><span class="line">    <span class="keyword">for</span> _, _, block <span class="keyword">in</span> tool_results[:-KEEP_RECENT_TOOL_RESULTS]:</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(block.get(<span class="string">&quot;content&quot;</span>, <span class="string">&quot;&quot;</span>)) &gt; <span class="number">120</span>:</span><br><span class="line">            block[<span class="string">&quot;content&quot;</span>] = <span class="string">&quot;[Earlier tool result compacted. Re-run if needed.]&quot;</span></span><br><span class="line">    <span class="keyword">return</span> messages</span><br></pre></td></tr></table></figure>
+
+<p>旧结果清掉了，但单条新结果可能就有 500KB——一个 <code>cat</code> 大文件的输出就能打满上下文。→ L3。</p>
+<h3 id="L3-tool-result-budget-—-大结果落盘"><a href="#L3-tool-result-budget-—-大结果落盘" class="headerlink" title="L3: tool_result_budget — 大结果落盘"></a>L3: tool_result_budget — 大结果落盘</h3><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/layer1-budget.svg" alt="大结果落盘"></p>
+<p>模型一次读了 5 个大文件，单条 user 消息里所有 <code>tool_result</code> 加起来 500KB。</p>
+<p>统计最后一条 user 消息里所有 <code>tool_result</code> 的总大小。超过 200KB → 按大小排序，从最大的开始落盘到 <code>.task_outputs/tool-results/</code>，上下文里只留 <code>&lt;persisted-output&gt;</code> 标记 + 前 2000 字符预览。模型看到标记后知道完整内容在磁盘上，需要时可以重新读。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">tool_result_budget</span>(<span class="params">messages, max_bytes=<span class="number">200_000</span></span>):</span><br><span class="line">    last = messages[-<span class="number">1</span>]</span><br><span class="line">    blocks = [(i, b) <span class="keyword">for</span> i, b <span class="keyword">in</span> <span class="built_in">enumerate</span>(last[<span class="string">&quot;content&quot;</span>])</span><br><span class="line">              <span class="keyword">if</span> b.get(<span class="string">&quot;type&quot;</span>) == <span class="string">&quot;tool_result&quot;</span>]</span><br><span class="line">    total = <span class="built_in">sum</span>(<span class="built_in">len</span>(<span class="built_in">str</span>(b.get(<span class="string">&quot;content&quot;</span>, <span class="string">&quot;&quot;</span>))) <span class="keyword">for</span> _, b <span class="keyword">in</span> blocks)</span><br><span class="line">    <span class="keyword">if</span> total &lt;= max_bytes:</span><br><span class="line">        <span class="keyword">return</span> messages</span><br><span class="line">    ranked = <span class="built_in">sorted</span>(blocks, key=<span class="keyword">lambda</span> p: <span class="built_in">len</span>(<span class="built_in">str</span>(p[<span class="number">1</span>].get(<span class="string">&quot;content&quot;</span>, <span class="string">&quot;&quot;</span>))), reverse=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">for</span> idx, block <span class="keyword">in</span> ranked:</span><br><span class="line">        <span class="keyword">if</span> total &lt;= max_bytes:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        block[<span class="string">&quot;content&quot;</span>] = persist_large_output(block[<span class="string">&quot;tool_use_id&quot;</span>], <span class="built_in">str</span>(block[<span class="string">&quot;content&quot;</span>]))</span><br><span class="line">        total = recalculate_total(blocks)</span><br><span class="line">    <span class="keyword">return</span> messages</span><br></pre></td></tr></table></figure>
+
+<p>前三层都是纯文本&#x2F;结构操作，0 API 调用，但也无法”理解”对话内容。上下文可能仍然太大。→ L4。</p>
+<h3 id="L4-compact-history-—-LLM-全量摘要"><a href="#L4-compact-history-—-LLM-全量摘要" class="headerlink" title="L4: compact_history — LLM 全量摘要"></a>L4: compact_history — LLM 全量摘要</h3><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/auto-compact.svg" alt="LLM 全量摘要"></p>
+<p>前三层全跑完了，但在超大项目中连续工作 30 分钟后，token 仍然超过阈值。</p>
+<p>三步流程：</p>
+<ol>
+<li><strong>保存 transcript</strong>：完整对话写入 <code>.transcripts/</code>，JSONL 格式。transcript 保留了可恢复记录，但模型的活跃上下文里只剩摘要。对模型当下推理来说，细节已经不在上下文中了。教学代码没有提供 transcript 检索工具。</li>
+<li><strong>LLM 生成摘要</strong>：把对话历史发给 LLM，要求保留当前目标、重要发现、已改文件、剩余工作、用户约束等关键信息。</li>
+<li><strong>替换消息列表</strong>：所有旧消息被替换为一条摘要。教学版只保留摘要；真实 Claude Code 会在 compact 后重新附加部分最近文件、计划、agent&#x2F;skill&#x2F;tool 等上下文。</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">compact_history</span>(<span class="params">messages</span>):</span><br><span class="line">    transcript_path = write_transcript(messages)  <span class="comment"># 先保存完整对话</span></span><br><span class="line">    summary = summarize_history(messages)          <span class="comment"># LLM 生成摘要</span></span><br><span class="line">    <span class="keyword">return</span> [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>,</span><br><span class="line">             <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;[Compacted]\n\n<span class="subst">&#123;summary&#125;</span>&quot;</span>&#125;]</span><br></pre></td></tr></table></figure>
+
+<p><strong>熔断器</strong>：连续失败 3 次后停止重试，防止死循环浪费 API 调用。</p>
+<h3 id="应急-reactive-compact"><a href="#应急-reactive-compact" class="headerlink" title="应急: reactive_compact"></a>应急: reactive_compact</h3><p>有时候 API 还是返回 <code>prompt_too_long</code>（413），上下文增长速度快于压缩触发速度时。</p>
+<p>这时触发 <strong>reactive_compact</strong>：比 compact_history 更激进，从尾部回退，以字节级精度裁剪到 API 可接受的大小，只保留最后 5 条消息 + 摘要。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">reactive_compact</span>(<span class="params">messages</span>):</span><br><span class="line">    transcript = write_transcript(messages)</span><br><span class="line">    summary = summarize_history(messages)</span><br><span class="line">    tail = messages[-<span class="number">5</span>:]</span><br><span class="line">    <span class="keyword">return</span> [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>,</span><br><span class="line">             <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;[Reactive compact]\n\n<span class="subst">&#123;summary&#125;</span>&quot;</span>&#125;, *tail]</span><br></pre></td></tr></table></figure>
+
+<p>reactive compact 有重试上限（默认 1 次）。再失败就抛出异常，不无限循环。完整的错误恢复逻辑留给 s11。</p>
+<h3 id="合起来跑"><a href="#合起来跑" class="headerlink" title="合起来跑"></a>合起来跑</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">agent_loop</span>(<span class="params">messages</span>):</span><br><span class="line">    reactive_retries = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># 三个预处理器（0 API 调用）</span></span><br><span class="line">        <span class="comment"># 顺序：budget 先跑，确保大内容落盘后再做占位和裁剪</span></span><br><span class="line">        messages[:] = tool_result_budget(messages)    <span class="comment"># L3: 大结果落盘</span></span><br><span class="line">        messages[:] = snip_compact(messages)          <span class="comment"># L1: 裁中间</span></span><br><span class="line">        messages[:] = micro_compact(messages)         <span class="comment"># L2: 旧结果占位</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 还不够？LLM 摘要（1 API 调用）</span></span><br><span class="line">        <span class="keyword">if</span> estimate_token_count(messages) &gt; THRESHOLD:</span><br><span class="line">            messages[:] = compact_history(messages)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            response = client.messages.create(...)</span><br><span class="line">        <span class="keyword">except</span> PromptTooLongError:</span><br><span class="line">            <span class="keyword">if</span> reactive_retries &lt; MAX_REACTIVE_RETRIES:</span><br><span class="line">                messages[:] = reactive_compact(messages)  <span class="comment"># 应急</span></span><br><span class="line">                reactive_retries += <span class="number">1</span></span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">raise</span>  <span class="comment"># 超过重试上限，抛出异常</span></span><br><span class="line">        <span class="comment"># ... 工具执行 ...</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># compact 工具：模型主动调用时触发 compact_history</span></span><br><span class="line">        <span class="keyword">if</span> block.name == <span class="string">&quot;compact&quot;</span>:</span><br><span class="line">            messages[:] = compact_history(messages)</span><br><span class="line">            results.append(&#123;..., <span class="string">&quot;content&quot;</span>: <span class="string">&quot;[Compacted. History summarized.]&quot;</span>&#125;)</span><br><span class="line">            messages.append(&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: results&#125;)</span><br><span class="line">            <span class="keyword">break</span>  <span class="comment"># 结束当前 turn，用压缩后的上下文开始新一轮</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>顺序不能换。</strong> L3（budget）在 L2（micro）前面，因为 micro 会把旧的大 tool_result 替换成一行占位符，budget 必须在那之前把完整内容落盘。这也是为什么 CC 源码把 <code>applyToolResultBudget</code> 放在最前面。</p>
+<hr>
+<h2 id="相对-s07-的变更"><a href="#相对-s07-的变更" class="headerlink" title="相对 s07 的变更"></a>相对 s07 的变更</h2><table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s07)</th>
+<th>之后 (s08)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>上下文管理</td>
+<td>无（上下文无限膨胀）</td>
+<td>四层压缩管线 + 应急</td>
+</tr>
+<tr>
+<td>新函数</td>
+<td>—</td>
+<td>snip_compact, micro_compact, tool_result_budget, compact_history, reactive_compact</td>
+</tr>
+<tr>
+<td>工具</td>
+<td>bash, read, write, edit, glob, todo_write, task, load_skill (8)</td>
+<td>8 + compact (9)</td>
+</tr>
+<tr>
+<td>循环</td>
+<td>LLM 调用 → 工具执行</td>
+<td>每轮前跑三层预处理器 + 阈值触发 compact_history</td>
+</tr>
+<tr>
+<td>设计原则</td>
+<td>—</td>
+<td>便宜的先跑，贵的后跑</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="试一下"><a href="#试一下" class="headerlink" title="试一下"></a>试一下</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> learn-claude-code</span><br><span class="line">python s08_context_compact/code.py</span><br></pre></td></tr></table></figure>
+
+<p>试试这些 prompt：</p>
+<ol>
+<li><code>Read the file README.md, then read code.py, then read s01_agent_loop/README.md</code>（连续读多个文件，观察 L2 压缩旧结果）</li>
+<li><code>Read every file in s08_context_compact/</code>（一次性读大量内容，观察 L3 落盘）</li>
+<li>反复对话 20+ 轮，观察是否出现 <code>[auto compact]</code> 或 <code>[reactive compact]</code></li>
+</ol>
+<p>观察重点：每次工具执行后，旧 tool_result 是否被压缩？连续对话后 token 超阈值时，是否自动触发了摘要？</p>
+<hr>
+<h2 id="接下来"><a href="#接下来" class="headerlink" title="接下来"></a>接下来</h2><p>上下文压缩让 Agent 能跑很久不会崩。但每次压缩后，用户之前告诉它的偏好、约束也跟着丢了。能不能让 Agent 有选择地记住重要的事？</p>
+<p>s09 Memory → 三个子系统：选择记什么、提取关键信息、整理巩固。跨压缩、跨会话。</p>
+<details>
+<summary>深入 CC 源码</summary>
+
+<blockquote>
+<p>以下基于 CC 源码 <code>compact.ts</code>、<code>autoCompact.ts</code>、<code>microCompact.ts</code>、<code>query.ts</code> 的分析。</p>
+</blockquote>
+<h3 id="执行顺序对照"><a href="#执行顺序对照" class="headerlink" title="执行顺序对照"></a>执行顺序对照</h3><p>教学版为了讲解方便按 L1&#x2F;L2&#x2F;L3&#x2F;L4 编号，但实际执行顺序和编号不完全对应：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>教学版</th>
+<th>Claude Code</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>执行顺序</td>
+<td>budget → snip → micro → auto</td>
+<td>budget → snip → micro → collapse → auto（<code>query.ts:379-468</code>）</td>
+</tr>
+<tr>
+<td>snip_compact</td>
+<td>保留头 3 + 尾 47</td>
+<td>CC 仅主线程启用；实现不在开源仓库中（<code>HISTORY_SNIP</code> feature gate），但接口可见：<code>snipCompactIfNeeded(messages)</code> → <code>{ messages, tokensFreed, boundaryMessage? }</code>，还暴露了 <code>SnipTool</code> 工具让模型主动调用。教学版的 3&#x2F;47 是简化参数</td>
+</tr>
+<tr>
+<td>micro_compact</td>
+<td>文本占位符替换</td>
+<td>两条路径：time-based 直接清内容，cached 走 API <code>cache_edits</code>（legacy path 已移除）</td>
+</tr>
+<tr>
+<td>micro_compact 白名单</td>
+<td>按位置（最近 3 条）</td>
+<td>time-based 按时间阈值触发；cached 按计数触发（<code>microCompact.ts</code>）</td>
+</tr>
+<tr>
+<td>tool_result_budget</td>
+<td>200KB 字符</td>
+<td>200,000 字符（<code>toolLimits.ts:49</code>）</td>
+</tr>
+<tr>
+<td>compact_history 阈值</td>
+<td>字符数估算</td>
+<td>精确 token：<code>contextWindow - maxOutputTokens - 13_000</code></td>
+</tr>
+<tr>
+<td>摘要要求</td>
+<td>5 类信息</td>
+<td>9 个部分 + <code>&lt;analysis&gt;</code>&#x2F;<code>&lt;summary&gt;</code> 双标签</td>
+</tr>
+<tr>
+<td>压缩 prompt</td>
+<td>简单 prompt</td>
+<td>首尾双重防呆禁止调工具</td>
+</tr>
+<tr>
+<td>PTL retry</td>
+<td>有（简化）</td>
+<td><code>truncateHeadForPTLRetry()</code> 按消息组回退（<code>compact.ts:243-290</code>）</td>
+</tr>
+<tr>
+<td>后压缩恢复</td>
+<td>无（教学版只保留摘要）</td>
+<td>自动重新读取最近文件、计划、agent&#x2F;skill&#x2F;tool 等</td>
+</tr>
+<tr>
+<td>熔断器</td>
+<td>3 次</td>
+<td>3 次（<code>autoCompact.ts:70</code>）</td>
+</tr>
+<tr>
+<td>reactive 重试</td>
+<td>1 次</td>
+<td>CC 有更精细的分级重试</td>
+</tr>
+</tbody></table>
+<h3 id="执行顺序详解"><a href="#执行顺序详解" class="headerlink" title="执行顺序详解"></a>执行顺序详解</h3><p>CC 源码 <code>query.ts</code> 中的真实顺序：</p>
+<ol>
+<li><code>applyToolResultBudget</code>（L379）：先处理大结果，确保完整内容落盘</li>
+<li><code>snipCompact</code>（L403）：裁中间消息</li>
+<li><code>microcompact</code>（L414）：旧结果占位</li>
+<li><code>contextCollapse</code>（L441）：独立的上下文管理系统（教学版无）</li>
+<li><code>autoCompact</code>（L454）：LLM 全量摘要</li>
+</ol>
+<p>教学版的 budget → snip → micro 顺序与此一致。教学版没有 contextCollapse 机制。</p>
+<h3 id="完整常量参考"><a href="#完整常量参考" class="headerlink" title="完整常量参考"></a>完整常量参考</h3><table>
+<thead>
+<tr>
+<th>常量</th>
+<th>值</th>
+<th>源文件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>AUTOCOMPACT_BUFFER_TOKENS</code></td>
+<td>13,000</td>
+<td><code>autoCompact.ts:62</code></td>
+</tr>
+<tr>
+<td><code>MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES</code></td>
+<td>3</td>
+<td><code>autoCompact.ts:70</code></td>
+</tr>
+<tr>
+<td><code>MAX_OUTPUT_TOKENS_FOR_SUMMARY</code></td>
+<td>20,000</td>
+<td><code>autoCompact.ts:30</code></td>
+</tr>
+<tr>
+<td><code>POST_COMPACT_TOKEN_BUDGET</code></td>
+<td>50,000</td>
+<td><code>compact.ts:123</code></td>
+</tr>
+<tr>
+<td><code>POST_COMPACT_MAX_FILES_TO_RESTORE</code></td>
+<td>5</td>
+<td><code>compact.ts:122</code></td>
+</tr>
+<tr>
+<td><code>POST_COMPACT_MAX_TOKENS_PER_FILE</code></td>
+<td>5,000</td>
+<td><code>compact.ts:124</code></td>
+</tr>
+<tr>
+<td>时间 micro_compact 间隔</td>
+<td>60 分钟</td>
+<td><code>timeBasedMCConfig.ts</code></td>
+</tr>
+<tr>
+<td><code>MAX_COMPACT_STREAMING_RETRIES</code></td>
+<td>2</td>
+<td><code>compact.ts:131</code></td>
+</tr>
+</tbody></table>
+<h3 id="contextCollapse-和-sessionMemoryCompact"><a href="#contextCollapse-和-sessionMemoryCompact" class="headerlink" title="contextCollapse 和 sessionMemoryCompact"></a>contextCollapse 和 sessionMemoryCompact</h3><p>CC 源码中还有两个机制本教学版没有展开：</p>
+<ul>
+<li><strong>contextCollapse</strong>：独立的上下文管理系统，启用时抑制 proactive autocompact（<code>autoCompact.ts:215-222</code>），由 collapse 的 commit&#x2F;blocking 流程接管上下文管理。但 manual <code>/compact</code> 和 reactive fallback 仍是独立路径，不受 contextCollapse 影响。</li>
+<li><strong>sessionMemoryCompact</strong>：compact_history 之前，CC 会先尝试用已有的 session memory（s09 会讲到）做轻量摘要，不调 LLM。这个机制等学完 s09 之后回头看会更清楚。</li>
+</ul>
+<h3 id="压缩-prompt-长什么样？"><a href="#压缩-prompt-长什么样？" class="headerlink" title="压缩 prompt 长什么样？"></a>压缩 prompt 长什么样？</h3><p>CC 的压缩 prompt 有两个硬性要求：</p>
+<ol>
+<li><strong>绝对禁止调用工具</strong>：开头就是 <code>CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.</code>，末尾还会再 REMINDER 一次</li>
+<li><strong>先分析再总结</strong>：模型需要先在 <code>&lt;analysis&gt;</code> 标签里理清思路，然后在 <code>&lt;summary&gt;</code> 标签里输出正式摘要。analysis 在格式化时被剥离</li>
+</ol>
+<h3 id="教学版的简化是刻意的"><a href="#教学版的简化是刻意的" class="headerlink" title="教学版的简化是刻意的"></a>教学版的简化是刻意的</h3><ul>
+<li>micro_compact 用文本占位 → 我们没有 API 层的 <code>cache_edits</code> 权限</li>
+<li>token 用字符数估算 → 精确 tokenizer 不在教学范围内</li>
+<li>后压缩恢复省略 → 教学版只保留摘要，不自动重新附加文件</li>
+<li>两个辅助机制不展开 → 属于 10% 的细节</li>
+</ul>
+<p>核心设计思想，便宜的先跑贵的后跑，完整保留。</p>
+</details>
+
+<!-- translation-sync: zh@v1, en@v1, ja@v1 -->
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io">刘元</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io/2026/01/08/s08_context_compact/">https://liuyuann.github.io/2026/01/08/s08_context_compact/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://liuyuann.github.io" target="_blank">刘元的技术博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Claude-Code/">Claude Code</a><a class="post-meta__tags" href="/tags/AI-Agent/">AI Agent</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a></div><div class="post-share"><div class="social-share" data-image="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&amp;q=80" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/01/09/s09_memory/" title="s09: Memory — 压缩会丢细节，要有一层不丢的"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&amp;q=80" onerror="onerror=null;src='/'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">s09: Memory — 压缩会丢细节，要有一层不丢的</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s07 → s08 → s09 → s10 → s11 → … → s20  “压缩会丢细节, 要有一层不丢的” — 文件仓库 + 索引 + 按需加载，跨压缩、跨会话。 Harness 层: 记忆 — 跨压缩、跨会话的知识积累。   问题s08 的 autoCompact 会把当前目标、剩余工作、用户约束写进摘要，但细节会丢失：”用 tab 缩进不要用空格”可能被简化成”用户有代码风格偏好”。而且新开一个会话，连摘要也没了。 LLM 没有持久状态，所有信息都在上下文窗口里。上下文满了要压缩，压缩就有损。需要一层不参与压缩、跨会话保留的存储。  解决方案 s08 的压缩管线保留，聚焦记忆。存储选文件系统：.memory/ 目录下，每个记忆一个 .md 文件，带 YAML frontmatter（name &#x2F; description &#x2F; type）。文件多了需要索引：MEMORY.md 一行一个链接，注入 SYSTEM。 关键设计：索引常驻 SYSTEM prompt（可被 prompt cache 缓存）...</div></div></div></a><a class="pagination-related" href="/2026/01/07/s07_skill_loading/" title="s07: Skill Loading — 用到的时候才加载"><img class="cover" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="onerror=null;src='/'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">s07: Skill Loading — 用到的时候才加载</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → s06 → s07 → s08 → s09 → … → s20  “用到时再加载, 别全塞 prompt 里” — 通过 tool_result 注入, 不塞 system prompt。 Harness 层: 知识 — 按需加载, 不堆满上下文。   问题你的项目有一套 React 组件规范、一份 SQL 风格指南、一份 API 设计文档。你希望 Agent 自动遵守这些规范。最直接的想法，全塞进 system prompt： 123456SYSTEM = (    f&quot;You are a coding agent. &quot;    + open(&quot;docs/react-style.md&quot;).read()       # 2000 行    + open(&quot;docs/sql-style.md&quot;).read()         # 1500 行    + open(&quot;docs/api-design.md&quot;).r...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/01/10/s10_system_prompt/" title="s10: System Prompt — 运行时组装，不硬编码"><img class="cover" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-10</div><div class="info-item-2">s10: System Prompt — 运行时组装，不硬编码</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s08 → s09 → s10 → s11 → s12 → … → s20  “prompt 是组装出来的, 不是写死的” — 分段 + 按需拼接 + 缓存。 Harness 层: 提示 — 运行时组装, 不硬编码。   问题从 s01 到 s09，system prompt 都是一行硬编码： 1SYSTEM = f&quot;You are a coding agent at &#123;WORKDIR&#125;. Use tools to solve tasks.&quot;  s01 够用，只有 bash、read、write 三个工具。但到 s09，Agent 已经有记忆、有压缩、有技能加载。prompt 该提的能力越来越多： 12345678SYSTEM = (    f&quot;You are a coding agent at &#123;WORKDIR&#125;. &quot;    &quot;Use tools to solve tasks. Act, don&#x27;t explain. &q...</div></div></div></a><a class="pagination-related" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议"><img class="cover" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-19</div><div class="info-item-2">s19: MCP Tools — 外接工具，标准协议</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s17 → s18 → s19 → s20  “外接工具, 标准协议” — 发现、组装、调用，Agent 不需要知道工具是谁写的。 Harness 层: 插件 — 外部能力通过标准协议接入。   问题s01 到 s18，Agent 的所有工具都是手写的——bash、read、write、task、worktree。每个工具的输入验证、执行逻辑、错误处理，都是你一行行写的。 现在你有 3 个外部服务想接入：公司的 Jira API（查 issue、建 ticket）、自建的部署系统（触发 deploy、看日志）、团队的 Notion 知识库（搜文档、建页面）。你不想为每个服务重写一套工具代码。 你需要一个标准协议——外部服务只要实现它，Agent 就能直接调用，不管服务用什么语言写的。  解决方案 MCP（Model Context Protocol）定义了 Agent 如何发现和调用外部工具。核心概念：    概念 作用    MCPClient Agent 端的客户端，连接 server、发现工具、调用工具   MCP ...</div></div></div></a><a class="pagination-related" href="/2026/01/09/s09_memory/" title="s09: Memory — 压缩会丢细节，要有一层不丢的"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-09</div><div class="info-item-2">s09: Memory — 压缩会丢细节，要有一层不丢的</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s07 → s08 → s09 → s10 → s11 → … → s20  “压缩会丢细节, 要有一层不丢的” — 文件仓库 + 索引 + 按需加载，跨压缩、跨会话。 Harness 层: 记忆 — 跨压缩、跨会话的知识积累。   问题s08 的 autoCompact 会把当前目标、剩余工作、用户约束写进摘要，但细节会丢失：”用 tab 缩进不要用空格”可能被简化成”用户有代码风格偏好”。而且新开一个会话，连摘要也没了。 LLM 没有持久状态，所有信息都在上下文窗口里。上下文满了要压缩，压缩就有损。需要一层不参与压缩、跨会话保留的存储。  解决方案 s08 的压缩管线保留，聚焦记忆。存储选文件系统：.memory/ 目录下，每个记忆一个 .md 文件，带 YAML frontmatter（name &#x2F; description &#x2F; type）。文件多了需要索引：MEMORY.md 一行一个链接，注入 SYSTEM。 关键设计：索引常驻 SYSTEM prompt（可被 prompt cache 缓存）...</div></div></div></a><a class="pagination-related" href="/2026/01/01/s01_agent_loop/" title="s01: Agent Loop — 一个循环就够了"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-01</div><div class="info-item-2">s01: Agent Loop — 一个循环就够了</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → … → s20  “One loop &amp; Bash is all you need” — 一个工具 + 一个循环 &#x3D; 一个 Agent。 Harness 层: 循环 — 模型与真实世界的第一道连接。   问题你提出了一个问题给大模型：“帮我读取下我的目录下有哪些文件，并且执行XXX.py”。 模型能输出一条 bash 命令，但输出完了就停了，它不会自己跑，也不会看到结果后继续推理。 你可以手动跑一遍，把输出粘贴回对话框，让它接着干。下一个命令出来，你再跑一遍、再贴回去。 每一个来回，你都在做中间层。而把它自动化，就是这一章要做的事。  解决方案 一个 while True 循环，模型调用工具就继续，不调用就停。整个过程只有两个信号：    信号 含义 循环动作    stop_reason == &quot;tool_use&quot; 模型举手说”我要用工具” 执行 → 结果喂回去 → 继续   stop_reason != &quot;tool_use&quot; 模型说”...</div></div></div></a><a class="pagination-related" href="/2026/01/11/s11_error_recovery/" title="s11: Error Recovery — 错误不是结束"><img class="cover" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-11</div><div class="info-item-2">s11: Error Recovery — 错误不是结束</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s09 → s10 → s11 → s12 → s13 → … → s20  “错误不是终点, 是重试的起点” — 升级 token、压缩上下文、切换模型。 Harness 层: 韧性 — 主循环遇到错误时分类并恢复。   问题Agent 跑着跑着报错了： 1Error: 529 overloaded  Agent 崩溃了。它没有重试，没有换模型，没有减少上下文——直接崩溃。 生产环境中 API 错误是常态。三种最常见的故障模式：输出被截断（模型话说一半 token 用完了）、上下文超限（压缩后还是太长）、临时故障（429 限流 &#x2F; 529 过载）。一个不处理错误的 Agent 就像一个一碰就熄火的车。  解决方案 s10 的循环、prompt 组装全部保留。唯一的变动：LLM 调用包裹在 try&#x2F;except 里，根据错误类型走不同的恢复路径。恢复后 continue 回到循环开头重新调用 LLM。 三种最常见的恢复模式（教学版只处理 429&#x2F;529；真实系统还覆盖连接错误、超时、云厂商认证...</div></div></div></a><a class="pagination-related" href="/2026/01/05/s05_todo_write/" title="s05: TodoWrite — 没有计划的 Agent 就会偏"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-05</div><div class="info-item-2">s05: TodoWrite — 没有计划的 Agent 就会偏</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → s06 → s07 → … → s20  “没有计划的 agent 走哪算哪” — 先列步骤再动手，长任务更不容易漏项。 Harness 层: 规划 — 让 Agent 在动手之前先想清楚。   问题给 Agent 一个复杂任务：”把所有 Python 文件改成 snake_case 命名，然后跑测试，修好失败。” Agent 开始干活，改了 3 个文件，跑了个测试，发现 2 个失败，开始修。修着修着，它忘了最初是”改成 snake_case”，测试失败把注意力全吸走了。 对话越长越严重：工具结果不断填满上下文，系统提示的影响力被稀释。一个 10 步重构，做完 1-3 步就开始即兴发挥，因为 4-10 步已经被挤出注意力了。  解决方案 保留上一章的最小 hook 结构，重点看新增的 todo_write 工具和 reminder 机制。todo_write 本身不做任何实际工作，不能读文件、不能跑命令，只是让 Agent 在动手之前先理清思路。 dispatch 机制不变，新工具仍...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="author-info-name">刘元</div><div class="author-info-description">高通 AI 工程师 | LLM Agent 开发者</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" href="/atom.xml"><i class="fas fa-rss"></i><span>订阅</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/LiuYuann" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1903554839@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">2.</span> <span class="toc-text">解决方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text">工作原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#L1-snip-compact-%E2%80%94-%E8%A3%81%E6%8E%89%E6%97%A0%E5%85%B3%E7%9A%84%E6%97%A7%E5%AF%B9%E8%AF%9D"><span class="toc-number">3.1.</span> <span class="toc-text">L1: snip_compact — 裁掉无关的旧对话</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#L2-micro-compact-%E2%80%94-%E6%97%A7%E5%B7%A5%E5%85%B7%E7%BB%93%E6%9E%9C%E5%8D%A0%E4%BD%8D"><span class="toc-number">3.2.</span> <span class="toc-text">L2: micro_compact — 旧工具结果占位</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#L3-tool-result-budget-%E2%80%94-%E5%A4%A7%E7%BB%93%E6%9E%9C%E8%90%BD%E7%9B%98"><span class="toc-number">3.3.</span> <span class="toc-text">L3: tool_result_budget — 大结果落盘</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#L4-compact-history-%E2%80%94-LLM-%E5%85%A8%E9%87%8F%E6%91%98%E8%A6%81"><span class="toc-number">3.4.</span> <span class="toc-text">L4: compact_history — LLM 全量摘要</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BA%94%E6%80%A5-reactive-compact"><span class="toc-number">3.5.</span> <span class="toc-text">应急: reactive_compact</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%88%E8%B5%B7%E6%9D%A5%E8%B7%91"><span class="toc-number">3.6.</span> <span class="toc-text">合起来跑</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%AF%B9-s07-%E7%9A%84%E5%8F%98%E6%9B%B4"><span class="toc-number">4.</span> <span class="toc-text">相对 s07 的变更</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%95%E4%B8%80%E4%B8%8B"><span class="toc-number">5.</span> <span class="toc-text">试一下</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E4%B8%8B%E6%9D%A5"><span class="toc-number">6.</span> <span class="toc-text">接下来</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F%E5%AF%B9%E7%85%A7"><span class="toc-number">6.1.</span> <span class="toc-text">执行顺序对照</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F%E8%AF%A6%E8%A7%A3"><span class="toc-number">6.2.</span> <span class="toc-text">执行顺序详解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E5%B8%B8%E9%87%8F%E5%8F%82%E8%80%83"><span class="toc-number">6.3.</span> <span class="toc-text">完整常量参考</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#contextCollapse-%E5%92%8C-sessionMemoryCompact"><span class="toc-number">6.4.</span> <span class="toc-text">contextCollapse 和 sessionMemoryCompact</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%8B%E7%BC%A9-prompt-%E9%95%BF%E4%BB%80%E4%B9%88%E6%A0%B7%EF%BC%9F"><span class="toc-number">6.5.</span> <span class="toc-text">压缩 prompt 长什么样？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%99%E5%AD%A6%E7%89%88%E7%9A%84%E7%AE%80%E5%8C%96%E6%98%AF%E5%88%BB%E6%84%8F%E7%9A%84"><span class="toc-number">6.6.</span> <span class="toc-text">教学版的简化是刻意的</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="大模型（LLMs）面试题全集精选"/></a><div class="content"><a class="title" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选">大模型（LLMs）面试题全集精选</a><time datetime="2026-06-04T12:00:00.000Z" title="发表于 2026-06-04 20:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集"><img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="互联网公司面试题合集"/></a><div class="content"><a class="title" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集">互联网公司面试题合集</a><time datetime="2026-06-04T08:00:00.000Z" title="发表于 2026-06-04 16:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/llm-interview-questions-wiki/" title="大模型（LLMs）面试题全集 — 225 题精解"><img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="大模型（LLMs）面试题全集 — 225 题精解"/></a><div class="content"><a class="title" href="/2026/06/04/llm-interview-questions-wiki/" title="大模型（LLMs）面试题全集 — 225 题精解">大模型（LLMs）面试题全集 — 225 题精解</a><time datetime="2026-06-04T02:00:00.000Z" title="发表于 2026-06-04 10:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/20/s20_comprehensive/" title="s20: Comprehensive Agent — 全部机制归一循环"><img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="s20: Comprehensive Agent — 全部机制归一循环"/></a><div class="content"><a class="title" href="/2026/01/20/s20_comprehensive/" title="s20: Comprehensive Agent — 全部机制归一循环">s20: Comprehensive Agent — 全部机制归一循环</a><time datetime="2026-01-20T02:00:00.000Z" title="发表于 2026-01-20 10:00:00">2026-01-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="s19: MCP Tools — 外接工具，标准协议"/></a><div class="content"><a class="title" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议">s19: MCP Tools — 外接工具，标准协议</a><time datetime="2026-01-19T02:00:00.000Z" title="发表于 2026-01-19 10:00:00">2026-01-19</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2018 - 2026 By 刘元</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

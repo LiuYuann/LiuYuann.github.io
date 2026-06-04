@@ -1,0 +1,424 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>s09: Memory — 压缩会丢细节，要有一层不丢的 | 刘元的技术博客</title><meta name="author" content="刘元"><meta name="copyright" content="刘元"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="中文 · English · 日本語 s01 → … → s07 → s08 → s09 → s10 → s11 → … → s20  “压缩会丢细节, 要有一层不丢的” — 文件仓库 + 索引 + 按需加载，跨压缩、跨会话。 Harness 层: 记忆 — 跨压缩、跨会话的知识积累。   问题s08 的 autoCompact 会把当前目标、剩余工作、用户约束写进摘要，但细节会丢失：”用 tab">
+<meta property="og:type" content="article">
+<meta property="og:title" content="s09: Memory — 压缩会丢细节，要有一层不丢的">
+<meta property="og:url" content="https://liuyuann.github.io/2026/01/09/s09_memory/index.html">
+<meta property="og:site_name" content="刘元的技术博客">
+<meta property="og:description" content="中文 · English · 日本語 s01 → … → s07 → s08 → s09 → s10 → s11 → … → s20  “压缩会丢细节, 要有一层不丢的” — 文件仓库 + 索引 + 按需加载，跨压缩、跨会话。 Harness 层: 记忆 — 跨压缩、跨会话的知识积累。   问题s08 的 autoCompact 会把当前目标、剩余工作、用户约束写进摘要，但细节会丢失：”用 tab">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80">
+<meta property="article:published_time" content="2026-01-09T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-04T08:51:56.102Z">
+<meta property="article:author" content="刘元">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Claude Code">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "s09: Memory — 压缩会丢细节，要有一层不丢的",
+  "url": "https://liuyuann.github.io/2026/01/09/s09_memory/",
+  "image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80",
+  "datePublished": "2026-01-09T02:00:00.000Z",
+  "dateModified": "2026-06-04T08:51:56.102Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "刘元",
+      "url": "https://liuyuann.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://liuyuann.github.io/2026/01/09/s09_memory/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 's09: Memory — 压缩会丢细节，要有一层不丢的',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&amp;q=80);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">刘元的技术博客</span></a><a class="nav-page-title" href="/"><span class="site-name">s09: Memory — 压缩会丢细节，要有一层不丢的</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">s09: Memory — 压缩会丢细节，要有一层不丢的</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-01-09T02:00:00.000Z" title="发表于 2026-01-09 10:00:00">2026-01-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-04T08:51:56.102Z" title="更新于 2026-06-04 16:51:56">2026-06-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/learn-claude-code/">learn-claude-code</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>10分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p><a href="README.md">中文</a> · <a href="README.en.md">English</a> · <a href="README.ja.md">日本語</a></p>
+<p>s01 → … → s07 → s08 → <code>s09</code> → <a href="../s10_system_prompt/">s10</a> → s11 → … → s20</p>
+<blockquote>
+<p><em>“压缩会丢细节, 要有一层不丢的”</em> — 文件仓库 + 索引 + 按需加载，跨压缩、跨会话。</p>
+<p><strong>Harness 层</strong>: 记忆 — 跨压缩、跨会话的知识积累。</p>
+</blockquote>
+<hr>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>s08 的 autoCompact 会把当前目标、剩余工作、用户约束写进摘要，但细节会丢失：”用 tab 缩进不要用空格”可能被简化成”用户有代码风格偏好”。而且新开一个会话，连摘要也没了。</p>
+<p>LLM 没有持久状态，所有信息都在上下文窗口里。上下文满了要压缩，压缩就有损。需要一层不参与压缩、跨会话保留的存储。</p>
+<hr>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/memory-overview.svg" alt="Memory Overview"></p>
+<p>s08 的压缩管线保留，聚焦记忆。存储选文件系统：<code>.memory/</code> 目录下，每个记忆一个 <code>.md</code> 文件，带 YAML frontmatter（<code>name</code> &#x2F; <code>description</code> &#x2F; <code>type</code>）。文件多了需要索引：<code>MEMORY.md</code> 一行一个链接，注入 SYSTEM。</p>
+<p>关键设计：索引常驻 SYSTEM prompt（可被 prompt cache 缓存），文件内容按需注入到当前 user turn（按 filename&#x2F;description 匹配当前对话，不破坏 cache）。写入由每轮结束后的提取器完成：用户显式说”记住”或表达稳定偏好时，提取器会保存为记忆。文件积累多了，定期整理去重。</p>
+<p>四类记忆，各有用途：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>回答什么</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>user</td>
+<td>你是谁</td>
+<td>“用 tab 不用空格”</td>
+</tr>
+<tr>
+<td>feedback</td>
+<td>怎么做事</td>
+<td>“别 mock 数据库”</td>
+</tr>
+<tr>
+<td>project</td>
+<td>正在发生什么</td>
+<td>“auth 重写是合规驱动”</td>
+</tr>
+<tr>
+<td>reference</td>
+<td>东西在哪找</td>
+<td>“pipeline bug 在 Linear INGEST”</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/memory-subsystems.svg" alt="Memory Subsystems"></p>
+<h3 id="存储：Markdown-文件-索引"><a href="#存储：Markdown-文件-索引" class="headerlink" title="存储：Markdown 文件 + 索引"></a>存储：Markdown 文件 + 索引</h3><p>每个记忆是一个 <code>.md</code> 文件，YAML frontmatter 记录元数据：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">name: user-preference-tabs</span><br><span class="line">description: User prefers tabs for indentation</span><br><span class="line"><span class="section">type: user</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line">User prefers using tabs, not spaces, for indentation.</span><br><span class="line"><span class="strong">**Why:**</span> Consistency with existing codebase conventions.</span><br><span class="line"><span class="strong">**How to apply:**</span> Always use tabs when writing or editing files.</span><br></pre></td></tr></table></figure>
+
+<p><code>MEMORY.md</code> 是索引，一行一个链接：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> [<span class="string">user-preference-tabs</span>](<span class="link">user-preference-tabs.md</span>) — User prefers tabs for indentation</span><br></pre></td></tr></table></figure>
+
+<p>写入新记忆时自动重建索引：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">write_memory_file</span>(<span class="params">name, mem_type, description, body</span>):</span><br><span class="line">    slug = name.lower().replace(<span class="string">&quot; &quot;</span>, <span class="string">&quot;-&quot;</span>)</span><br><span class="line">    filepath = MEMORY_DIR / <span class="string">f&quot;<span class="subst">&#123;slug&#125;</span>.md&quot;</span></span><br><span class="line">    filepath.write_text(</span><br><span class="line">        <span class="string">f&quot;---\nname: <span class="subst">&#123;name&#125;</span>\ndescription: <span class="subst">&#123;description&#125;</span>\ntype: <span class="subst">&#123;mem_type&#125;</span>\n---\n\n<span class="subst">&#123;body&#125;</span>\n&quot;</span></span><br><span class="line">    )</span><br><span class="line">    _rebuild_index()</span><br></pre></td></tr></table></figure>
+
+<h3 id="加载：两条路径"><a href="#加载：两条路径" class="headerlink" title="加载：两条路径"></a>加载：两条路径</h3><p><strong>路径一：索引常驻 SYSTEM。</strong> <code>build_system()</code> 每轮重建 SYSTEM 时读取 <code>MEMORY.md</code>，把记忆清单注入。SYSTEM prompt 中的索引可以被 prompt cache 缓存，不需要每轮重新发送。</p>
+<p><strong>路径二：相关记忆按需注入。</strong> 每轮调用前，<code>load_memories()</code> 把最近对话和记忆目录（name + description）一起发给 LLM 做一次轻量 side-query，选出相关的文件名，再读文件内容临时注入到当前 user turn。最多 5 条，控制开销。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">select_relevant_memories</span>(<span class="params">messages, max_items=<span class="number">5</span></span>):</span><br><span class="line">    files = list_memory_files()</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> files:</span><br><span class="line">        <span class="keyword">return</span> []</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Build catalog: &quot;0: user-preference-tabs — User prefers tabs...&quot;</span></span><br><span class="line">    catalog = <span class="string">&quot;\n&quot;</span>.join(<span class="string">f&quot;<span class="subst">&#123;i&#125;</span>: <span class="subst">&#123;f[<span class="string">&#x27;name&#x27;</span>]&#125;</span> — <span class="subst">&#123;f[<span class="string">&#x27;description&#x27;</span>]&#125;</span>&quot;</span> <span class="keyword">for</span> i, f <span class="keyword">in</span> <span class="built_in">enumerate</span>(files))</span><br><span class="line"></span><br><span class="line">    response = client.messages.create(model=MODEL, messages=[&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>,</span><br><span class="line">        <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;Select relevant memory indices. Return JSON array.\n\n&quot;</span></span><br><span class="line">                   <span class="string">f&quot;Recent conversation:\n<span class="subst">&#123;recent&#125;</span>\n\nMemory catalog:\n<span class="subst">&#123;catalog&#125;</span>&quot;</span>&#125;],</span><br><span class="line">        max_tokens=<span class="number">200</span>)</span><br><span class="line">    text = extract_text(response.content).strip()</span><br><span class="line">    indices = json.loads(re.search(<span class="string">r&#x27;\[.*?\]&#x27;</span>, text).group())</span><br><span class="line">    <span class="keyword">return</span> [files[i][<span class="string">&quot;filename&quot;</span>] <span class="keyword">for</span> i <span class="keyword">in</span> indices <span class="keyword">if</span> <span class="number">0</span> &lt;= i &lt; <span class="built_in">len</span>(files)]</span><br></pre></td></tr></table></figure>
+
+<p>如果 side-query 失败（API 错误、JSON 解析失败），降级到关键词匹配 name + description。</p>
+<h3 id="写入：每轮结束后提取"><a href="#写入：每轮结束后提取" class="headerlink" title="写入：每轮结束后提取"></a>写入：每轮结束后提取</h3><p>用户不会每次都说”记住这个”。偏好通常散落在正常对话中：”用 tab 比空格好”、”以后都用单引号”。</p>
+<p><code>extract_memories()</code> 在每轮结束时运行，条件是模型停止且没有 tool_use（说明对话告一段落）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># In agent_loop:</span></span><br><span class="line"><span class="keyword">if</span> response.stop_reason != <span class="string">&quot;tool_use&quot;</span>:</span><br><span class="line">    extract_memories(pre_compress)   <span class="comment"># 从压缩前快照提取新记忆</span></span><br><span class="line">    consolidate_memories()       <span class="comment"># 检查是否需要整理</span></span><br><span class="line">    <span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+
+<p>提取前先检查已有记忆，避免重复。提取 prompt 要求 LLM 返回 <code>{name, type, description, body}</code> 的 JSON 数组，只有确实有新信息时才写文件。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">extract_memories</span>(<span class="params">messages</span>):</span><br><span class="line">    dialogue = format_recent_messages(messages[-<span class="number">10</span>:])</span><br><span class="line">    existing = <span class="string">&quot;\n&quot;</span>.join(<span class="string">f&quot;- <span class="subst">&#123;m[<span class="string">&#x27;name&#x27;</span>]&#125;</span>: <span class="subst">&#123;m[<span class="string">&#x27;description&#x27;</span>]&#125;</span>&quot;</span> <span class="keyword">for</span> m <span class="keyword">in</span> list_memory_files())</span><br><span class="line"></span><br><span class="line">    prompt = (</span><br><span class="line">        <span class="string">&quot;Extract user preferences, constraints, or project facts.\n&quot;</span></span><br><span class="line">        <span class="string">&quot;Return JSON array: [&#123;name, type, description, body&#125;].\n&quot;</span></span><br><span class="line">        <span class="string">&quot;If nothing new or already covered, return [].\n\n&quot;</span></span><br><span class="line">        <span class="string">f&quot;Existing memories:\n<span class="subst">&#123;existing&#125;</span>\n\nDialogue:\n<span class="subst">&#123;dialogue[:<span class="number">4000</span>]&#125;</span>&quot;</span></span><br><span class="line">    )</span><br><span class="line">    <span class="comment"># ... parse response, write files ...</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="整理：低频合并去重"><a href="#整理：低频合并去重" class="headerlink" title="整理：低频合并去重"></a>整理：低频合并去重</h3><p>记忆文件会积累。<code>consolidate_memories()</code> 在文件数达到阈值（默认 10）时触发，让 LLM 去重、合并矛盾、淘汰过时记忆：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">CONSOLIDATE_THRESHOLD = <span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">consolidate_memories</span>():</span><br><span class="line">    files = list_memory_files()</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(files) &lt; CONSOLIDATE_THRESHOLD:</span><br><span class="line">        <span class="keyword">return</span>  <span class="comment"># 太少，不值得整理</span></span><br><span class="line">    <span class="comment"># Send all memories to LLM, get back deduplicated list</span></span><br><span class="line">    <span class="comment"># Replace all files with consolidated results</span></span><br></pre></td></tr></table></figure>
+
+<p>CC 把这个过程叫 Dream，实际有四层门控：时间间隔、扫描节流、会话数、文件锁。教学版简化为文件数阈值。</p>
+<h3 id="Memory-适合保存什么"><a href="#Memory-适合保存什么" class="headerlink" title="Memory 适合保存什么"></a>Memory 适合保存什么</h3><p>Memory 保存跨会话仍然有用的信息：用户偏好、反复出现的反馈、项目背景、常用入口和排查线索。它关注“以后还会用到什么”，并通过索引 + 按需加载把这些信息带回当前对话。</p>
+<p>session memory 关注同一会话内的连续性：compact 之后，当前会话还需要保留哪些上下文。两者配合使用：Memory 管长期知识，session memory 管当前会话的压缩续接。</p>
+<hr>
+<h2 id="相对-s08-的变更"><a href="#相对-s08-的变更" class="headerlink" title="相对 s08 的变更"></a>相对 s08 的变更</h2><table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s08)</th>
+<th>之后 (s09)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>记忆能力</td>
+<td>无（压缩后偏好随摘要退化）</td>
+<td>存储 + 加载 + 提取 + 整理</td>
+</tr>
+<tr>
+<td>新函数</td>
+<td>—</td>
+<td>write_memory_file, select_relevant_memories, load_memories, extract_memories, consolidate_memories</td>
+</tr>
+<tr>
+<td>存储</td>
+<td>—</td>
+<td>.memory&#x2F;MEMORY.md 索引 + .memory&#x2F;*.md 文件</td>
+</tr>
+<tr>
+<td>工具</td>
+<td>bash, read, write, edit, glob, todo_write, task, load_skill, compact (9)</td>
+<td>bash, read_file, write_file, edit_file, glob, task (6)</td>
+</tr>
+<tr>
+<td>循环</td>
+<td>每轮只做压缩</td>
+<td>每轮注入记忆 + 压缩 + 每轮结束后提取 + 定期整理</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="试一下"><a href="#试一下" class="headerlink" title="试一下"></a>试一下</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> learn-claude-code</span><br><span class="line">python s09_memory/code.py</span><br></pre></td></tr></table></figure>
+
+<p>试试这些 prompt（分多轮输入，观察记忆的累积和加载）：</p>
+<ol>
+<li><code>I prefer using tabs for indentation, not spaces. Remember that.</code></li>
+<li><code>Create a Python file called test.py</code>（观察 Agent 是否用了 tab）</li>
+<li><code>What did I tell you about my preferences?</code>（观察 Agent 是否记得）</li>
+<li><code>I also prefer single quotes over double quotes for strings.</code></li>
+</ol>
+<p>观察重点：每轮结束后是否出现 <code>[Memory: extracted N new memories]</code>？<code>.memory/</code> 目录下是否生成了 <code>.md</code> 文件？<code>MEMORY.md</code> 索引是否更新？新一轮对话时 Agent 是否自动加载了之前的记忆？</p>
+<hr>
+<h2 id="接下来"><a href="#接下来" class="headerlink" title="接下来"></a>接下来</h2><p>记忆、压缩、工具都已就绪。但 system prompt 还是硬编码的一大段字符串。加了新工具要手动加描述，换了项目要重写整个 prompt。prompt 应该运行时组装。</p>
+<p>s10 System Prompt → 分段 + 运行时组装。不同项目、不同工具，拼出不同的 prompt。</p>
+<details>
+<summary>深入 CC 源码</summary>
+
+<blockquote>
+<p>以下基于 CC 源码 <code>src/</code> 下 <code>memdir/</code>、<code>services/</code>、<code>utils/</code>、<code>query/</code> 的分析，行号已对照核实。</p>
+</blockquote>
+<h3 id="源码路径"><a href="#源码路径" class="headerlink" title="源码路径"></a>源码路径</h3><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>行数</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>memdir/memdir.ts</code></td>
+<td>507</td>
+<td>核心：MEMORY.md 定义（<code>34-38</code>）、记忆行为指令区分 memory&#x2F;plan&#x2F;tasks（<code>199-266</code>）、<code>loadMemoryPrompt()</code> 三条路径（<code>419-490</code>）</td>
+</tr>
+<tr>
+<td><code>memdir/findRelevantMemories.ts</code></td>
+<td>141</td>
+<td>Sonnet side-query 选记忆（<code>18-24</code> 系统提示、<code>97-122</code> 调用逻辑）</td>
+</tr>
+<tr>
+<td><code>memdir/memoryTypes.ts</code></td>
+<td>271</td>
+<td>类型定义，frontmatter 字段</td>
+</tr>
+<tr>
+<td><code>memdir/memoryScan.ts</code></td>
+<td>—</td>
+<td>扫描 .md 文件，排除 MEMORY.md，读 frontmatter，最多 200 个，按 mtime 降序（<code>35-94</code>）</td>
+</tr>
+<tr>
+<td><code>services/extractMemories/extractMemories.ts</code></td>
+<td>615</td>
+<td>forked agent 提取记忆，受限权限，<code>skipTranscript: true</code>，<code>maxTurns: 5</code>（<code>371-427</code>）</td>
+</tr>
+<tr>
+<td><code>services/autoDream/autoDream.ts</code></td>
+<td>324</td>
+<td>Dream 整理，四层门控（<code>63-66</code> 默认值、<code>130-190</code> 门控、<code>224-233</code> forked agent）</td>
+</tr>
+<tr>
+<td><code>services/SessionMemory/sessionMemory.ts</code></td>
+<td>495</td>
+<td>会话级记忆管理</td>
+</tr>
+<tr>
+<td><code>services/compact/sessionMemoryCompact.ts</code></td>
+<td>—</td>
+<td>session memory 轻量摘要，阈值 10K&#x2F;5&#x2F;40K（<code>56-61</code>）</td>
+</tr>
+<tr>
+<td><code>utils/attachments.ts</code></td>
+<td>—</td>
+<td>注入预算：200 行 &#x2F; 4096 字节每文件，60KB 每 session（<code>269-288</code>）；按 query 找相关 memory（<code>2196-2241</code>）</td>
+</tr>
+<tr>
+<td><code>query.ts</code></td>
+<td>—</td>
+<td>memory prefetch 每轮启动（<code>301-304</code>），非阻塞收集（<code>1592-1614</code>）</td>
+</tr>
+<tr>
+<td><code>query/stopHooks.ts</code></td>
+<td>—</td>
+<td>stop hook fire-and-forget 触发提取和 Dream（<code>141-155</code>）</td>
+</tr>
+</tbody></table>
+<h3 id="记忆选择：LLM-选，不是-embedding"><a href="#记忆选择：LLM-选，不是-embedding" class="headerlink" title="记忆选择：LLM 选，不是 embedding"></a>记忆选择：LLM 选，不是 embedding</h3><p>CC 用 <strong>Sonnet 本身来选</strong>（<code>findRelevantMemories.ts</code>），不是 embedding 向量相似度：</p>
+<ol>
+<li><code>memoryScan.ts</code> 扫描 <code>.memory/</code> 下所有 <code>.md</code> 文件（排除 MEMORY.md），最多 200 个，按 mtime 降序</li>
+<li>把 <code>name</code> + <code>description</code> 列成清单</li>
+<li>发给 Sonnet side-query：”根据名称和描述选出真正有用的记忆（最多 5 个）。不确定就不要选。”</li>
+<li>Sonnet 返回 <code>{ selected_memories: [&quot;file1.md&quot;, ...] }</code></li>
+<li>选中文件读取完整内容（每文件 ≤ 200 行 &#x2F; 4096 字节），注入上下文。单 session 总预算 60KB</li>
+</ol>
+<p>每轮用户 turn 开始时，<code>query.ts:301-304</code> 启动 memory prefetch（异步）；工具执行后 <code>1592-1614</code> 非阻塞收集结果，不卡主流程。</p>
+<h3 id="提取时机：stop-hook，不是-autoCompact-后"><a href="#提取时机：stop-hook，不是-autoCompact-后" class="headerlink" title="提取时机：stop hook，不是 autoCompact 后"></a>提取时机：stop hook，不是 autoCompact 后</h3><p>触发位置（<code>stopHooks.ts:141-155</code>）：在 <code>handleStopHooks()</code> 中，fire-and-forget 触发提取和 Dream。教学版把提取放在 <code>stop_reason != &quot;tool_use&quot;</code> 分支里，方向一致。</p>
+<p>CC 的提取通过 forked agent 执行（<code>extractMemories.ts:371-427</code>）：受限权限、<code>skipTranscript: true</code>、<code>maxTurns: 5</code>。还有重叠保护：如果主 Agent 已经写入了记忆文件，跳过提取。</p>
+<h3 id="记忆文件格式"><a href="#记忆文件格式" class="headerlink" title="记忆文件格式"></a>记忆文件格式</h3><p>CC 用 Markdown + YAML frontmatter，和教学版一致。四种类型：<code>user</code>、<code>feedback</code>、<code>project</code>、<code>reference</code>。</p>
+<p><code>memdir.ts:34-38</code> 定义索引约束：<code>MEMORY.md</code> 最多 200 行 &#x2F; 25KB。<code>memdir.ts:199-266</code> 构建记忆行为指令，明确区分 memory、plan、tasks。存储位置：<code>~/.claude/projects/&lt;sanitized-git-root&gt;/memory/</code>。</p>
+<h3 id="Dream：四层门控"><a href="#Dream：四层门控" class="headerlink" title="Dream：四层门控"></a>Dream：四层门控</h3><p>不是”空闲时触发”或”数量够了就合并”，而是四层门控（<code>autoDream.ts</code>，默认值 <code>63-66</code>，门控逻辑 <code>130-190</code>）：</p>
+<ol>
+<li><strong>时间门控</strong>：距上次合并 ≥ 24 小时</li>
+<li><strong>扫描节流</strong>：避免频繁扫描文件系统</li>
+<li><strong>会话门控</strong>：自上次合并以来修改了 ≥ 5 个会话 transcript</li>
+<li><strong>锁门控</strong>：没有其他进程正在合并（<code>.consolidate-lock</code> 文件）</li>
+</ol>
+<p>合并本身通过 forked agent 执行（<code>224-233</code>）：定位 → 收集近期信号 → 合并写文件 → 剪枝更新索引。锁文件 mtime 就是 lastConsolidatedAt。崩溃恢复：1 小时后锁自动过期。</p>
+<h3 id="User-Memory-vs-Session-Memory"><a href="#User-Memory-vs-Session-Memory" class="headerlink" title="User Memory vs Session Memory"></a>User Memory vs Session Memory</h3><table>
+<thead>
+<tr>
+<th></th>
+<th>User Memory</th>
+<th>Session Memory</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>持久性</td>
+<td>跨会话</td>
+<td>单会话</td>
+</tr>
+<tr>
+<td>存储</td>
+<td><code>memory/</code> 下多个 .md 文件</td>
+<td><code>session-memory/&lt;id&gt;/memory.md</code></td>
+</tr>
+<tr>
+<td>加载到</td>
+<td>system prompt</td>
+<td>compact 摘要</td>
+</tr>
+<tr>
+<td>用途</td>
+<td>跨会话的知识积累</td>
+<td>跨 compact 的上下文连续性</td>
+</tr>
+</tbody></table>
+<p>sessionMemoryCompact（s08 中提到的机制）正是使用了 Session Memory：autoCompact 前先读 session memory 文件，如果内容足够（≥ 10K token、≥ 5 条文本消息、≤ 40K token，<code>sessionMemoryCompact.ts:56-61</code>），就用它做摘要，不调 LLM。</p>
+<h3 id="真实实现比教学版复杂的地方"><a href="#真实实现比教学版复杂的地方" class="headerlink" title="真实实现比教学版复杂的地方"></a>真实实现比教学版复杂的地方</h3><ul>
+<li><strong>Feature flags</strong>：记忆相关功能有多层 feature gate 控制</li>
+<li><strong>Team memory</strong>：团队共享记忆，<code>loadMemoryPrompt()</code> 有专门路径（教学版未涉及）</li>
+<li><strong>KAIROS</strong>：时机感知的记忆提取策略，<code>loadMemoryPrompt()</code> 中 daily-log 模式</li>
+<li><strong>Prompt cache</strong>：记忆注入需要考虑 prompt cache 的 TTL，避免每次都重写 system prompt 的大段内容</li>
+<li><strong>文件锁</strong>：多进程并发时的锁机制</li>
+<li><strong>Memory prefetch</strong>：异步预取，不阻塞主流程</li>
+</ul>
+<h3 id="教学版的简化是刻意的"><a href="#教学版的简化是刻意的" class="headerlink" title="教学版的简化是刻意的"></a>教学版的简化是刻意的</h3><ul>
+<li>LLM side-query → LLM side-query + 关键词降级：教学版保留了 LLM 选择，加了降级路径</li>
+<li>记忆 JSON → Markdown + frontmatter：教学版与 CC 一致</li>
+<li>stop hook 触发 → <code>stop_reason != &quot;tool_use&quot;</code> 分支：方向一致</li>
+<li>四层门控 → 文件数阈值：教学版没有 transcript 系统和多会话概念</li>
+<li>forked agent + 受限权限 → 直接调用：教学版没有子进程隔离</li>
+</ul>
+</details>
+
+<!-- translation-sync: zh@v1, en@v1, ja@v1 -->
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io">刘元</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io/2026/01/09/s09_memory/">https://liuyuann.github.io/2026/01/09/s09_memory/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://liuyuann.github.io" target="_blank">刘元的技术博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Claude-Code/">Claude Code</a><a class="post-meta__tags" href="/tags/AI-Agent/">AI Agent</a><a class="post-meta__tags" href="/tags/%E6%95%99%E7%A8%8B/">教程</a></div><div class="post-share"><div class="social-share" data-image="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&amp;q=80" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/01/10/s10_system_prompt/" title="s10: System Prompt — 运行时组装，不硬编码"><img class="cover" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80" onerror="onerror=null;src='/'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">s10: System Prompt — 运行时组装，不硬编码</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s08 → s09 → s10 → s11 → s12 → … → s20  “prompt 是组装出来的, 不是写死的” — 分段 + 按需拼接 + 缓存。 Harness 层: 提示 — 运行时组装, 不硬编码。   问题从 s01 到 s09，system prompt 都是一行硬编码： 1SYSTEM = f&quot;You are a coding agent at &#123;WORKDIR&#125;. Use tools to solve tasks.&quot;  s01 够用，只有 bash、read、write 三个工具。但到 s09，Agent 已经有记忆、有压缩、有技能加载。prompt 该提的能力越来越多： 12345678SYSTEM = (    f&quot;You are a coding agent at &#123;WORKDIR&#125;. &quot;    &quot;Use tools to solve tasks. Act, don&#x27;t explain. &q...</div></div></div></a><a class="pagination-related" href="/2026/01/08/s08_context_compact/" title="s08: Context Compact — 上下文总会满"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&amp;q=80" onerror="onerror=null;src='/'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">s08: Context Compact — 上下文总会满</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → s06 → s07 → s08 → s09 → s10 → … → s20  “上下文总会满, 要有办法腾地方” — 四层压缩策略, 便宜的先跑贵的后跑。 Harness 层: 压缩 — 干净的记忆, 无限的会话。   问题Agent 跑着跑着，不动了。 手里有 bash、有 read、有 write，能力是够的。但它读了一个 1000 行的文件（~4000 token），又读了 30 个文件，跑了 20 条命令。每条命令的输出、每个文件的内容，全都堆在 messages 列表里。 上下文窗口是有限的。满了之后，API 直接拒绝：prompt_too_long。 不压缩，Agent 根本没法在大项目里干活。  解决方案 保留 s07 的 hook 结构、技能加载、子 Agent 等骨架，省略部分工具细节以聚焦压缩。核心变动：每轮 LLM 调用前插入三层预处理器（0 API），token 仍超阈值时触发 LLM 摘要（1 API），API 报错时应急裁剪。 核心设计：便宜的先跑，贵的后...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/01/10/s10_system_prompt/" title="s10: System Prompt — 运行时组装，不硬编码"><img class="cover" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-10</div><div class="info-item-2">s10: System Prompt — 运行时组装，不硬编码</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s08 → s09 → s10 → s11 → s12 → … → s20  “prompt 是组装出来的, 不是写死的” — 分段 + 按需拼接 + 缓存。 Harness 层: 提示 — 运行时组装, 不硬编码。   问题从 s01 到 s09，system prompt 都是一行硬编码： 1SYSTEM = f&quot;You are a coding agent at &#123;WORKDIR&#125;. Use tools to solve tasks.&quot;  s01 够用，只有 bash、read、write 三个工具。但到 s09，Agent 已经有记忆、有压缩、有技能加载。prompt 该提的能力越来越多： 12345678SYSTEM = (    f&quot;You are a coding agent at &#123;WORKDIR&#125;. &quot;    &quot;Use tools to solve tasks. Act, don&#x27;t explain. &q...</div></div></div></a><a class="pagination-related" href="/2026/01/14/s14_cron_scheduler/" title="s14: Cron Scheduler — 按时间表生产工作"><img class="cover" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-14</div><div class="info-item-2">s14: Cron Scheduler — 按时间表生产工作</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s12 → s13 → s14 → s15 → s16 → … → s20  “按时间表生产工作, 调度与执行解耦” — cron 调度, 持久化或会话级。 Harness 层: 调度 — 独立线程判断时间, 队列传递触发。   问题闹钟不需要你盯着它才会响。你设好 7:00，到点它自己响，你在睡觉、在洗澡、在做饭，它都照响不误。 s13 让 Agent 能后台执行慢操作，但所有操作仍然是你手动触发的。你说一句，Agent 动一下。”每天早上 9 点跑测试”、”每 30 分钟检查 CI 状态”，这些周期性任务不该需要人每次来推。  解决方案 教学代码沿用 S13 的简化任务系统、后台执行和 prompt 组装；为了聚焦调度器，省略完整错误恢复、记忆和技能系统。新增：独立的 cron 调度线程，每秒检查一次，时间到了把任务塞进 cron_queue；再由 queue processor 在 Agent 空闲时自动交付。 手动 vs 定时：     手动触发 (s13) 定时触发 (s14)    触发者 用户输入 调度线程 ...</div></div></div></a><a class="pagination-related" href="/2026/01/03/s03_permission/" title="s03: Permission — 执行前做权限判断"><img class="cover" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-03</div><div class="info-item-2">s03: Permission — 执行前做权限判断</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → s05 → … → s20  “工具执行前先做权限判断” — 权限管线决定哪些操作需要审批。 Harness 层: 权限 — 在工具执行前加一道门。   问题s02 的 Agent 有 5 个工具。file tools 受 safe_path 保护，但 bash 不受限制。让它”清理一下项目”，可能执行 rm -rf /。 安全不能靠信任模型，要靠代码——在工具执行之前做判断。  解决方案 s02 的循环完全保留。唯一的变动在工具执行前插入 check_permission()——每个工具调用经过三道闸门，顺序固定：硬拒绝优先，软询问次之，都没命中就放行。 三道闸门对应三种决策：    闸门 作用 命中后    1. 拒绝列表 永远禁止的操作（rm -rf /、sudo） 直接拒绝，不执行   2. 规则匹配 取决于上下文的操作（写工作区外、rm 文件） 交给闸门 3   3. 用户审批 闸门 2 命中后，暂停等用户确认 用户决定允许或拒绝   三道都没命中 → 直接执行。大部分日常操作走这条路...</div></div></div></a><a class="pagination-related" href="/2026/01/18/s18_worktree_isolation/" title="s18: Worktree Isolation — 各干各的，互不干扰"><img class="cover" src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-18</div><div class="info-item-2">s18: Worktree Isolation — 各干各的，互不干扰</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s16 → s17 → s18 → s19 → s20  “各干各的目录, 互不干扰” — 任务管目标, worktree 管目录, 按 ID 绑定。 Harness 层: 隔离 — 并行执行的目录隔离。   问题s17 中，Alice 和 Bob 都在同一个目录下工作。Alice 的任务是”重构认证模块”，Bob 的任务是”重构 UI 登录页”。 Alice write_file(&quot;config.py&quot;, ...)。Bob 也 write_file(&quot;config.py&quot;, ...)。两个人改同一个文件，互相覆盖。而且无法干净地回滚——分不清哪些改动是谁的。 s15-s17 解决了”谁干什么”（任务系统）和”怎么通信”（消息总线），但没解决”在哪干”。  解决方案 Git worktree 让你在同一仓库中创建多个独立的工作目录，每个有自己的分支。Alice 在 .worktrees/auth-refactor/ 下工作，Bob 在 .worktrees/ui-login/ 下工作...</div></div></div></a><a class="pagination-related" href="/2026/01/01/s01_agent_loop/" title="s01: Agent Loop — 一个循环就够了"><img class="cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-01</div><div class="info-item-2">s01: Agent Loop — 一个循环就够了</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → … → s20  “One loop &amp; Bash is all you need” — 一个工具 + 一个循环 &#x3D; 一个 Agent。 Harness 层: 循环 — 模型与真实世界的第一道连接。   问题你提出了一个问题给大模型：“帮我读取下我的目录下有哪些文件，并且执行XXX.py”。 模型能输出一条 bash 命令，但输出完了就停了，它不会自己跑，也不会看到结果后继续推理。 你可以手动跑一遍，把输出粘贴回对话框，让它接着干。下一个命令出来，你再跑一遍、再贴回去。 每一个来回，你都在做中间层。而把它自动化，就是这一章要做的事。  解决方案 一个 while True 循环，模型调用工具就继续，不调用就停。整个过程只有两个信号：    信号 含义 循环动作    stop_reason == &quot;tool_use&quot; 模型举手说”我要用工具” 执行 → 结果喂回去 → 继续   stop_reason != &quot;tool_use&quot; 模型说”...</div></div></div></a><a class="pagination-related" href="/2026/01/12/s12_task_system/" title="s12: Task System — 目标太大，拆成小任务"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-12</div><div class="info-item-2">s12: Task System — 目标太大，拆成小任务</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s10 → s11 → s12 → s13 → s14 → … → s20  “大目标拆成小任务, 排好序, 持久化” — 文件持久化的任务图, 多 agent 协作的基础。 Harness 层: 任务 — 持久化的目标, 可恢复的进度。   问题Agent 接到一个项目：搭数据库、写 API、加测试。它用 s05 的 TodoWrite 列了一张清单，然后开始写 API，写到一半发现没数据库表，回头补；加测试时发现 API 接口签名又变了… 盖房子不能先盖屋顶再打地基。任务之间有先后。任务依赖应该形成有向无环图（DAG）；教学版只演示 blockedBy 检查，没有实现环检测。 s05 的 TodoWrite 是当前任务的执行清单，保存在会话内存中。这里需要的是任务系统：每个任务是一个 JSON 文件，任务之间有 blockedBy 依赖，跨会话持久化在磁盘上。  解决方案 教学代码保留基础 agent loop，为聚焦任务系统省略了 S11 的完整错误恢复（RecoveryState、退避、升级、reactive co...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="author-info-name">刘元</div><div class="author-info-description">高通 AI 工程师 | LLM Agent 开发者</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" href="/atom.xml"><i class="fas fa-rss"></i><span>订阅</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/LiuYuann" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1903554839@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">2.</span> <span class="toc-text">解决方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text">工作原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%EF%BC%9AMarkdown-%E6%96%87%E4%BB%B6-%E7%B4%A2%E5%BC%95"><span class="toc-number">3.1.</span> <span class="toc-text">存储：Markdown 文件 + 索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E8%BD%BD%EF%BC%9A%E4%B8%A4%E6%9D%A1%E8%B7%AF%E5%BE%84"><span class="toc-number">3.2.</span> <span class="toc-text">加载：两条路径</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99%E5%85%A5%EF%BC%9A%E6%AF%8F%E8%BD%AE%E7%BB%93%E6%9D%9F%E5%90%8E%E6%8F%90%E5%8F%96"><span class="toc-number">3.3.</span> <span class="toc-text">写入：每轮结束后提取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E7%90%86%EF%BC%9A%E4%BD%8E%E9%A2%91%E5%90%88%E5%B9%B6%E5%8E%BB%E9%87%8D"><span class="toc-number">3.4.</span> <span class="toc-text">整理：低频合并去重</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Memory-%E9%80%82%E5%90%88%E4%BF%9D%E5%AD%98%E4%BB%80%E4%B9%88"><span class="toc-number">3.5.</span> <span class="toc-text">Memory 适合保存什么</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%AF%B9-s08-%E7%9A%84%E5%8F%98%E6%9B%B4"><span class="toc-number">4.</span> <span class="toc-text">相对 s08 的变更</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%95%E4%B8%80%E4%B8%8B"><span class="toc-number">5.</span> <span class="toc-text">试一下</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E4%B8%8B%E6%9D%A5"><span class="toc-number">6.</span> <span class="toc-text">接下来</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BA%90%E7%A0%81%E8%B7%AF%E5%BE%84"><span class="toc-number">6.1.</span> <span class="toc-text">源码路径</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%B0%E5%BF%86%E9%80%89%E6%8B%A9%EF%BC%9ALLM-%E9%80%89%EF%BC%8C%E4%B8%8D%E6%98%AF-embedding"><span class="toc-number">6.2.</span> <span class="toc-text">记忆选择：LLM 选，不是 embedding</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E5%8F%96%E6%97%B6%E6%9C%BA%EF%BC%9Astop-hook%EF%BC%8C%E4%B8%8D%E6%98%AF-autoCompact-%E5%90%8E"><span class="toc-number">6.3.</span> <span class="toc-text">提取时机：stop hook，不是 autoCompact 后</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%B0%E5%BF%86%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="toc-number">6.4.</span> <span class="toc-text">记忆文件格式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dream%EF%BC%9A%E5%9B%9B%E5%B1%82%E9%97%A8%E6%8E%A7"><span class="toc-number">6.5.</span> <span class="toc-text">Dream：四层门控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#User-Memory-vs-Session-Memory"><span class="toc-number">6.6.</span> <span class="toc-text">User Memory vs Session Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9C%9F%E5%AE%9E%E5%AE%9E%E7%8E%B0%E6%AF%94%E6%95%99%E5%AD%A6%E7%89%88%E5%A4%8D%E6%9D%82%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="toc-number">6.7.</span> <span class="toc-text">真实实现比教学版复杂的地方</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%99%E5%AD%A6%E7%89%88%E7%9A%84%E7%AE%80%E5%8C%96%E6%98%AF%E5%88%BB%E6%84%8F%E7%9A%84"><span class="toc-number">6.8.</span> <span class="toc-text">教学版的简化是刻意的</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="大模型（LLMs）面试题全集精选"/></a><div class="content"><a class="title" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选">大模型（LLMs）面试题全集精选</a><time datetime="2026-06-04T12:00:00.000Z" title="发表于 2026-06-04 20:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集"><img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="互联网公司面试题合集"/></a><div class="content"><a class="title" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集">互联网公司面试题合集</a><time datetime="2026-06-04T08:00:00.000Z" title="发表于 2026-06-04 16:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/llm-interview-questions-wiki/" title="大模型（LLMs）面试题全集 — 225 题精解"><img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="大模型（LLMs）面试题全集 — 225 题精解"/></a><div class="content"><a class="title" href="/2026/06/04/llm-interview-questions-wiki/" title="大模型（LLMs）面试题全集 — 225 题精解">大模型（LLMs）面试题全集 — 225 题精解</a><time datetime="2026-06-04T02:00:00.000Z" title="发表于 2026-06-04 10:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/20/s20_comprehensive/" title="s20: Comprehensive Agent — 全部机制归一循环"><img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="s20: Comprehensive Agent — 全部机制归一循环"/></a><div class="content"><a class="title" href="/2026/01/20/s20_comprehensive/" title="s20: Comprehensive Agent — 全部机制归一循环">s20: Comprehensive Agent — 全部机制归一循环</a><time datetime="2026-01-20T02:00:00.000Z" title="发表于 2026-01-20 10:00:00">2026-01-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="s19: MCP Tools — 外接工具，标准协议"/></a><div class="content"><a class="title" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议">s19: MCP Tools — 外接工具，标准协议</a><time datetime="2026-01-19T02:00:00.000Z" title="发表于 2026-01-19 10:00:00">2026-01-19</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2018 - 2026 By 刘元</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
