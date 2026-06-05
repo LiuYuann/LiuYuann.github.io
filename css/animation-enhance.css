@@ -1,0 +1,145 @@
+/* ===========================
+   炫酷动画效果增强
+   =========================== */
+
+/* --- 1. 卡片悬浮 3D 效果 --- */
+.post {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 180, 216, 0.15) !important;
+}
+
+/* --- 2. 首页文章卡片入场动画 --- */
+.index_card {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.index_card:nth-child(1) { animation-delay: 0.1s; }
+.index_card:nth-child(2) { animation-delay: 0.2s; }
+.index_card:nth-child(3) { animation-delay: 0.3s; }
+.index_card:nth-child(4) { animation-delay: 0.4s; }
+.index_card:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- 3. 标签云脉冲动画 --- */
+.tag-cloud-list a {
+  transition: all 0.3s ease !important;
+}
+
+.tag-cloud-list a:hover {
+  transform: scale(1.2) !important;
+  text-shadow: 0 0 10px rgba(0, 180, 216, 0.5) !important;
+}
+
+/* --- 4. 导航栏磨砂玻璃效果 --- */
+.nav {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* --- 5. 按钮悬浮发光 --- */
+.button {
+  transition: all 0.3s ease !important;
+}
+
+.button:hover {
+  box-shadow: 0 0 20px rgba(0, 180, 216, 0.4) !important;
+  transform: translateY(-2px);
+}
+
+/* --- 6. 图片悬浮缩放 --- */
+.post_cover img {
+  transition: transform 0.5s ease !important;
+}
+
+.post_cover:hover img {
+  transform: scale(1.05);
+}
+
+/* --- 7. 链接下划线动画 --- */
+a {
+  background-image: linear-gradient(
+    to right,
+    #00b4d8 0%,
+    #00b4d8 100%
+  );
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  transition: background-size 0.3s ease;
+}
+
+a:hover {
+  background-size: 100% 2px;
+}
+
+/* --- 8. 文章目录平滑高亮 --- */
+#sidebar .toc-link {
+  transition: all 0.3s ease !important;
+}
+
+#sidebar .toc-link:hover {
+  padding-left: 8px !important;
+  color: #00b4d8 !important;
+}
+
+/* --- 9. 加载更多按钮动画 --- */
+#page-nav:hover {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* --- 10. 滚动条美化 --- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00b4d8, #0096c7);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #0096c7, #0077b6);
+}
+
+/* --- 11. 页脚浮动动画 --- */
+.footer {
+  animation: footerFloat 3s ease-in-out infinite;
+}
+
+@keyframes footerFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* --- 12. 头像旋转光晕 --- */
+.author_img img {
+  animation: avatarGlow 3s ease-in-out infinite;
+}
+
+@keyframes avatarGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(0, 180, 216, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(0, 180, 216, 0.6); }
+}
