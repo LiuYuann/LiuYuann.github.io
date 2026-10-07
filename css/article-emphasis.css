@@ -1,0 +1,11 @@
+/* Keep Markdown emphasis distinct from the muted article body in both themes. */
+#article-container strong,
+#article-container b {
+  color: #17212f;
+  font-weight: 800;
+}
+
+[data-theme="dark"] #article-container strong,
+[data-theme="dark"] #article-container b {
+  color: #fff;
+}
