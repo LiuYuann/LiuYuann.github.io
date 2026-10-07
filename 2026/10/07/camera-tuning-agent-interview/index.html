@@ -1,0 +1,2370 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Camera Tuning Agent 面试问答：LangGraph、GraphRAG 与全流程性能评测（87 题） | 刘元的技术博客</title><meta name="author" content="刘元"><meta name="copyright" content="刘元"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="从用户需求、意图识别和参数召回，到粗扫、编译、采集评测与模型辅助细扫，按能力主题整理 87 道面试题及答案，标注 30 道核心题、八类难点与分岗备考路线。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Camera Tuning Agent 面试问答：LangGraph、GraphRAG 与全流程性能评测（87 题）">
+<meta property="og:url" content="https://liuyuann.github.io/2026/10/07/camera-tuning-agent-interview/index.html">
+<meta property="og:site_name" content="刘元的技术博客">
+<meta property="og:description" content="从用户需求、意图识别和参数召回，到粗扫、编译、采集评测与模型辅助细扫，按能力主题整理 87 道面试题及答案，标注 30 道核心题、八类难点与分岗备考路线。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80">
+<meta property="article:published_time" content="2026-10-07T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-07T05:38:11.833Z">
+<meta property="article:author" content="刘元">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="GraphRAG">
+<meta property="article:tag" content="LangGraph">
+<meta property="article:tag" content="RAG">
+<meta property="article:tag" content="大模型应用">
+<meta property="article:tag" content="面试题">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Camera Tuning Agent 面试问答：LangGraph、GraphRAG 与全流程性能评测（87 题）",
+  "url": "https://liuyuann.github.io/2026/10/07/camera-tuning-agent-interview/",
+  "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80",
+  "datePublished": "2026-10-07T04:00:00.000Z",
+  "dateModified": "2026-10-07T05:38:11.833Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "刘元",
+      "url": "https://liuyuann.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://liuyuann.github.io/2026/10/07/camera-tuning-agent-interview/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const hour = new Date().getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (theme === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else theme === 'light' ? activateLightMode() : activateDarkMode()
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Camera Tuning Agent 面试问答：LangGraph、GraphRAG 与全流程性能评测（87 题）',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      if ($loadingBox.classList.contains('loaded')) return
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+
+  if (document.readyState === 'complete') {
+    preloader.endLoading()
+  } else {
+    window.addEventListener('load', preloader.endLoading)
+    document.addEventListener('DOMContentLoaded', preloader.endLoading)
+    // Add timeout protection: force end after 7 seconds
+    setTimeout(preloader.endLoading, 7000)
+  }
+
+  if (false) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/mine.jpg" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">31</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">刘元的技术博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Camera Tuning Agent 面试问答：LangGraph、GraphRAG 与全流程性能评测（87 题）</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Camera Tuning Agent 面试问答：LangGraph、GraphRAG 与全流程性能评测（87 题）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-07T04:00:00.000Z" title="发表于 2026-10-07 12:00:00">2026-10-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-07T05:38:11.833Z" title="更新于 2026-10-07 13:38:11">2026-10-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%9D%A2%E8%AF%95%E9%A2%98/">面试题</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">41.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>124分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>面向大模型应用开发岗位，以 Camera Tuning 为业务场景，按能力主题整理 <strong>79 道项目与工程问答 + 8 道系统性能评测专项问答</strong>，区分 30 道核心必答、43 道重点追问和 14 道按岗扩展，并提供八类难点与备考路线。包含完整项目口述、Plan-and-Execute 与 ReAct 式闭环、LangGraph 工作流、GraphRAG 参数召回、工具集成、Python 服务化、异步任务、权限与部署、Harness Engineering、Hermes Agent、内存与记忆管理，以及成功率、延迟、吞吐量、成本和可靠性的评测方法。</p>
+<span id="more"></span>
+
+<p>适用岗位：大模型应用开发、Agent 应用开发、LLM 工程师。<br>整理日期：2026-10-07。</p>
+<p>本手册按能力主题重组，标明准备优先级、理解难度和答题抓手，共 <strong>79 道项目与工程问答 + 8 道性能评测专项问答，共 87 题</strong>。覆盖需求理解、RAG&#x2F;GraphRAG、Agent、HIL、Python 服务开发、异步任务、数据权限、模型接入、部署评测、Harness Engineering、Hermes Agent，以及运行时内存与记忆管理。尚未提供具体招聘 JD，岗位覆盖按常见 AI 应用开发职责整理；这代表学习范围，不表示项目已经使用文中全部技术。</p>
+<p>本文以你确认的实际链路为主线：<strong>用户提出需求场景 → 模型识别意图 → RAG 召回相关参数及描述 → 形成 plan JSON → 按计划执行现有流程 → 根据评测反馈局部迭代。</strong> 架构可以表述为 <strong>外层 Plan-and-Execute，内层 ReAct 式反馈执行闭环</strong>。GraphRAG 中已有调参方案、参数、参数描述；QGenie 和 LangGraph 支持模型调用与流程编排，QCATS、机械臂、光源箱和手机提供真实执行反馈。</p>
+<p>项目的大模型应用价值首先在于把用户的业务语言转换成既有系统可使用的参数输入。后端现有流程继续完成参数实例定位、粗扫、配置编译、实验室执行、评测与细扫。原执行代码中可见模型参与细扫组合推荐，因此要分别说明“前端从 RAG 召回参数”和“后端利用实验历史推荐参数调整”，两者职责不同。</p>
+<div class="mermaid-wrap"><pre class="mermaid-src" data-config="{}" hidden>
+    flowchart LR
+    U[用户提出需求场景] --&gt; I[模型识别意图]
+    I --&gt; R[RAG 召回相关参数及描述]
+    K[方案与参数知识库] --&gt; R
+    R --&gt; P[形成高层 plan JSON]
+    P --&gt; V[计划检查与必要的人工审核]
+    V --&gt; E[按计划选择步骤和执行模块]
+    E --&gt; W[定位参数实例与当前值]
+    W --&gt; C[粗扫计划与配置编译]
+    C --&gt; L[实验室执行与 QCATS 评测]
+    L --&gt; F[历史分析与细扫推荐]
+    F --&gt; X[修改配置并再次执行评测]
+    X --&gt; D{达标或达到停止条件}
+    D --&gt;|继续| F
+    D --&gt;|本步骤结束| N{整体达标或仍有下一步骤}
+    N --&gt;|继续计划| E
+    N --&gt;|整体结束| O[最佳配置引用与评测记录]
+  </pre></div>
+
+<p>**贯穿示例：**用户说“夜景噪声偏大，希望改善噪声并保留细节”。意图识别提取场景、问题、目标和约束；检索阶段从已有知识中召回相关参数及描述；再交给现有流程处理。这里不预设具体参数名、数值、修改方向，也不把用户描述直接当成已经证实的问题根因。</p>
+<p>**使用约定：**参考答案提供技术解释与表达模板，不代表所有机制都已在项目落地。数据库、embedding 模型、QGenie 模型版本、checkpoint、异步队列、rerank、性能数据等尚未确认；相关设计只在确实实现后使用“我们实现了”，否则说“当前限制是……，下一步会……”。文中的图谱和数据结构是建议示例，不是对现有实现的断言。没有用本地模拟程序推断真实系统能力。</p>
+<p><span id="reading-navigation"></span></p>
+<h2 id="阅读导航"><a href="#阅读导航" class="headerlink" title="阅读导航"></a>阅读导航</h2><ul>
+<li><a href="#study-guide">备考总览与重难点</a>：30 道核心题、八类难点、分岗路线与复习安排</li>
+<li><a href="#workflow">零、现有执行流程与完整项目口述</a>：业务链路、计划层级与实际代码依据</li>
+<li><a href="#architecture">一、项目定位、需求理解与 Agent 架构</a>：9 题</li>
+<li><a href="#graphrag">二、GraphRAG 知识建模与参数检索</a>：20 题</li>
+<li><a href="#tools">三、模型接入、计划交接与工具执行</a>：10 题</li>
+<li><a href="#reliability">四、工作流可靠性与 HIL 人工介入</a>：4 题</li>
+<li><a href="#memory-management">五、上下文、运行时内存与长期记忆</a>：11 题</li>
+<li><a href="#application-engineering">六、Python 服务化、并发与工程交付</a>：9 题</li>
+<li><a href="#performance">七、效果评测、性能分析与成本优化</a>：12 题</li>
+<li><a href="#harness-engineering">八、Harness Engineering 驾驭工程</a>：6 题</li>
+<li><a href="#hermes-agent">九、Hermes Agent 使用与迁移经验</a>：6 题</li>
+<li><a href="#evidence">十、面试前需要补齐的证据</a>：个人职责、真实材料与简历表述</li>
+<li><a href="#jd-preparation">十一、岗位要求与备考证据对照</a>：JD 映射与可演示任务</li>
+</ul>
+<p><span id="study-guide"></span></p>
+<h2 id="备考总览：先掌握主线，再突破难点"><a href="#备考总览：先掌握主线，再突破难点" class="headerlink" title="备考总览：先掌握主线，再突破难点"></a>备考总览：先掌握主线，再突破难点</h2><p>这套题按“项目是什么 → 如何理解与检索 → 如何规划与执行 → 如何受控运行 → 如何做成服务 → 如何证明有效 → 有哪些实践积累”组织。正文保留原 Q&#x2F;P 题号，方便查找之前的笔记；题号因按主题归类而不再连续。每题都有优先级、难度和答题抓手。</p>
+<h3 id="优先级与难度分别怎么看？"><a href="#优先级与难度分别怎么看？" class="headerlink" title="优先级与难度分别怎么看？"></a>优先级与难度分别怎么看？</h3><table>
+<thead>
+<tr>
+<th>标记</th>
+<th>含义</th>
+<th>准备到什么程度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A · 核心必答（30 题）</td>
+<td>本项目主线与 AI 应用开发基本能力</td>
+<td>能在 1—2 分钟内讲清，并给出项目例子或设计依据</td>
+</tr>
+<tr>
+<td>B · 重点追问（43 题）</td>
+<td>支撑主线的工程细节和方案取舍</td>
+<td>能解释机制、替代方案和一个失败场景</td>
+</tr>
+<tr>
+<td>C · 按岗扩展（14 题）</td>
+<td>依 JD 或简历进一步展开的主题</td>
+<td>先理解边界，岗位明确要求或简历写过时升级准备</td>
+</tr>
+</tbody></table>
+<p>**难度单独标注为基础、进阶、难点。**重点表示值得优先准备，难点表示容易在实现细节或证据上被追问，两者不等同。这是针对当前项目的备考建议，不是面试频率统计。尤其是简历上写明的能力，即使标为 B&#x2F;C，也要能解释自己的实现。</p>
+<h3 id="第一轮：30-道核心题的讲述顺序"><a href="#第一轮：30-道核心题的讲述顺序" class="headerlink" title="第一轮：30 道核心题的讲述顺序"></a>第一轮：30 道核心题的讲述顺序</h3><table>
+<thead>
+<tr>
+<th>顺序</th>
+<th>核心题</th>
+<th>本轮要讲出的结论</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. 项目与架构</td>
+<td><a href="#q01">Q01</a>、<a href="#q03">Q03</a>、<a href="#q04">Q04</a>、<a href="#q05">Q05</a>、<a href="#q06">Q06</a></td>
+<td>用户需求如何变成计划，P-E 与 ReAct 各负责什么</td>
+</tr>
+<tr>
+<td>2. 知识与检索</td>
+<td><a href="#q15">Q15</a>、<a href="#q16">Q16</a>、<a href="#q17">Q17</a>、<a href="#q18">Q18</a>、<a href="#q20">Q20</a>、<a href="#q23">Q23</a></td>
+<td>参数来自哪里，图关系如何参与召回，如何保证适用性</td>
+</tr>
+<tr>
+<td>3. 工具与执行</td>
+<td><a href="#q09">Q09</a>、<a href="#q10">Q10</a>、<a href="#q11">Q11</a>、<a href="#q12">Q12</a>、<a href="#q13">Q13</a></td>
+<td>谁执行工具，怎样接上后端，长任务与重试如何处理</td>
+</tr>
+<tr>
+<td>4. 恢复与人工介入</td>
+<td><a href="#q27">Q27</a>、<a href="#q33">Q33</a></td>
+<td>恢复时核对什么，审批什么版本，如何避免重复操作</td>
+</tr>
+<tr>
+<td>5. 应用开发</td>
+<td><a href="#q46">Q46</a>、<a href="#q47">Q47</a>、<a href="#q53">Q53</a></td>
+<td>API、worker、并发和提示词如何形成可维护的服务</td>
+</tr>
+<tr>
+<td>6. 上下文管理</td>
+<td><a href="#q70">Q70</a>、<a href="#q72">Q72</a></td>
+<td>State、上下文和长期记忆如何分工，关键约束如何保留</td>
+</tr>
+<tr>
+<td>7. 评测与证据</td>
+<td><a href="#q29">Q29</a>、<a href="#q30">Q30</a>、<a href="#q31">Q31</a>、<a href="#p01">P01</a>、<a href="#p02">P02</a>、<a href="#p05">P05</a>、<a href="#p08">P08</a></td>
+<td>如何定义成功、做对照、定位错误，哪些结论有实测依据</td>
+</tr>
+</tbody></table>
+<p>先读<a href="#workflow">完整执行流程</a>，再按表练习。每题先用一句话回答，再补机制、例子和验证；不需要把参考答案逐字背出。</p>
+<h3 id="第二轮：八个需要深入准备的难点"><a href="#第二轮：八个需要深入准备的难点" class="headerlink" title="第二轮：八个需要深入准备的难点"></a>第二轮：八个需要深入准备的难点</h3><table>
+<thead>
+<tr>
+<th>难点与题目</th>
+<th>建议回答顺序</th>
+<th>容易失分的地方</th>
+<th>应准备的材料</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P-E + ReAct 与状态边界：<a href="#q04">Q04</a>、<a href="#q06">Q06</a>、<a href="#q76">Q76</a></td>
+<td>计划来源 → 步骤执行 → 局部观测与动作 → 停止 → 恢复</td>
+<td>有 JSON 就宣称完整规划；局部改值就称全局重规划</td>
+<td>脱敏 plan、State 示意和一轮反馈记录</td>
+</tr>
+<tr>
+<td>GraphRAG 的实际价值：<a href="#q17">Q17</a>、<a href="#q18">Q18</a>、<a href="#q20">Q20</a>、<a href="#q29">Q29</a>、<a href="#q39">Q39</a></td>
+<td>实体与版本 → 查询入口 → 图扩展 → 过滤 → 参数输出 → 对照</td>
+<td>只列图数据库名；把连边当成适用性；声称消除幻觉</td>
+<td>一份方案子图、检索轨迹和失败样例</td>
+</tr>
+<tr>
+<td>长任务的一致性：<a href="#q13">Q13</a>、<a href="#q27">Q27</a>、<a href="#q48">Q48</a></td>
+<td>提交超时 → 状态未知 → 查询外部事实 → 幂等重试或对账</td>
+<td>超时直接重发；checkpoint&#x2F;outbox 等同 exactly-once</td>
+<td>任务状态图、幂等键规则与恢复时序</td>
+</tr>
+<tr>
+<td>HIL 的批准与执行一致：<a href="#q33">Q33</a></td>
+<td>形成可审查计划 → 绑定版本 → 批准 → 恢复 → 执行前核对</td>
+<td>批准后改计划继续用旧授权；中断恢复重复产生副作用</td>
+<td>审核载荷、版本变化示例和恢复路径</td>
+</tr>
+<tr>
+<td>全系统评测与归因：<a href="#p02">P02</a>、<a href="#p05">P05</a>、<a href="#p06">P06</a></td>
+<td>定义目标与分母 → 冻结数据和条件 → 分层指标 → 对照&#x2F;消融</td>
+<td>执行结束当达标；去掉失败样本；同时改多个组件归因单项</td>
+<td>指标口径表、样本清单、基线与报告模板</td>
+</tr>
+<tr>
+<td>上下文压缩与记忆冲突：<a href="#q72">Q72</a>、<a href="#q74">Q74</a>、<a href="#q75">Q75</a>、<a href="#q77">Q77</a></td>
+<td>关键事实结构化 → token 预算 → 摘要留出处 → 更新失效 → 删除与隔离</td>
+<td>摘要丢掉限制；存了历史就算会记忆；删主库后索引仍可命中</td>
+<td>预算表、改口&#x2F;冲突&#x2F;删除前后的取用记录</td>
+</tr>
+<tr>
+<td>并发、延迟与瓶颈：<a href="#q47">Q47</a>、<a href="#p03">P03</a>、<a href="#p04">P04</a></td>
+<td>区分 I&#x2F;O 和 CPU → 测排队与执行 → 找资源瓶颈 → 限流&#x2F;背压</td>
+<td>async 等于无限并发；首 token 快就称端到端快；替身耗时代表实机</td>
+<td>分阶段 trace、并发与设备容量假设</td>
+</tr>
+<tr>
+<td>Harness 与个人实践证据：<a href="#q59">Q59</a>、<a href="#q60">Q60</a>、<a href="#q63">Q63</a>、<a href="#q65">Q65</a></td>
+<td>真实失败 → 环境&#x2F;工具改动 → 固定条件验证 → 交付与剩余限制</td>
+<td>把工具自带能力当个人贡献；把使用经验说成训练模型</td>
+<td>一次真实任务、个人改动、成功与失败轨迹</td>
+</tr>
+</tbody></table>
+<p>材料尚未具备时，明确作为待补充证据或设计草稿，不代填结果。沿难点表练一次失败场景，比继续增加名词更能检验理解。</p>
+<h3 id="第三轮：按岗位方向加深"><a href="#第三轮：按岗位方向加深" class="headerlink" title="第三轮：按岗位方向加深"></a>第三轮：按岗位方向加深</h3><table>
+<thead>
+<tr>
+<th>岗位或简历重点</th>
+<th>继续阅读</th>
+<th>应具备的讲解能力</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RAG &#x2F; 知识库</td>
+<td><a href="#graphrag">第二章</a>、<a href="#q29">Q29</a>、<a href="#p05">P05</a></td>
+<td>讲出切分、混合检索、重排和图扩展的收益及代价</td>
+</tr>
+<tr>
+<td>Agent &#x2F; LangGraph</td>
+<td><a href="#tools">第三章</a>、<a href="#reliability">第四章</a>、<a href="#q76">Q76</a></td>
+<td>画出任务状态、工具边界、恢复与审批流程</td>
+</tr>
+<tr>
+<td>Python 后端 &#x2F; 平台工程</td>
+<td><a href="#application-engineering">第六章</a>、<a href="#p03">P03</a>—<a href="#p06">P06</a></td>
+<td>说明长任务 API、异步并发、幂等、权限、观测与发布</td>
+</tr>
+<tr>
+<td>多轮对话 &#x2F; 记忆</td>
+<td><a href="#memory-management">第五章</a></td>
+<td>解释写入、读取、冲突、删除和效果验证</td>
+</tr>
+<tr>
+<td>AI 编程 &#x2F; Harness &#x2F; Hermes</td>
+<td><a href="#harness-engineering">第八章</a>、<a href="#hermes-agent">第九章</a></td>
+<td>展示自己的任务和修改，而非复述产品说明</td>
+</tr>
+<tr>
+<td>多模态 &#x2F; 推理部署</td>
+<td><a href="#q55">Q55</a>、<a href="#q57">Q57</a>、<a href="#q78">Q78</a></td>
+<td>解释输入对齐、推理资源和应用侧的能力边界</td>
+</tr>
+</tbody></table>
+<h3 id="复习安排与自测标准"><a href="#复习安排与自测标准" class="headerlink" title="复习安排与自测标准"></a>复习安排与自测标准</h3><ul>
+<li>**只有一天：**先练 Q01、Q04、Q11、Q20、Q33、P01 六个口述入口，再检查核心题表中的遗漏；整理个人职责、一条成功链路和一个真实失败案例。</li>
+<li>**有三天：**第一天完成核心题；第二天逐个演练八类难点；第三天按目标 JD 选 B&#x2F;C 题，补证据并模拟一轮面试。</li>
+<li>**有一周：**在前三天基础上，完成或复查<a href="#practice-tasks">四个可演示任务</a>，整理实际记录，按薄弱环节回练。</li>
+</ul>
+<p>每题自测四项：能否先给直接答案；能否落到自己的链路；能否处理一个反例或故障；能否区分已实现、设计方案和实测结果。可在个人笔记标记“不会 &#x2F; 能解释 &#x2F; 有证据”。A 类题至少能解释，涉及个人经历的结论必须有证据。</p>
+<p><span id="workflow"></span></p>
+<h2 id="零、现有执行流程与完整项目口述"><a href="#零、现有执行流程与完整项目口述" class="headerlink" title="零、现有执行流程与完整项目口述"></a>零、现有执行流程与完整项目口述</h2><h3 id="面试官问：不要只说“接上现有流程”，后面到底怎么执行？"><a href="#面试官问：不要只说“接上现有流程”，后面到底怎么执行？" class="headerlink" title="面试官问：不要只说“接上现有流程”，后面到底怎么执行？"></a>面试官问：不要只说“接上现有流程”，后面到底怎么执行？</h3><p><strong>可直接口述的回答：</strong></p>
+<p>整个系统从用户的需求场景开始。模型先识别场景、问题、目标和约束，再通过 RAG 从知识库召回相关参数及描述，形成描述调参步骤的 plan JSON。外层执行器按计划选择对应模块，召回解决“有哪些相关参数”，计划明确“按什么步骤和方法处理”，后面再把它们落到实际工程配置。</p>
+<p>进入现有流程后，系统结合当前任务的元数据定位对应 XML、参数区域和触发条件，读取当前参数值，形成可以执行的调参输入。然后进行粗扫：逐个参数做不同幅度的调整，生成候选配置，修改 XML，并调用编译工具生成对应 bin。</p>
+<p>接着把实验计划和 bin 交给实验室执行端。原有链路使用共享目录传递产物、RabbitMQ 发送任务通知，由实验室端按计划进行设备配置、场景控制、图像采集和 QCATS 评测，再回传结果。编排侧读取每个候选的指标，形成粗扫历史。</p>
+<p>细扫时，把目标、参数信息、粗扫结果、细扫历史和当前最佳结果提供给模型，让它推荐下一批参数组合和调整幅度。程序将建议转换成实际配置，再走编译、执行、采集和评测，更新已测候选中的最佳结果，直到达标或触发停止条件。</p>
+<p>因此，整体采用外层 Plan-and-Execute 管理步骤、内层 ReAct 式循环完成需要反馈的实验迭代。程序按计划组织执行，模型结合实际观测提出细扫动作，工具完成配置、采集与评测，最终保留最佳配置引用、评测结果和过程记录。粗扫或预置步骤可以是固定策略，不要求每一步都调用模型。</p>
+<h3 id="各阶段究竟输入什么、输出什么？"><a href="#各阶段究竟输入什么、输出什么？" class="headerlink" title="各阶段究竟输入什么、输出什么？"></a>各阶段究竟输入什么、输出什么？</h3><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>输入</th>
+<th>处理与输出</th>
+<th>主要责任</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. 意图识别</td>
+<td>用户需求场景</td>
+<td>提取问题、目标、约束和已知条件</td>
+<td>前端模型理解</td>
+</tr>
+<tr>
+<td>2. 参数召回</td>
+<td>结构化意图、知识库</td>
+<td>召回相关方案、参数及描述</td>
+<td>RAG&#x2F;GraphRAG 检索</td>
+</tr>
+<tr>
+<td>3. 高层计划与目标</td>
+<td>召回参数、用户目标、业务规则</td>
+<td>形成 plan JSON，明确步骤、方法、参数引用和验收依据</td>
+<td>规划层；阈值来自业务依据</td>
+</tr>
+<tr>
+<td>4. 步骤分发与配置定位</td>
+<td>计划步骤、工程配置、任务元数据</td>
+<td>选择执行模块，找到 XML、区域、触发条件、当前值</td>
+<td>计划执行器与配置解析逻辑</td>
+</tr>
+<tr>
+<td>5. 粗扫规划</td>
+<td>已选参数及当前值</td>
+<td>对单个参数生成多个调整候选</td>
+<td>现有粗扫策略，可配置选择模式</td>
+</tr>
+<tr>
+<td>6. 配置与编译</td>
+<td>候选计划</td>
+<td>修改工程 XML，生成候选 bin 与计划记录</td>
+<td>配置管理器及编译工具</td>
+</tr>
+<tr>
+<td>7. 实验提交</td>
+<td>bin、计划、场景和目标配置</td>
+<td>产物传递、消息通知、等待实验执行</td>
+<td>编排侧与实验室执行端</td>
+</tr>
+<tr>
+<td>8. 采集评测</td>
+<td>候选配置和场景</td>
+<td>设备执行、图像采集、QCATS 指标返回</td>
+<td>既有硬件控制与评测工具</td>
+</tr>
+<tr>
+<td>9. 细扫推荐</td>
+<td>参数知识、粗扫与细扫历史、最佳结果</td>
+<td>模型推荐参数组合与调整幅度，程序转换成计划</td>
+<td>模型建议加现有执行逻辑</td>
+</tr>
+<tr>
+<td>10. 结果更新与停止</td>
+<td>各候选实际指标</td>
+<td>更新最佳引用，判断目标、轮数或无法继续等条件</td>
+<td>目标评估和编排逻辑</td>
+</tr>
+<tr>
+<td>11. 结果交付</td>
+<td>最佳引用、配置产物、实验记录</td>
+<td>返回可追溯结果，分别说明执行状态与目标达成状态</td>
+<td>报告与结果接口</td>
+</tr>
+</tbody></table>
+<p>这里的粗扫以原执行代码中的逐参数探索为依据，不套用学习示例中两参数笛卡尔积搜索的细节。是否在当前部署中使用预置方案、纯模型推荐或其他模块，要说明实际启用路径。</p>
+<h3 id="面试官问：模型到底在哪几处发挥作用？"><a href="#面试官问：模型到底在哪几处发挥作用？" class="headerlink" title="面试官问：模型到底在哪几处发挥作用？"></a>面试官问：模型到底在哪几处发挥作用？</h3><p><strong>可直接口述的回答：</strong></p>
+<p>前端模型把需求转换成检索意图，通过 RAG 找到相关参数，再组织调参策略与步骤。原有后端细扫还会调用模型分析已经测过的结果，推荐下一批组合和调整幅度。规划层决定步骤与方法，局部决策层根据目标和实验历史提出动作，配置修改、编译、硬件执行和指标计算由工具完成。</p>
+<p>细扫用了模型，不代表每轮都会重新查询前端 GraphRAG；知识片段如何传递、是否重新检索，应以真实调用链说明。</p>
+<h3 id="plan-JSON、每轮计划和运行状态分别是什么？"><a href="#plan-JSON、每轮计划和运行状态分别是什么？" class="headerlink" title="plan JSON、每轮计划和运行状态分别是什么？"></a>plan JSON、每轮计划和运行状态分别是什么？</h3><table>
+<thead>
+<tr>
+<th>对象</th>
+<th>表达的内容</th>
+<th>代码或设计对应</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>高层 plan JSON</td>
+<td>有序步骤、调参方法及该步骤涉及的参数</td>
+<td>用户确认存在计划文件；代码以 <code>tuning_strategy.tuning_steps</code> 驱动执行</td>
+</tr>
+<tr>
+<td>单轮实验计划</td>
+<td>当前粗扫或细扫要尝试的配置、调整幅度和产物引用</td>
+<td><code>AdjustmentPlan</code>、<code>coarse_plan.json</code>、<code>fine_plan.json</code></td>
+</tr>
+<tr>
+<td>执行状态与结果</td>
+<td>当前步骤、已经执行的候选、外部任务、最佳结果和停止原因</td>
+<td>编排状态、历史记录与 <code>tuning_plan_results.json</code>；持久化恢复需单独设计</td>
+</tr>
+</tbody></table>
+<p>高层计划不是完整执行轨迹。每轮配置可以变化而高层步骤不变；文件名含 plan 也不自动意味着有 LLM 规划能力，判断依据是计划由谁产生、表达什么、执行器如何消费，以及是否根据结果做决策。</p>
+<p><strong>与代码字段一致的精简结构示意（占位值，不是可直接执行的生产配置）：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;tuning_steps&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;TuningMethod&quot;</span><span class="punctuation">:</span> <span class="string">&quot;fullscan&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;parameters_to_adjust&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span><span class="attr">&quot;ISP&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;模块&gt;&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;xml&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;配置文件&gt;&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;param&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;召回参数&gt;&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;region&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;区域&gt;&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;use_llm_for_coarse_scan&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;max_fine_tune_rounds&quot;</span><span class="punctuation">:</span> <span class="number">5</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里展示的是计划与执行器之间的字段关系，真实请求还需要上下文中的目标、触发条件和原代码要求的信息。<code>plan_id</code>、schema 版本、审核版本和逐步状态等是有价值的生产化补充，不能因为示例没有它们就认为现有恢复与审计机制已经齐全。</p>
+<h3 id="原执行代码依据与口述边界"><a href="#原执行代码依据与口述边界" class="headerlink" title="原执行代码依据与口述边界"></a>原执行代码依据与口述边界</h3><p>本节结合用户确认的前端链路和 <code>optimization3.py</code> 中的后端代码整理。本次只进行了静态阅读，没有启动模型服务、编译、消息队列或硬件实验。</p>
+<table>
+<thead>
+<tr>
+<th>后端能力</th>
+<th>代码中的入口或实现</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>从任务元数据定位 XML、触发区域，读取当前参数值</td>
+<td><code>tuning_plan_generation</code>、<code>XmlConfigManager</code></td>
+</tr>
+<tr>
+<td>按高层步骤选择模块，汇总步骤结果</td>
+<td><code>TuningPlan.run</code> 遍历 <code>tuning_steps</code>，<code>_create_tuning_module</code> 按 <code>TuningMethod</code> 分发</td>
+</tr>
+<tr>
+<td>粗扫与细扫编排</td>
+<td><code>FullScanISPTuningOrchestrator</code></td>
+</tr>
+<tr>
+<td>逐参数粗扫候选</td>
+<td><code>_generate_system_driven_coarse_scan_plans</code>、<code>_generate_coarse_scan_plans</code></td>
+</tr>
+<tr>
+<td>修改配置并调用编译器，支持候选并行编译</td>
+<td><code>corase_scan_collection</code>、<code>fine_tune_collection</code>、<code>generateBin</code>、<code>generateBins_Multi</code></td>
+</tr>
+<tr>
+<td>共享目录传递产物、RabbitMQ 通知实验室端并读取返回文件</td>
+<td><code>run_coarse_scan_stage</code>、<code>run_fine_tune_stage</code>、<code>send_and_wait_response</code></td>
+</tr>
+<tr>
+<td>模型读取实验历史，推荐细扫组合</td>
+<td><code>call_llm_for_fine_tune_decision</code></td>
+</tr>
+<tr>
+<td>记录最佳结果和目标判断</td>
+<td>参数管理器、<code>Target</code>、细扫结果处理逻辑</td>
+</tr>
+</tbody></table>
+<p>原脚本入口还包含基于已有 QCAT 报告构造任务的路径；用户需求驱动的前端需要把意图、召回参数与目标信息映射到后端所需结构，不能假定只传参数名就足够。本地文件没有证明整条 GraphRAG 前端已按某个具体 schema 接好，实际字段以接口为准。</p>
+<p>代码既有实验室提交路径，也有 DEBUG 数据和未实现的辅助评估路径；不能把任意一次本地运行称为实机验证。设备部署、机械臂动作等执行细节位于实验室端，不从编排脚本推断所有驱动实现。</p>
+<p>**需要如实说明的工程边界：**当前可见的等待函数是阻塞轮询，并有清空接收队列、自动确认消息的行为，未体现完整的超时与结果关联机制；配置入口仍有参数校验 TODO；某条细扫路径达到轮数上限且未达标也会返回 True。因此，文中幂等恢复、严格校验和并发安全属于改进设计，不能说原脚本已经完整实现。系统验收必须读取实际目标结果和停止原因，不能直接把该布尔返回值当作任务达标。</p>
+<p><span id="architecture"></span></p>
+<h2 id="一、项目定位、需求理解与-Agent-架构"><a href="#一、项目定位、需求理解与-Agent-架构" class="headerlink" title="一、项目定位、需求理解与 Agent 架构"></a>一、项目定位、需求理解与 Agent 架构</h2><p>先讲项目价值与架构，再处理需求变化。阅读顺序：一分钟介绍 → 意图与约束 → P-E + ReAct → LangGraph 与 State → 多轮纠正。</p>
+<p><strong>本章题目：</strong><a href="#q01">Q01</a>、<a href="#q02">Q02</a>、<a href="#q03">Q03</a>、<a href="#q04">Q04</a>、<a href="#q05">Q05</a>、<a href="#q06">Q06</a>、<a href="#q07">Q07</a>、<a href="#q40">Q40</a>、<a href="#q41">Q41</a>。</p>
+<p><span id="q01"></span></p>
+<h3 id="Q01：请用一分钟介绍这个项目。"><a href="#Q01：请用一分钟介绍这个项目。" class="headerlink" title="Q01：请用一分钟介绍这个项目。"></a>Q01：请用一分钟介绍这个项目。</h3><p><strong>备考定位：A · 核心必答｜基础。</strong> 答题抓手：业务价值、个人职责、完整链路与当前边界。</p>
+<p><strong>参考答案：</strong></p>
+<p>这个项目把用户提出的 Camera Tuning 需求转换为可以执行的调参计划。用户先描述场景和问题，模型识别意图，通过 RAG 召回相关参数及描述，再形成 plan JSON，由执行器按步骤调用现有流程。</p>
+<p>整体是外层 Plan-and-Execute、内层 ReAct 式实验反馈循环：外层明确步骤和调参方法，后端执行粗扫、编译、采集和 QCATS 评测，在细扫环节由模型根据历史推荐下一批组合。我用 LangGraph 组织状态与流转，通过 QGenie 接入模型，GraphRAG 提供参数依据。工程重点是计划可执行、召回有来源、工具执行受控，以及结果可验证。</p>
+<p>**常见追问：**你本人负责哪些模块？已经跑通到哪一步？什么情况下仍需要人工介入？</p>
+<p>**准备要求：**补充个人职责、真实使用范围和一条完整成功记录。没有量化数据时，不声称效率提升了某个百分比。</p>
+<p><span id="q02"></span></p>
+<h3 id="Q02：为什么需要模型做意图识别？关键词匹配不能做吗？"><a href="#Q02：为什么需要模型做意图识别？关键词匹配不能做吗？" class="headerlink" title="Q02：为什么需要模型做意图识别？关键词匹配不能做吗？"></a>Q02：为什么需要模型做意图识别？关键词匹配不能做吗？</h3><p><strong>备考定位：B · 重点追问｜基础。</strong> 答题抓手：语义理解的收益，以及关键词基线适用范围。</p>
+<p><strong>参考答案：</strong></p>
+<p>用户通常描述的是场景和感受，比如“夜景颗粒明显，但不要把细节抹掉”，不一定知道对应的参数名。模型的作用是理解语义、提取目标和约束，把不同说法转换成适合检索的需求表达。</p>
+<p>对于固定术语或明确参数名，关键词和精确匹配很有效，可以作为基线或补充。模型是否有价值，要看它在口语表达、多目标和省略信息上的识别效果。后续算法解决的是给定参数后的执行或优化问题，模型与 RAG 负责前面的“需求对应哪些参数”。</p>
+<p>**常见追问：**拿掉模型后损失什么？</p>
+<p>**回答重点：**能否把自然语言需求准确映射到知识库中的相关参数，是最直接的价值验证。</p>
+<p><span id="q03"></span></p>
+<h3 id="Q03：意图识别输出什么？如何处理模糊需求？"><a href="#Q03：意图识别输出什么？如何处理模糊需求？" class="headerlink" title="Q03：意图识别输出什么？如何处理模糊需求？"></a>Q03：意图识别输出什么？如何处理模糊需求？</h3><p><strong>备考定位：A · 核心必答｜基础。</strong> 答题抓手：结构化意图、多目标约束与缺失条件。</p>
+<p><strong>参考答案：</strong></p>
+<p>意图识别应输出适合检索和后续接口使用的结构化信息。可以包括场景、用户观察到的问题、目标、约束、已知平台条件，以及缺失但必要的信息。具体字段要与实际实现一致。</p>
+<p>例如“夜景降噪但保留细节”同时包含场景、改善目标和保留约束，不能只识别出“降噪”两个字。对于“画质不太好”这样的宽泛输入，应请求补充会影响召回的关键条件，或先返回候选问题类别。不能自行补出用户没有提供的硬件版本、数值目标或问题根因。</p>
+<p>**常见追问：**一次需求有多个意图怎么办？模型给出的置信度能直接作为阈值吗？</p>
+<p>**回答重点：**保留多目标及其关系；关键缺失信息单独记录。模型自报置信度不一定校准，应结合标注集、字段完整性和召回结果验证，而不是直接把它当概率。</p>
+<p><span id="q04"></span></p>
+<h3 id="Q04：有-plan-JSON，是否可以说采用-Plan-and-Execute-加-ReAct？"><a href="#Q04：有-plan-JSON，是否可以说采用-Plan-and-Execute-加-ReAct？" class="headerlink" title="Q04：有 plan JSON，是否可以说采用 Plan-and-Execute 加 ReAct？"></a>Q04：有 plan JSON，是否可以说采用 Plan-and-Execute 加 ReAct？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：高层计划、局部反馈和自动重规划的区别。</p>
+<p><strong>参考答案：30 秒版本</strong></p>
+<p>我的系统采用外层 Plan-and-Execute、内层 ReAct 式反馈循环。模型先识别用户需求，通过 GraphRAG 召回相关参数，再组织成 JSON 计划，由执行器按步骤执行。在细扫等需要动态决策的步骤内，模型根据实际评测反馈推荐下一批参数组合，工具执行后再返回结果。外层决定做哪些步骤，内层根据反馈决定当前步骤怎么继续。</p>
+<p><strong>参考答案：约 90 秒完整版本</strong></p>
+<p>我的系统采用外层 Plan-and-Execute、内层 ReAct 式反馈循环，用 LangGraph 组织状态和流程。</p>
+<p>用户先提出需求场景，模型识别目标和约束，通过 GraphRAG 召回相关参数及描述，再组织成 JSON 计划。计划里包含 <code>tuning_steps</code>，每一步指定调参方法和涉及的参数。执行器读取计划，按顺序调用对应模块，这部分是 Plan-and-Execute。</p>
+<p>在具体步骤内部，例如细扫阶段，模型读取粗扫结果、已有细扫历史和当前最佳结果，推荐下一批参数组合。程序完成配置修改、bin 编译、设备采集和 QCATS 评测，再把结果反馈给模型，决定下一轮动作。这部分是 ReAct 式的“观察—决策—执行”循环。</p>
+<p>两层结合的原因是，高层步骤和参数范围需要明确，方便检查、审核和追踪；实验结果又无法提前完全预测，需要执行阶段利用反馈调整动作。确定性的配置、编译和采集由程序完成，模型主要负责需要语义理解或反馈分析的决策，实际效果由工具结果和验收规则判断。</p>
+<p><strong>面试官要求举例时：</strong></p>
+<p>例如用户提出“改善夜景噪声，同时保留细节”。系统先提取场景、改善目标和保留约束，通过 RAG 找到相关参数，再形成包含调参步骤的计划。</p>
+<p>执行到 <code>fullscan</code> 步骤时，先进行粗扫，获得参数变化与指标变化的实验记录。细扫模型依据这些结果推荐组合，再实际执行和评测。达到验收目标可以提前结束；没有达到则在该步骤允许的预算内继续，步骤结束后由外层判断是否执行下一步或结束整个计划。</p>
+<p>这个例子说明，参数来自知识库，具体调整通过实验验证，模型提出下一步建议。示例用于解释链路，不代表已经取得某个固定幅度的画质提升。</p>
+<p><strong>两层职责对照：</strong></p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>主要输入</th>
+<th>主要输出</th>
+<th>负责的决定</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>外层 Plan-and-Execute</td>
+<td>需求、目标、召回参数和可用调参方法</td>
+<td>高层 plan JSON、步骤分发与结果汇总</td>
+<td>做哪些步骤、采用什么方法、涉及哪些参数</td>
+</tr>
+<tr>
+<td>内层 ReAct 式循环</td>
+<td>当前步骤目标、参数知识、实验历史与最新观测</td>
+<td>下一批调整建议及实际执行结果</td>
+<td>当前步骤下一轮尝试什么、反馈是否支持继续</td>
+</tr>
+<tr>
+<td>确定性执行与验收</td>
+<td>计划、候选配置、工具返回及业务规则</td>
+<td>配置产物、指标、目标判断和停止状态</td>
+<td>参数是否合法、工具是否成功、结果是否达标</td>
+</tr>
+</tbody></table>
+<p><strong>高频追问速答：</strong></p>
+<table>
+<thead>
+<tr>
+<th>面试官追问</th>
+<th>可以这样回答</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>为什么不只用 ReAct？</td>
+<td>高层任务有明确阶段，先形成计划便于审核、控制范围和追踪进度，不必让模型每轮重新决定整个流程。</td>
+</tr>
+<tr>
+<td>为什么不只用 P-E？</td>
+<td>实验结果无法提前确定，把所有具体动作一次写死就难以利用新反馈；因此执行阶段保留局部动态决策。</td>
+</tr>
+<tr>
+<td>JSON 计划是模型生成的吗？</td>
+<td>模型组织需求对应的策略与步骤，参数来自检索；XML 路径、触发区域、当前值等由现有解析逻辑补全。面试时按实际字段说明哪些由模型生成、哪些由程序填入。</td>
+</tr>
+<tr>
+<td>有 JSON 就是 P-E 吗？</td>
+<td>不是，JSON 只是载体。需要说明它表达执行步骤、规划阶段如何形成、执行器如何消费；参数表或结果日志本身不能证明 P-E。</td>
+</tr>
+<tr>
+<td>这是标准工具调用 ReAct 吗？</td>
+<td>当前细扫是模型输出结构化调整建议、程序执行工具管道、再回传观测，准确称为 ReAct 式反馈循环；不要求采用固定的 Thought&#x2F;Action&#x2F;Observation 文本格式。</td>
+</tr>
+<tr>
+<td>会自动重规划整个任务吗？</td>
+<td>当前能确认按高层步骤执行和步骤内反馈调整，不据此声称会自动增删或重排整体计划。局部候选变化不等于高层 replan。</td>
+</tr>
+<tr>
+<td>需要高层 replan 时怎么办？</td>
+<td>先定义触发条件，生成新计划版本，重新检查参数、预算与未完成任务；必要时使旧审批失效。这是扩展设计，已实现范围需要如实说明。</td>
+</tr>
+<tr>
+<td>LangGraph 在其中做什么？</td>
+<td>管理状态、节点和条件流转，承载规划与执行模式；原有执行器可作为被调用模块。LangGraph 是实现工具，P-E 和 ReAct 是决策组织方式。</td>
+</tr>
+<tr>
+<td>如何证明模型真的使用了反馈？</td>
+<td>展示实际实验观测、下一轮结构化建议和执行记录，解释哪些新结果改变了建议，并用对照实验验证价值；不能只展示模型的一段解释。</td>
+</tr>
+</tbody></table>
+<p><strong>回答依据与实现边界：</strong></p>
+<p><code>TuningPlan.run()</code> 遍历 <code>tuning_steps</code>，通过 <code>TuningMethod</code> 分发 <code>fullscan</code>、<code>preset</code> 等模块；<code>call_llm_for_fine_tune_decision</code> 读取目标、参数知识、粗扫与细扫历史并返回候选组合。前者支撑按计划执行，后者支撑基于观测的局部决策。</p>
+<p>目前原脚本部分布尔成功返回值与目标达成状态存在混用，面试说明应明确以实际指标和验收结果判断达标，不声称代码已经具备完整可靠的停止、审批和恢复机制。也不需要展示模型完整内部思维链，工具调用与实验记录才是可检查证据。</p>
+<p>**记忆句：**先把需求变成有依据的执行计划，再让执行阶段根据真实反馈调整动作；外层管步骤，内层管当前步骤的反馈迭代。</p>
+<p><span id="q05"></span></p>
+<h3 id="Q05：为什么选-LangGraph，而不是普通-Python-循环？"><a href="#Q05：为什么选-LangGraph，而不是普通-Python-循环？" class="headerlink" title="Q05：为什么选 LangGraph，而不是普通 Python 循环？"></a>Q05：为什么选 LangGraph，而不是普通 Python 循环？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：状态图的选型依据，以及相对普通循环的代价。</p>
+<p><strong>参考答案：</strong></p>
+<p>普通代码也能实现这条主线。LangGraph 可以把意图识别、检索、计划生成、计划检查、步骤执行和结果汇总表达为明确节点，同时承载执行阶段的反馈循环；信息补充、空召回、校验失败、HIL 和调用失败等分支也便于组织和观察。原有 <code>TuningPlan</code> 可以作为被调用的执行器，不需要把所有业务函数都改写成图节点。</p>
+<p>框架也有成本，例如状态合并规则、checkpoint 配置、调试和版本依赖。如果流程只是固定的一次模型调用加一次工具调用，引入图框架的收益可能不大。我的选型依据应是实际存在的分支和生命周期复杂度。</p>
+<p>**常见追问：**用了 LangGraph 就自动支持持久化恢复了吗？</p>
+<p>**回答重点：**没有。需要配置持久化机制、线程&#x2F;任务标识和恢复流程；外部工具副作用仍需要单独处理。</p>
+<p><span id="q06"></span></p>
+<h3 id="Q06：State-怎么设计？为什么不只用-messages？"><a href="#Q06：State-怎么设计？为什么不只用-messages？" class="headerlink" title="Q06：State 怎么设计？为什么不只用 messages？"></a>Q06：State 怎么设计？为什么不只用 messages？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：业务状态、消息、计划版本与外部任务引用。</p>
+<p><strong>参考答案：</strong></p>
+<p>messages 适合保存模型交互，但主线还需要结构化字段。建议区分用户原始需求、结构化意图、召回参数及来源、plan 引用与版本、当前步骤、步骤状态、局部反馈，以及下游任务标识。计划定义和运行状态分开维护，才能准确说明恢复的是哪一版计划的哪一步。</p>
+<p>意图、检索结果和实际提交的参数集合应分开保存，才能追踪信息在哪一步发生变化。后续流程已有自己的实验历史和最佳方案时，前端 State 可以只保存关联 ID，避免重复维护两份事实。图像和完整日志存外部存储，State 保存引用。</p>
+<p><strong>设计示例：</strong></p>
+<table>
+<thead>
+<tr>
+<th>信息</th>
+<th>建议保存位置</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>原始需求、结构化意图、缺失条件</td>
+<td>工作流 State</td>
+<td>保留语义与检索依据</td>
+</tr>
+<tr>
+<td>召回参数、来源、下游请求及任务 ID</td>
+<td>工作流 State</td>
+<td>追踪检索到执行的交接</td>
+</tr>
+<tr>
+<td>plan 引用与版本、当前步骤、步骤结果</td>
+<td>工作流 State 与计划&#x2F;结果存储</td>
+<td>区分计划意图和实际执行进度</td>
+</tr>
+<tr>
+<td>精简模型交互</td>
+<td>messages</td>
+<td>支持模型理解上下文</td>
+</tr>
+<tr>
+<td>原始图片、长日志</td>
+<td>文件或对象存储</td>
+<td>避免塞入上下文和 checkpoint</td>
+</tr>
+<tr>
+<td>实验明细、参数版本</td>
+<td>数据库</td>
+<td>支持查询、审计、统计</td>
+</tr>
+<tr>
+<td>参数定义及方案关系</td>
+<td>知识图谱</td>
+<td>支持关系检索</td>
+</tr>
+</tbody></table>
+<p>**常见追问：**并行更新字段怎么办？</p>
+<p>**回答重点：**明确覆盖字段与聚合字段，为聚合字段设计 reducer；多路检索可分别保存结果，再按参数身份去重、合并来源，不能简单覆盖其他分支的召回结果。</p>
+<p><span id="q07"></span></p>
+<h3 id="Q07：这是单-Agent-还是多-Agent？需要拆多个-Agent-吗？"><a href="#Q07：这是单-Agent-还是多-Agent？需要拆多个-Agent-吗？" class="headerlink" title="Q07：这是单 Agent 还是多 Agent？需要拆多个 Agent 吗？"></a>Q07：这是单 Agent 还是多 Agent？需要拆多个 Agent 吗？</h3><p><strong>备考定位：C · 按岗扩展｜基础。</strong> 答题抓手：独立决策主体与多个工作流节点的区别。</p>
+<p><strong>参考答案：</strong></p>
+<p>多个节点或多个工具不等于多个 Agent。意图识别节点、RAG 节点和现有流程入口本身不能证明是多 Agent；若没有多个独立决策主体，描述为一个模型应用工作流即可。</p>
+<p>只有在独立任务可以并行、上下文需要隔离或不同职责确实有独立决策需求时，我才会考虑多 Agent。拆分后需要评估协调成本、重复调用和错误传播，不能仅因为有“规划、执行、评估”三个名字就认为必须用三个 Agent。</p>
+<p>**常见追问：**独立评估 Agent 能保证结果正确吗？</p>
+<p>**回答重点：**不能。模型评审可以辅助，但客观约束和工具执行结果仍要独立验证。</p>
+<p><span id="q40"></span></p>
+<h3 id="Q40：多轮对话中，用户纠正了场景，你怎么更新意图？"><a href="#Q40：多轮对话中，用户纠正了场景，你怎么更新意图？" class="headerlink" title="Q40：多轮对话中，用户纠正了场景，你怎么更新意图？"></a>Q40：多轮对话中，用户纠正了场景，你怎么更新意图？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：用户纠正后的状态更新与旧约束失效。</p>
+<p><strong>参考答案：</strong></p>
+<p>把新增信息、纠正信息和新任务分开处理。例如用户说“不是夜景，是室内逆光”，应替换场景字段，同时保留仍然有效的“保留细节”等约束。保存原始消息和结构化意图版本，必要时确认含义，而不是把所有历史条件简单累加。</p>
+<p>如果场景变化影响参数适用性，需要重新检索并生成新的请求版本。旧计划的审核结果不能自动授权新计划。任务已经在设备执行时，还要区分变更请求和当前执行实例，根据是否支持取消选择等待、取消或创建后续任务。</p>
+<p>**常见追问：**长期记忆中的用户偏好和本次明确要求冲突怎么办？</p>
+<p>**回答：**本次明确要求优先；长期偏好只补充未指定信息，并保留来源与可撤销性，不能覆盖当前任务约束。</p>
+<p><span id="q41"></span></p>
+<h3 id="Q41：用户说的是现象，你为什么认为已经知道根因？"><a href="#Q41：用户说的是现象，你为什么认为已经知道根因？" class="headerlink" title="Q41：用户说的是现象，你为什么认为已经知道根因？"></a>Q41：用户说的是现象，你为什么认为已经知道根因？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：区分现象、根因假设与已验证结论。</p>
+<p><strong>参考答案：</strong></p>
+<p>意图识别首先提取用户观察和希望改善的目标。比如“照片模糊”不能直接等价为“锐化不足”；根因应作为待验证假设，信息不足时澄清必要条件或检索多个候选方向。</p>
+<p>查询改写要保留原始需求，避免把推测写成确定条件。评测时既检查改写是否覆盖目标，也检查是否引入无依据的事实。可以比较原始查询、改写查询和二者联合检索的结果，发现改写把检索方向带偏的问题。</p>
+<p>**常见追问：**是否要每次都追问用户？</p>
+<p>**回答：**只追问会实质影响参数适用性、任务目标或执行条件的信息；已有明确上下文时复用它，避免让用户重复填写。</p>
+<p><span id="graphrag"></span></p>
+<p><span id="retrieval-details"></span></p>
+<h2 id="二、GraphRAG-知识建模与参数检索"><a href="#二、GraphRAG-知识建模与参数检索" class="headerlink" title="二、GraphRAG 知识建模与参数检索"></a>二、GraphRAG 知识建模与参数检索</h2><p>先解释知识如何组织和一次查询如何执行，再深入切分、embedding、混合检索与重排，最后讨论替代方案。重点是召回到适用且可执行的参数。</p>
+<p><strong>本章题目：</strong><a href="#q15">Q15</a>、<a href="#q16">Q16</a>、<a href="#q17">Q17</a>、<a href="#q18">Q18</a>、<a href="#q19">Q19</a>、<a href="#q20">Q20</a>、<a href="#q21">Q21</a>、<a href="#q22">Q22</a>、<a href="#q23">Q23</a>、<a href="#q24">Q24</a>、<a href="#q34">Q34</a>、<a href="#q35">Q35</a>、<a href="#q36">Q36</a>、<a href="#q37">Q37</a>、<a href="#q38">Q38</a>、<a href="#q39">Q39</a>、<a href="#q42">Q42</a>、<a href="#q43">Q43</a>、<a href="#q44">Q44</a>、<a href="#q45">Q45</a>。</p>
+<p><span id="q15"></span></p>
+<h3 id="Q15：你的-GraphRAG-存什么，提供什么能力？"><a href="#Q15：你的-GraphRAG-存什么，提供什么能力？" class="headerlink" title="Q15：你的 GraphRAG 存什么，提供什么能力？"></a>Q15：你的 GraphRAG 存什么，提供什么能力？</h3><p><strong>备考定位：A · 核心必答｜基础。</strong> 答题抓手：方案、参数、描述和图关系的实际检索作用。</p>
+<p><strong>参考答案：</strong></p>
+<p>知识层组织调参方案、参数及参数描述，并保留方案和参数之间的关联。用户需求经过意图识别后，通过 RAG 召回与需求相关的参数。方案关系可以帮助找到关联参数，描述帮助理解参数与需求的相关性；输出最终要服务于现有流程的参数输入。</p>
+<p>严格说，图数据库或图存储负责保存知识，GraphRAG 是利用图结构检索并增强生成的机制。选择什么数据库和索引，与 GraphRAG 的概念需要分开说明。</p>
+<p>**常见追问：**只是把文本放进图数据库，就算 GraphRAG 吗？</p>
+<p>**回答重点：**要说明图关系实际如何参与检索。若只对节点描述做向量检索，应准确描述为图存储加向量检索。</p>
+<p><span id="q16"></span></p>
+<h3 id="Q16：为什么不用普通向量-RAG-或关系型数据库？"><a href="#Q16：为什么不用普通向量-RAG-或关系型数据库？" class="headerlink" title="Q16：为什么不用普通向量 RAG 或关系型数据库？"></a>Q16：为什么不用普通向量 RAG 或关系型数据库？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：图检索、向量检索和关系库的选型依据。</p>
+<p><strong>参考答案：</strong></p>
+<p>向量检索擅长从自然语言问题定位相关内容，但不天然保证拿全一个方案下的参数及其定义。图检索可以在定位相关节点后按明确关系补齐上下文，减少仅凭文本相似度拼接知识的情况。</p>
+<p>关系型数据库也能表达这些关系。如果只有方案和参数两张表、关联查询固定，关系库可能更简单。选择图数据库的理由应来自真实存在的多类型关系、可变路径查询和维护需求，而不是认为图数据库一定更先进。</p>
+<p>**常见追问：**图查询就一定比 SQL 快吗？</p>
+<p>**回答重点：**不是。要结合数据规模、查询路径、索引、部署与维护成本比较。</p>
+<p><span id="q17"></span></p>
+<h3 id="Q17：方案、参数、描述如何建模？参数值放哪里？"><a href="#Q17：方案、参数、描述如何建模？参数值放哪里？" class="headerlink" title="Q17：方案、参数、描述如何建模？参数值放哪里？"></a>Q17：方案、参数、描述如何建模？参数值放哪里？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：参数定义、方案推荐值与运行实例的区别。</p>
+<p><strong>参考答案：</strong></p>
+<p>当前已确认知识库保存方案、参数和参数描述，没有确认存储具体取值。基础模型可以用“方案关联参数”，参数描述作为参数属性。对于参数召回，这个关系已经可以提供知识组织方式。</p>
+<p>如果实际还保存方案取值，我会进一步区分参数定义和方案内配置。参数定义表达参数是什么，包括标识、描述、单位等；方案内配置表达某个方案把这个参数设置成什么值。</p>
+<p>同一个参数在多个方案中的值可能不同，因此不能把方案特有的值直接写成参数定义的全局属性。简单情况可以把值放在方案到参数的关系属性里；需要保存证据、版本或审核状态时，可以单独建配置项节点。</p>
+<p>参数描述如果只是一个字段，作为属性即可；如果需要多个语言、版本或独立来源，可以拆成文档片段或定义版本节点，不必把所有文本都建成节点。</p>
+<p><strong>扩展模型示例（仅适用于确实保存取值与版本的情况）：</strong></p>
+<div class="mermaid-wrap"><pre class="mermaid-src" data-config="{}" hidden>
+    graph LR
+    S[方案版本] --&gt;|包含| A[配置项]
+    A --&gt;|引用| P[参数定义版本]
+    A --&gt; V[取值或曲线引用]
+    P --&gt;|来源| D[文档片段]
+  </pre></div>
+
+<p>**常见追问：**如果值是 LUT 或数组呢？</p>
+<p>**回答重点：**保留结构化类型和维度，必要时存外部配置引用与校验哈希，避免当作无类型文本处理。</p>
+<p><span id="q18"></span></p>
+<h3 id="Q18：如何处理参数重名、平台差异和版本变化？"><a href="#Q18：如何处理参数重名、平台差异和版本变化？" class="headerlink" title="Q18：如何处理参数重名、平台差异和版本变化？"></a>Q18：如何处理参数重名、平台差异和版本变化？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：参数稳定身份、平台过滤与版本适用性。</p>
+<p><strong>参考答案：</strong></p>
+<p>不能只用参数展示名称当唯一键。可以结合平台、模块、完整字段路径和 schema 版本确定参数定义身份。展示名称用于阅读，稳定标识用于关联。</p>
+<p>查询时先使用已知任务信息限制适用范围，再进行语义匹配或图扩展。如果平台或版本缺失，系统应该补充信息或明确保留不确定性，而不是自动套用最相似的定义。</p>
+<p>旧定义与旧方案应保留版本关系，便于历史实验复现，不能更新一个节点后让所有旧方案悄悄引用新含义。</p>
+<p>**常见追问：**新版本与旧版本参数可以自动映射吗？</p>
+<p>**回答重点：**只能在有明确映射依据和校验规则时转换，字段名字相似不等于行为相同。</p>
+<p><span id="q19"></span></p>
+<h3 id="Q19：知识如何入图？是否用-LLM-抽取？"><a href="#Q19：知识如何入图？是否用-LLM-抽取？" class="headerlink" title="Q19：知识如何入图？是否用 LLM 抽取？"></a>Q19：知识如何入图？是否用 LLM 抽取？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：结构化解析、实体消歧和入库质量。</p>
+<p><strong>参考答案：</strong></p>
+<p>如果数据本来就是结构化配置，优先用确定性解析，准确保留参数路径、类型和取值。非结构化文档可以通过规则或模型抽取实体与关系，但抽取结果要经过 schema 校验、实体消歧和质量检查。</p>
+<p>每条重要知识保留来源和版本，避免只留下一个无法核查的结论。模型生成的关联只是待验证候选，不能因为写入图谱就自动成为事实。</p>
+<p>**常见追问：**增量更新怎么做？</p>
+<p>**回答重点：**用稳定 ID、内容版本和来源哈希识别变化；更新实体、关系和索引，并标记失效知识，避免重复入图及残留旧关系。</p>
+<p><span id="q20"></span></p>
+<h3 id="Q20：一次-GraphRAG-查询具体怎么执行？"><a href="#Q20：一次-GraphRAG-查询具体怎么执行？" class="headerlink" title="Q20：一次 GraphRAG 查询具体怎么执行？"></a>Q20：一次 GraphRAG 查询具体怎么执行？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：意图到入口召回、图扩展、过滤和证据输出。</p>
+<p><strong>参考答案：</strong></p>
+<p>主线是先识别用户需求中的场景、问题、目标和约束，形成检索条件；然后定位相关方案或参数，利用已有关系读取关联参数及描述，形成可以传给现有流程的参数候选。库中存在平台或版本信息时，可以用实际已知条件进行过滤。</p>
+<p>定位节点可以使用精确匹配、关键词或向量检索，是否组合取决于实现。图扩展也不需要每次遍历很多跳，目标是拿到当前决策必需的关系。</p>
+<div class="mermaid-wrap"><pre class="mermaid-src" data-config="{}" hidden>
+    flowchart LR
+    A[用户需求场景] --&gt; B[模型识别意图和已知条件]
+    B --&gt; C[定位相关方案或参数]
+    C --&gt; D[受约束的关系查询]
+    D --&gt; E[去重与筛选]
+    E --&gt; F[带来源的证据包]
+    F --&gt; G[适配现有流程的参数输入]
+    G --&gt; H[调用现有流程]
+  </pre></div>
+
+<p>**常见追问：**图检索结果如何放进 prompt？</p>
+<p>**回答重点：**整理为参数标识、描述、关联方案及来源；若存在适用条件等信息一并保留。是否还由模型做候选筛选，应按实现回答。参数召回是检索系统执行的，模型负责识别意图、发起或辅助查询，不能把模型记忆中的字段当作召回结果。</p>
+<p><span id="q21"></span></p>
+<h3 id="Q21：LLM-直接生成-Cypher-等图查询语句吗？"><a href="#Q21：LLM-直接生成-Cypher-等图查询语句吗？" class="headerlink" title="Q21：LLM 直接生成 Cypher 等图查询语句吗？"></a>Q21：LLM 直接生成 Cypher 等图查询语句吗？</h3><p><strong>备考定位：C · 按岗扩展｜进阶。</strong> 答题抓手：查询模板、只读约束与自由生成语句的边界。</p>
+<p><strong>参考答案：</strong></p>
+<p>对查询类型相对固定的场景，我倾向于封装预定义的只读查询工具，让模型提供实体标识、查询条件和检索意图，应用生成参数化查询，容易控制行为和成本。</p>
+<p>如果确实需要自然语言转图查询，要提供 schema，并在执行前检查允许的语法与操作、设置只读账户、查询超时和结果上限。仅在提示词中要求“只读”不足以形成执行权限边界。</p>
+<p>**常见追问：**参数化查询能防止所有风险吗？</p>
+<p>**回答重点：**不能。它主要处理参数传递，仍要限制查询结构、权限、复杂度及资源消耗。</p>
+<p><span id="q22"></span></p>
+<h3 id="Q22：怎么避免图检索内容太多或不相关？"><a href="#Q22：怎么避免图检索内容太多或不相关？" class="headerlink" title="Q22：怎么避免图检索内容太多或不相关？"></a>Q22：怎么避免图检索内容太多或不相关？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：图扩展范围、关系类型与上下文预算。</p>
+<p><strong>参考答案：</strong></p>
+<p>对入口节点数、关系类型、扩展深度、返回数量和上下文长度设置边界。先做版本等适用性过滤，再按问题相关性和证据质量筛选；需要时可以增加 rerank，但要验证它的收益。</p>
+<p>像参数定义这样的关键事实尽量保留原文或结构化值，长方案说明可以摘要。若不同来源互相冲突，要保留冲突及来源，让应用依据版本和可信度规则处理，不能在摘要时直接消除差异。</p>
+<p>**常见追问：**固定查询两跳是否合理？</p>
+<p>**回答重点：**跳数是成本边界，不是检索质量保证；关系语义和问题类型更重要。</p>
+<p><span id="q23"></span></p>
+<h3 id="Q23：没召回到参数，或召回了不相关参数，怎么办？"><a href="#Q23：没召回到参数，或召回了不相关参数，怎么办？" class="headerlink" title="Q23：没召回到参数，或召回了不相关参数，怎么办？"></a>Q23：没召回到参数，或召回了不相关参数，怎么办？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：无答案、低相关结果与拒绝进入执行的条件。</p>
+<p><strong>参考答案：</strong></p>
+<p>先定位原因：用户需求是否模糊、意图是否遗漏目标或约束、知识库是否缺少相应知识、查询是否只命中了相近词、适用条件是否错误排除了结果。无召回与低相关召回需要作为明确状态返回，不能用模型自行编造的参数填空。</p>
+<p>可以采用有限次查询改写、补充必要信息、组合不同检索方式或转人工处理，但不能为提高命中率而取消必要的平台约束。召回阈值和筛选方法应在标注样本上验证；向量相似度不是参数正确的概率。</p>
+<p>**常见追问：**模型建议的新参数能不能写回知识库，供下次召回？</p>
+<p>**回答重点：**当前没有确认回写机制。若扩展，需要来源核验、候选与已验证状态区分及适用范围管理，避免一次错误输出变成后续检索的“事实”。</p>
+<p><span id="q24"></span></p>
+<h3 id="Q24：你用的是-Microsoft-GraphRAG-吗？有没有社区摘要？"><a href="#Q24：你用的是-Microsoft-GraphRAG-吗？有没有社区摘要？" class="headerlink" title="Q24：你用的是 Microsoft GraphRAG 吗？有没有社区摘要？"></a>Q24：你用的是 Microsoft GraphRAG 吗？有没有社区摘要？</h3><p><strong>备考定位：C · 按岗扩展｜基础。</strong> 答题抓手：通用图增强检索与 Microsoft GraphRAG 的区别。</p>
+<p><strong>参考答案：</strong></p>
+<p>GraphRAG 可以泛指利用图结构增强检索与生成的方法，不一定是某一个具体框架。要准确说明项目使用的库、图存储和查询链路。</p>
+<p>如果项目围绕方案与参数的局部关系查询，就应这样描述。社区检测、分层社区摘要和全局汇总检索适合某些跨文档综合问题，不是所有 GraphRAG 系统的必选组件。</p>
+<p>**常见追问：**你做了实体关系抽取，就一定做了社区摘要吗？</p>
+<p>**回答重点：**两者是不同步骤，不把没有实现的能力补进回答。</p>
+<p><span id="q34"></span></p>
+<h3 id="Q34：参数名是英文缩写，用户需求是中文，怎么检索？"><a href="#Q34：参数名是英文缩写，用户需求是中文，怎么检索？" class="headerlink" title="Q34：参数名是英文缩写，用户需求是中文，怎么检索？"></a>Q34：参数名是英文缩写，用户需求是中文，怎么检索？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：英文参数标识、中文需求和可追溯别名。</p>
+<p><strong>参考答案：</strong></p>
+<p>我会同时保留参数原始标识和用于检索的语义描述。原始标识用于精确定位，描述中包含参数作用、所属模块、适用场景，以及经过核实的别名。用户说“暗处颗粒明显”时，语义检索帮助连接到相关描述；用户输入完整参数路径时，优先走精确或关键词匹配。</p>
+<p>模型可以将口语需求转换成检索表达，但要保留原始目标与约束，不能把“保留细节”改写丢失，也不能自动断定问题根因。中英文缩写是否能召回正确参数，要用领域样本验证，不能假设 embedding 天然理解内部字段。</p>
+<p>**常见追问：**需要把全部参数名翻译成中文吗？</p>
+<p>**回答：**不替换原始标识，而是增加可追溯的解释和别名。映射必须来自文档或人工核验，避免机器翻译把不同参数合并。</p>
+<p><span id="q35"></span></p>
+<h3 id="Q35：文档怎么切分？参数描述被切断怎么办？"><a href="#Q35：文档怎么切分？参数描述被切断怎么办？" class="headerlink" title="Q35：文档怎么切分？参数描述被切断怎么办？"></a>Q35：文档怎么切分？参数描述被切断怎么办？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：按知识对象切分，保持字段与描述完整。</p>
+<p><strong>参考答案：</strong></p>
+<p>优先按文档结构和知识对象切分。例如一个参数的名称、作用、类型、单位与适用条件尽量组成一个语义单元；一个较长方案分成多个子块，但保留方案 ID、标题路径和原文位置。表格需要保留列名与每一行的对应关系，不能只抽出一串数字。</p>
+<p>chunk size 以 token 计，并结合 embedding 输入限制、实际语义长度和召回效果选择。较小块便于精确命中但容易丢上下文，较大块信息完整但会引入无关内容。可以小块检索、按需补回父级方案或关联参数，控制最终上下文预算。</p>
+<p>**常见追问：**为什么设置 overlap？越大越好吗？</p>
+<p>**回答：**重叠用于减少边界信息丢失，过大会增加重复索引和重复候选。比较不同切分策略时固定模型与测试集，测参数覆盖率、无关内容比例和检索成本。</p>
+<p><span id="q36"></span></p>
+<h3 id="Q36：embedding-模型和向量索引怎么选？换模型如何迁移？"><a href="#Q36：embedding-模型和向量索引怎么选？换模型如何迁移？" class="headerlink" title="Q36：embedding 模型和向量索引怎么选？换模型如何迁移？"></a>Q36：embedding 模型和向量索引怎么选？换模型如何迁移？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：embedding 选型、索引质量与迁移一致性。</p>
+<p><strong>参考答案：</strong></p>
+<p>用真实“需求—相关参数”样本比较中英文表达、缩写和长描述下的 Recall@k、排序质量、延迟、维度与存储成本。效果差时先检查知识质量和切分，再判断是否需要换模型或领域训练。</p>
+<p>向量搜索可以使用余弦相似度、内积等度量，是否需要归一化取决于模型及索引配置。小数据集可以精确搜索；数据量增大后使用近似最近邻索引，例如 HNSW，以内存、构建成本和搜索召回率换取速度。近似索引的召回误差与“内容语义不相关”要分别排查。</p>
+<p>换 embedding 模型后，即使维度相同也不代表处于同一个语义空间。应对文档重建索引，确保查询与文档使用同版本模型，在新索引验证后切换，并保留旧版本用于回滚。不要把新旧向量混在一个查询空间里。</p>
+<p>**常见追问：**HNSW 搜索参数调大有什么效果？</p>
+<p>**回答：**通常探索更多候选可提高近似搜索召回，但延迟也会增加；具体取值通过数据规模与质量&#x2F;延迟曲线选择，不能照搬一个固定数字。</p>
+<p><span id="q37"></span></p>
+<h3 id="Q37：为什么混合检索？多路结果如何融合？"><a href="#Q37：为什么混合检索？多路结果如何融合？" class="headerlink" title="Q37：为什么混合检索？多路结果如何融合？"></a>Q37：为什么混合检索？多路结果如何融合？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：精确和语义召回融合、去重与排名依据。</p>
+<p><strong>参考答案：</strong></p>
+<p>关键词检索擅长字段名、缩写和明确术语，向量检索处理同义表达，图查询补充明确关联关系。可以多路取候选，按稳定参数 ID 去重，同时保留各路来源；平台或权限等硬约束仍要满足。</p>
+<p>不同检索器的原始分数通常不在同一尺度，直接相加容易失真。可以使用 RRF 等基于排名的融合，再按需重排。RRF 的一个形式是对各路的 <code>1 / (c + rank)</code> 求和；常数和各路权重影响融合结果，要验证而不是当成万能公式。</p>
+<p>图扩展产生的邻居不一定具有可比较的语义排名，可以先作为补充候选，再用相关性规则或统一重排筛选，不必强行当作同尺度的第三路分数。</p>
+<p>**常见追问：**多路都命中同一段文本，要给模型看三次吗？</p>
+<p>**回答：**不需要。合并实体或片段、保留多来源证据，并在上下文组装时去重，避免重复内容挤占预算。</p>
+<p><span id="q38"></span></p>
+<h3 id="Q38：召回与-rerank-有什么区别？为什么不让大模型看全部参数？"><a href="#Q38：召回与-rerank-有什么区别？为什么不让大模型看全部参数？" class="headerlink" title="Q38：召回与 rerank 有什么区别？为什么不让大模型看全部参数？"></a>Q38：召回与 rerank 有什么区别？为什么不让大模型看全部参数？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：候选召回与精排分工，以及上下文成本。</p>
+<p><strong>参考答案：</strong></p>
+<p>召回用于从大规模知识中快速选出候选，通常先计算文档向量并建立索引。重排对较少候选进一步比较与查询的相关性，例如 cross-encoder 联合读取查询和文档，获得更精细的排序，但每对输入都要计算，成本更高。</p>
+<p>让大模型阅读全部参数会增加 token、延迟和干扰。更合理的做法是先保证召回覆盖，再重排和组织有依据的参数信息。重排只能处理已有候选，前面漏掉的参数通常补不回来。</p>
+<p>**常见追问：**使用 LLM rerank 可以吗？</p>
+<p>**回答：**可以比较，但要控制候选数量、输出合法性、位置偏差、稳定性和成本。与专用重排模型比较后再选择，不因为用了大模型就认为排序更准。</p>
+<p><span id="q39"></span></p>
+<h3 id="Q39：图里与相关方案相连的参数，就一定适合当前需求吗？"><a href="#Q39：图里与相关方案相连的参数，就一定适合当前需求吗？" class="headerlink" title="Q39：图里与相关方案相连的参数，就一定适合当前需求吗？"></a>Q39：图里与相关方案相连的参数，就一定适合当前需求吗？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：图中有关联不等于当前场景适用。</p>
+<p><strong>参考答案：</strong></p>
+<p>不一定。一个方案可能同时解决多个问题，关联只能证明“该方案包含这个参数”，不能自动证明它适合当前目标。图关系用于扩展候选，最终还要结合需求、参数描述和适用条件筛选。</p>
+<p>还要区分“与目标直接相关”和“为了配置完整性必须带上的依赖参数”。后者可能不需要参与搜索，但需要随方案一起传递。检索结果可以记录选入理由、关系路径和是否可调整，让下游知道每个参数的角色。</p>
+<p>**常见追问：**图扩展提高 Recall 却降低 Precision，怎么取舍？</p>
+<p>**回答：**比较漏掉关键参数的代价与多测无关参数的成本，设置关系类型和候选上限，测最终目标达成率与实验次数。不能只优化召回率一个指标。</p>
+<p><span id="q42"></span></p>
+<h3 id="Q42：为什么用-RAG-而不是微调？什么时候考虑微调？"><a href="#Q42：为什么用-RAG-而不是微调？什么时候考虑微调？" class="headerlink" title="Q42：为什么用 RAG 而不是微调？什么时候考虑微调？"></a>Q42：为什么用 RAG 而不是微调？什么时候考虑微调？</h3><p><strong>备考定位：B · 重点追问｜基础。</strong> 答题抓手：知识更新问题与模型行为训练问题的区别。</p>
+<p><strong>参考答案：</strong></p>
+<p>参数定义和方案会更新，而且需要引用来源，适合通过检索提供事实。微调更适合学习稳定的意图标签、输出结构、术语表达或工具选择习惯，不能替代最新参数事实和执行校验。两者可以结合：微调改善理解行为，RAG 提供当前知识。</p>
+<p>如果意图类别固定且样本足够，可以先比较规则、小模型分类器和通用 LLM，不一定需要训练大模型。若考虑 LoRA 等参数高效微调，需要准备高质量样本、合理划分数据，并验证泛化、格式正确率与维护成本；“参数高效”也不意味着没有训练和推理资源成本。</p>
+<p>**常见追问：**向量模型效果不好，应该微调生成模型吗？</p>
+<p>**回答：**先定位瓶颈。检索表示问题应考虑改善描述、检索策略或训练 embedding&#x2F;reranker；生成模型微调不能自动修复召回缺失。</p>
+<p><span id="q43"></span></p>
+<h3 id="Q43：如何证明某个参数影响结果，而不是模型把相关性当成因果？"><a href="#Q43：如何证明某个参数影响结果，而不是模型把相关性当成因果？" class="headerlink" title="Q43：如何证明某个参数影响结果，而不是模型把相关性当成因果？"></a>Q43：如何证明某个参数影响结果，而不是模型把相关性当成因果？</h3><p><strong>备考定位：C · 按岗扩展｜难点。</strong> 答题抓手：控制变量、重复实验和因果结论边界。</p>
+<p><strong>参考答案：</strong></p>
+<p>RAG 提供候选依据，模型提出调整假设，真正的效果需要实验验证。比较时固定其他条件、记录参数变化与评测结果，并通过重复测试确认差异不是采集波动。</p>
+<p>逐参数粗扫有助于观察局部响应，但参数之间可能有交互，单独有效不保证组合有效；后续还要评估组合与未参与选择的场景。模型生成的解释也需要与实验记录一致，不能因为解释合理就宣称已找到因果关系。</p>
+<p>**常见追问：**为什么这题会出现在 AI 应用面试？</p>
+<p>**回答：**它检验应用是否区分检索证据、模型建议和外部验证，避免把大模型叙述当成业务结论。</p>
+<p><span id="q44"></span></p>
+<h3 id="Q44：换平台或换参数库，哪些能力可以复用？"><a href="#Q44：换平台或换参数库，哪些能力可以复用？" class="headerlink" title="Q44：换平台或换参数库，哪些能力可以复用？"></a>Q44：换平台或换参数库，哪些能力可以复用？</h3><p><strong>备考定位：C · 按岗扩展｜进阶。</strong> 答题抓手：公共工作流与平台适配器契约。</p>
+<p><strong>参考答案：</strong></p>
+<p>需求结构、检索接口、工作流编排、任务状态和观测机制可以设计成相对通用的部分。平台相关内容包括参数知识、字段映射、适用条件、业务校验和设备执行适配器。</p>
+<p>通过有版本的数据契约连接两层，避免把每个平台的例外都堆进系统提示词。新平台接入要验证知识质量、参数覆盖、映射正确性和完整执行效果，不能仅切换数据库地址就认为完成迁移。</p>
+<p>**常见追问：**适配器怎么定义？</p>
+<p>**回答：**明确输入的参数身份与配置版本，以及输出的可执行请求或错误；各平台实现具体映射，公共工作流依赖接口契约而非文件路径和设备细节。</p>
+<p><span id="q45"></span></p>
+<h3 id="Q45：如果重新做一次，你会简化哪个组件？"><a href="#Q45：如果重新做一次，你会简化哪个组件？" class="headerlink" title="Q45：如果重新做一次，你会简化哪个组件？"></a>Q45：如果重新做一次，你会简化哪个组件？</h3><p><strong>备考定位：C · 按岗扩展｜进阶。</strong> 答题抓手：根据实际复杂度简化组件和解释取舍。</p>
+<p><strong>参考答案：</strong></p>
+<p>我会先测量复杂度是否带来收益。若参数与方案关系简单且查询固定，可以先用关系库加检索；如果只是一次识别、一次检索和一次提交，可以采用明确工作流；只有反馈确实需要动态选择下一步时，再引入更复杂的 Agent 循环。</p>
+<p>是否保留查询改写、重排、图扩展或多 Agent，都应该结合质量、延迟、费用与维护成本做消融。可以讲一次真实的简化经历；没有做过的优化应作为设计判断，而不是编造个人成果。</p>
+<p>**常见追问：**这样是不是否定自己使用 LangGraph 和 GraphRAG？</p>
+<p>**回答：**不是。选型服务于当前需求；能够说清适用边界和替代方案，说明理解了工具的价值与成本。</p>
+<p><span id="tools"></span></p>
+<h2 id="三、模型接入、计划交接与工具执行"><a href="#三、模型接入、计划交接与工具执行" class="headerlink" title="三、模型接入、计划交接与工具执行"></a>三、模型接入、计划交接与工具执行</h2><p>沿一次真实调用讲：模型接口 → 工具契约 → 参数交接 → 长任务等待 → 超时重试 → 结果反馈；再展开模型网关和提示词管理。</p>
+<p><strong>本章题目：</strong><a href="#q08">Q08</a>、<a href="#q09">Q09</a>、<a href="#q10">Q10</a>、<a href="#q11">Q11</a>、<a href="#q12">Q12</a>、<a href="#q13">Q13</a>、<a href="#q14">Q14</a>、<a href="#q52">Q52</a>、<a href="#q53">Q53</a>、<a href="#q54">Q54</a>。</p>
+<p><span id="q08"></span></p>
+<h3 id="Q08：QGenie-如何接入？如何选择模型？"><a href="#Q08：QGenie-如何接入？如何选择模型？" class="headerlink" title="Q08：QGenie 如何接入？如何选择模型？"></a>Q08：QGenie 如何接入？如何选择模型？</h3><p><strong>备考定位：B · 重点追问｜基础。</strong> 答题抓手：实际模型身份、接口能力与选型评测。</p>
+<p><strong>参考答案：</strong></p>
+<p>我会把模型访问封装成适配层，统一请求消息、模型配置、超时、错误处理和返回结构。是否原生支持 tool calling、结构化输出、流式响应，要以实际使用的接口和模型版本为准。</p>
+<p>模型选型会用需求样本比较意图识别准确性、目标与约束提取完整性、结构化输出合法率，以及检索查询对最终参数召回的贡献，同时记录延迟和费用。是否使用模型对召回候选做筛选，也应按真实链路单独评测。</p>
+<p>**常见追问：**QGenie 是模型本身，还是调用平台&#x2F;接口？</p>
+<p>**准备要求：**准确说明项目中 QGenie 的角色、实际模型标识和调用方式，不凭名称推断接口能力。</p>
+<p><span id="q09"></span></p>
+<h3 id="Q09：Function-Calling-的完整过程是什么？"><a href="#Q09：Function-Calling-的完整过程是什么？" class="headerlink" title="Q09：Function Calling 的完整过程是什么？"></a>Q09：Function Calling 的完整过程是什么？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：模型提出调用、程序校验执行、工具结果回传。</p>
+<p><strong>参考答案：</strong></p>
+<p>如果模型通过工具触发检索，应用向它提供参数检索工具的名称、用途和 schema。模型返回调用请求，应用检查查询条件并执行 RAG，再把召回结果与调用 ID 关联后回传。调用现有流程也可以封装成工具，但不代表必须由模型决定何时调用；固定节点同样可以完成交接。</p>
+<p>模型输出了工具调用，并不表示工具已经执行。执行权在应用侧；工具返回结果后，模型可能继续调用其他工具，也可能生成最终答复。</p>
+<p>如果当前接口不支持原生工具调用，可以采用受约束的结构化动作输出，但仍需要明确解析、校验和错误修正机制，不能执行模型任意生成的代码。</p>
+<p>**常见追问：**模型一次请求多个工具，是不是可以全部并行？</p>
+<p>**回答重点：**只有无依赖、无资源冲突的调用才能并行。配置设备和采集图像通常有顺序依赖。</p>
+<p><span id="q10"></span></p>
+<h3 id="Q10：工具接口怎么设计？粒度多大合适？"><a href="#Q10：工具接口怎么设计？粒度多大合适？" class="headerlink" title="Q10：工具接口怎么设计？粒度多大合适？"></a>Q10：工具接口怎么设计？粒度多大合适？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：工具契约、业务粒度、错误类型与副作用。</p>
+<p><strong>参考答案：</strong></p>
+<p>工具应该表达稳定的业务动作，并有明确输入、输出和前置条件。过细的接口会让模型承担大量控制步骤，过粗的接口又会隐藏失败位置。</p>
+<p>对当前主线，重点是参数检索接口和现有流程入口。检索接口接收意图及条件，返回参数标识、描述和来源；现有流程入口接收符合其契约的请求，复用已有设备控制与评测逻辑。无需让前端模型重新编排每一条硬件命令。</p>
+<p>返回值要区分任务已受理、正在执行、成功和失败，包含任务 ID、错误类型及产物引用，而不是只返回一句“调用成功”。</p>
+<p>**常见追问：**机械臂和手机都要控制，如何避免操作冲突？</p>
+<p>**回答重点：**使用设备资源占用机制和执行前检查；生产环境可能需要租约及防止失效执行者继续操作的机制，不仅是进程内布尔变量。</p>
+<p><span id="q11"></span></p>
+<h3 id="Q11：RAG-召回参数以后，怎样接上现有流程？"><a href="#Q11：RAG-召回参数以后，怎样接上现有流程？" class="headerlink" title="Q11：RAG 召回参数以后，怎样接上现有流程？"></a>Q11：RAG 召回参数以后，怎样接上现有流程？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：参数身份如何映射到配置实例及可执行请求。</p>
+<p><strong>参考答案：</strong></p>
+<p>关键是定义交接的数据契约：召回结果是知识条目，现有流程需要的是它能识别的参数输入。应保留稳定参数标识、描述、来源和适用条件，并按下游实际要求映射字段。平台、模块和版本等条件是否存在于当前库中，需要如实说明。</p>
+<p>交接前可以检查参数确实来自本次召回或受控知识源、下游是否支持、是否重复或存在冲突。若下游还要求起始值或搜索范围，需要明确它们来自现有配置、知识库还是既有策略；召回了参数名和描述不代表已经具备一套可执行数值配置。</p>
+<p>结构化输出校验解决格式问题，业务映射解决接口兼容问题。不能让模型把知识库中的参数名随意改写成另一个下游字段，也不能静默丢弃无法映射的必要参数。</p>
+<p>**常见追问：**召回参数和生成参数值有什么区别？旧流程必须改造吗？</p>
+<p>**回答重点：**前者回答“有哪些相关参数”，后者回答“具体设置为多少”。通常可以通过适配层接入原入口；是否需要改造取决于原接口，不能直接假设接受任意参数列表。</p>
+<p><span id="q12"></span></p>
+<h3 id="Q12：硬件实验耗时较长，Agent-怎么等待？"><a href="#Q12：硬件实验耗时较长，Agent-怎么等待？" class="headerlink" title="Q12：硬件实验耗时较长，Agent 怎么等待？"></a>Q12：硬件实验耗时较长，Agent 怎么等待？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：长任务提交、持久化状态与等待资源释放。</p>
+<p><strong>参考答案：</strong></p>
+<p>适合把提交任务和获取结果分开。执行服务接收配置后返回任务 ID，工作流通过轮询或事件获取状态，完成后再进入评估节点。等待期间通常不需要反复调用模型。</p>
+<p>任务与配置版本、设备、采集产物和评测结果绑定，避免把上一轮结果当成本轮结果。还要分别定义模型请求超时、工具请求超时和实验总超时。</p>
+<p>取消工作流不一定能取消外部任务。需要记录取消状态、调用外部取消接口或在任务结束后丢弃不再适用的结果，并释放资源。</p>
+<p>**常见追问：**现在是不是已经用了消息队列？</p>
+<p>**准备要求：**按实际实现回答。同步执行是有效的初始方案，但不能声称具备尚未实现的异步调度能力。</p>
+<p><span id="q13"></span></p>
+<h3 id="Q13：超时后重试，如何避免重复执行？"><a href="#Q13：超时后重试，如何避免重复执行？" class="headerlink" title="Q13：超时后重试，如何避免重复执行？"></a>Q13：超时后重试，如何避免重复执行？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：提交结果未知时的幂等、查询和对账。</p>
+<p><strong>参考答案：</strong></p>
+<p>先区分网络瞬时错误、输入错误和不可重试的业务失败。网络超时只表示没有及时收到响应，不能证明操作没有执行。</p>
+<p>提交实验时使用稳定的幂等键，重试同一个请求时复用该键；执行服务持久化请求和任务的对应关系，重复提交返回已有任务。超时后优先查询状态，再决定是否重新提交。</p>
+<p>幂等键不能仅等于参数哈希，因为同一组参数可能需要多次独立采样。应区分“同一次实验的重试”和“新建一次重复实验”。</p>
+<p>**常见追问：**能否保证 exactly-once？</p>
+<p>**回答重点：**跨进程和外部设备很难笼统保证严格恰好一次；说明具体采用的去重、状态查询、对账与补偿机制及其边界。</p>
+<p><span id="q14"></span></p>
+<h3 id="Q14：现有流程的评测结果如何返回？会再次进入-RAG-吗？"><a href="#Q14：现有流程的评测结果如何返回？会再次进入-RAG-吗？" class="headerlink" title="Q14：现有流程的评测结果如何返回？会再次进入 RAG 吗？"></a>Q14：现有流程的评测结果如何返回？会再次进入 RAG 吗？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：评测产物关联，以及后端反馈与前端检索的分工。</p>
+<p><strong>参考答案：</strong></p>
+<p>原有执行代码会通过实验室端返回的计划结果文件取得指标，记录粗扫结果和细扫历史，并交给后端模型推荐下一批组合。后端的目标判断与最佳候选比较读取实际评测数据。前端则负责把任务发起和最终结果衔接到用户需求。</p>
+<p>这证明原后端有基于实验历史的模型建议环节，但不等于每轮都会重新调用前端 RAG。代码会把参数知识及知识片段传给细扫调用；是否触发新的图检索要单独确认。任务 ID、结果版本核对等可靠性机制按真实接口实现说明。</p>
+<p>如果使用的模型不具备视觉输入能力，就不能说它直接看图诊断；它可能是在分析 QCATS 指标和文本反馈。是否传图以及图像如何预处理，要按实际链路说明。</p>
+<p>**常见追问：**整个系统有闭环，是否意味着模型本身也在闭环中反复决策？</p>
+<p>**回答重点：**需要区分前端识别与召回、后端模型推荐、工具执行和结果展示。当前可见后端细扫会调用模型，粗扫存在系统策略路径。</p>
+<p><span id="q52"></span></p>
+<h3 id="Q52：如何统一接入多个模型，处理限流与故障切换？"><a href="#Q52：如何统一接入多个模型，处理限流与故障切换？" class="headerlink" title="Q52：如何统一接入多个模型，处理限流与故障切换？"></a>Q52：如何统一接入多个模型，处理限流与故障切换？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：限流、超时、回退模型与输出契约兼容。</p>
+<p><strong>参考答案：</strong></p>
+<p>模型适配层统一应用需要的输入输出、超时、用量记录和错误类型，但也保留各模型能力差异，例如工具调用、结构化输出、上下文限制和图像输入。接口格式相近不代表语义完全兼容。</p>
+<p>限流按模型和租户控制，临时错误做有界指数退避与抖动，遵守服务端返回的等待信息。长期失败可以熔断或切换已通过评测的备用模型；认证失败、参数错误不能简单重试。</p>
+<p>故障切换后继续做 schema 和业务校验，并记录实际模型版本。备用模型可能改变召回查询或细扫建议，不能悄悄降低验收要求。一次模型重试与一次新设备实验也要区分，避免故障切换导致重复执行。</p>
+<p>**常见追问：**模型请求超时是否意味着不计费？</p>
+<p>**回答：**不一定，服务端可能已处理。记录调用标识并尽可能核对实际用量；请求失败、重试次数和费用需要一起统计。</p>
+<p><span id="q53"></span></p>
+<h3 id="Q53：提示词如何设计、调试和版本管理？"><a href="#Q53：提示词如何设计、调试和版本管理？" class="headerlink" title="Q53：提示词如何设计、调试和版本管理？"></a>Q53：提示词如何设计、调试和版本管理？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：提示词职责、结构化输出和回归集。</p>
+<p><strong>参考答案：</strong></p>
+<p>围绕每个节点的任务设计提示词，明确输入含义、必须保留的约束、可用证据、允许的输出结构和缺信息时的行为。意图识别可以加入覆盖多目标、纠正和不支持请求的 few-shot 示例，但示例不能泄露测试集答案。</p>
+<p>先收集错误类型，再针对性修改。例如经常遗漏“保留细节”，就检查输出结构是否包含约束，并增加相关开发样例，而不是不断堆叠泛化指令。每次变更记录 prompt 版本、模型、检索配置和评测结果。</p>
+<p>约束输出格式可以用 schema 支持提高稳定性，但不保证事实正确。工具参数与执行权限仍由代码验证。温度降低可能减少波动，也不能保证不同模型版本或服务环境绝对可复现。</p>
+<p>**常见追问：**提示词改了以后，怎么确认没有修好一个问题又引入新问题？</p>
+<p>**回答：**在固定回归集上按错误类别和总体指标比较，关注约束遗漏、错误拒绝、参数有效性、token 和延迟，而不是只重测刚才失败的那一个样例。</p>
+<p><span id="q54"></span></p>
+<h3 id="Q54：Function-Calling-和-MCP-有什么区别？这里需要-MCP-吗？"><a href="#Q54：Function-Calling-和-MCP-有什么区别？这里需要-MCP-吗？" class="headerlink" title="Q54：Function Calling 和 MCP 有什么区别？这里需要 MCP 吗？"></a>Q54：Function Calling 和 MCP 有什么区别？这里需要 MCP 吗？</h3><p><strong>备考定位：C · 按岗扩展｜基础。</strong> 答题抓手：Function Calling 与 MCP 的层次及适用条件。</p>
+<p><strong>参考答案：</strong></p>
+<p>Function Calling 主要描述模型输出结构化工具调用请求的能力，实际执行仍由应用负责。MCP 是应用与外部工具或资源服务连接的一种协议方式，可以统一发现和调用能力；两者处在不同层次，可以配合使用。</p>
+<p>应用可以把 MCP 服务暴露的工具转换成模型可见的工具定义，执行请求后再把结果返回给模型。MCP 不会自动完成权限、业务校验、幂等和审核，也不会让模型突然具备工具选择能力。</p>
+<p>如果工具只由当前 Python 服务使用，直接函数或 HTTP 接口可能足够；多个应用需要复用工具时，才评估 MCP 封装的维护收益。当前项目是否使用 MCP，要按事实回答。</p>
+<p>**常见追问：**把设备控制封装成 MCP 工具就可以开放所有命令吗？</p>
+<p>**回答：**不可以。仍应提供受控业务操作、最小权限、参数校验和审计，工具返回的文本也不能自动作为高优先级指令。</p>
+<p><span id="reliability"></span></p>
+<h2 id="四、工作流可靠性与-HIL-人工介入"><a href="#四、工作流可靠性与-HIL-人工介入" class="headerlink" title="四、工作流可靠性与 HIL 人工介入"></a>四、工作流可靠性与 HIL 人工介入</h2><p>围绕“什么时候停、失败后怎么恢复、谁能批准执行”展开。Q13 的提交幂等是本章的前置知识；Q48 再深化消息一致性。</p>
+<p><strong>本章题目：</strong><a href="#q26">Q26</a>、<a href="#q27">Q27</a>、<a href="#q28">Q28</a>、<a href="#q33">Q33</a>。</p>
+<p><span id="q26"></span></p>
+<h3 id="Q26：Agent-无限循环、没有进展时怎么办？"><a href="#Q26：Agent-无限循环、没有进展时怎么办？" class="headerlink" title="Q26：Agent 无限循环、没有进展时怎么办？"></a>Q26：Agent 无限循环、没有进展时怎么办？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：停止原因、无进展判定与预算约束。</p>
+<p><strong>参考答案：</strong></p>
+<p>前端识别与召回链路需要限制信息补充、查询改写和校验修正次数，并设置时间与费用预算。如果就是一次识别加一次召回，应如实说明没有模型自主循环。下游现有流程的实验预算和停止条件仍由该流程控制。</p>
+<p>结束原因要区分达成目标、预算用尽、没有有效候选、外部工具失败和需要人工处理。不能只用一个 success 字段表示全部情况。</p>
+<p><strong>常见追问：</strong>“无进展”怎么定义？</p>
+<p>**回答重点：**按业务目标定义有效改善和容差，并考虑评测噪声；不能仅依据模型说“没有提升”。</p>
+<p><span id="q27"></span></p>
+<h3 id="Q27：工作流中途重启，怎么恢复？"><a href="#Q27：工作流中途重启，怎么恢复？" class="headerlink" title="Q27：工作流中途重启，怎么恢复？"></a>Q27：工作流中途重启，怎么恢复？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：checkpoint 恢复与外部任务事实核对。</p>
+<p><strong>参考答案：</strong></p>
+<p>可以使用持久化 checkpoint 保存图状态，并用稳定任务或线程标识关联恢复请求。但恢复节点不意味着外部任务可以安全重复执行。</p>
+<p>恢复后先核对外部任务状态：未提交则提交，正在运行则等待，已完成则读取结果，状态冲突则进入对账处理。提交侧的幂等键和执行侧的持久化记录共同避免重复操作。</p>
+<p>**常见追问：**外部任务完成了，但 checkpoint 没保存怎么办？</p>
+<p>**回答重点：**通过原任务标识查询外部事实，再更新工作流；不能只凭 checkpoint 中“未完成”就再次执行。</p>
+<p><span id="q28"></span></p>
+<h3 id="Q28：怎么防止提示词注入和越权工具调用？"><a href="#Q28：怎么防止提示词注入和越权工具调用？" class="headerlink" title="Q28：怎么防止提示词注入和越权工具调用？"></a>Q28：怎么防止提示词注入和越权工具调用？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：非可信内容、程序授权与受控工具接口。</p>
+<p><strong>参考答案：</strong></p>
+<p>检索文档、工具日志和用户上传内容都可能包含不可信指令，需要作为数据传入，避免混入高优先级指令。但仅靠文字分隔不能保证安全。</p>
+<p>应用侧采用工具白名单、身份权限检查、参数约束和受控设备接口。敏感配置与凭据由服务端管理，不需要放进模型上下文；日志和观测平台也要做脱敏。</p>
+<p>**常见追问：**把注入检测再交给一个模型就够了吗？</p>
+<p>**回答重点：**模型检测只能作为辅助，真正的执行权限由程序和基础设施控制。</p>
+<p><span id="q33"></span></p>
+<h3 id="Q33：HIL-应该接在哪里？如何用-LangGraph-实现人工介入？"><a href="#Q33：HIL-应该接在哪里？如何用-LangGraph-实现人工介入？" class="headerlink" title="Q33：HIL 应该接在哪里？如何用 LangGraph 实现人工介入？"></a>Q33：HIL 应该接在哪里？如何用 LangGraph 实现人工介入？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：审核位置、版本绑定、interrupt 恢复与副作用。</p>
+<p><strong>参考答案（可直接口述）：</strong></p>
+<p>这里我先按 Human-in-the-loop，也就是人工介入来理解。我会把人工介入放在参数召回后的方案确认、首次执行前的审核，以及迭代异常时的接管三个位置。</p>
+<p>第一个位置在意图识别和 RAG 召回之后。当需求有歧义、关键条件不完整或召回参数的适用性不确定时，展示识别出的目标、约束、参数列表、参数描述和知识来源，由工程师确认或修正，再进入现有流程。这个位置主要解决“是否理解了正确的问题、是否选对了参数”。</p>
+<p>第二个位置在可执行实验计划生成之后、提交设备执行之前。此时已经能展示具体配置差异、调整范围、候选数量、实验预算和预计设备占用，工程师可以批准一批边界明确的实验。这个位置解决“是否允许按这份计划实际执行”。如果生成配置或编译会修改共享工程，应在产生这些副作用之前完成相应审核；使用隔离工作副本时，可以先准备可审查的产物。</p>
+<p>第三个位置在粗扫或细扫过程中。当连续无改善、多个指标冲突、模型建议超出批准范围，或者设备异常无法自动恢复时，暂停并展示实验历史、当前最佳结果和异常原因，让工程师选择继续、修改范围、回退或终止。修改后的方案仍要通过程序校验，不能因为是人工输入就跳过检查。</p>
+<p>人工介入不意味着每轮都确认。我倾向于批准参数集合、允许范围和实验预算，在授权范围内自动执行；需要改变目标、扩大范围或处理异常时，再请求人工决策。</p>
+<p><strong>接入位置示意（设计方案，是否已实现按实际说明）：</strong></p>
+<div class="mermaid-wrap"><pre class="mermaid-src" data-config="{}" hidden>
+    flowchart TD
+    A[用户需求与意图识别] --&gt; B[RAG 召回参数]
+    B --&gt; C[人工确认目标与参数]
+    C --&gt; D[定位配置并生成实验计划]
+    D --&gt; E[人工批准执行范围与预算]
+    E --&gt; F[编译与设备执行]
+    F --&gt; G[采集与 QCATS 评测]
+    G --&gt; H{目标与执行状态检查}
+    H --&gt;|达标或正常停止| I[返回最佳结果与记录]
+    H --&gt;|未达标且可继续| J[模型辅助细扫]
+    J --&gt; K{建议是否在批准范围内}
+    K --&gt;|是| F
+    K --&gt;|否| L[人工修正或接管]
+    H --&gt;|异常或无进展| L
+    L --&gt;|修改方案| D
+    L --&gt;|终止或批准回退| M[执行受控结束或回退流程]
+  </pre></div>
+
+<p><strong>追问一：为什么不在用户刚提出需求时就审核全部内容？</strong></p>
+<p>用户提出目标时，尚未确定实际参数、配置差异和实验成本。先做必要的澄清，等召回结果与实验计划形成后，再审核具体内容，人工决策才有依据。低风险且规则明确的参数确认可以按策略自动通过，执行授权仍按实际业务要求设置。</p>
+<p><strong>追问二：在 LangGraph 中怎么暂停和恢复？</strong></p>
+<p>可以在审核节点调用 <code>interrupt()</code>，向上层返回可序列化的审核内容，并配置持久化 checkpointer。服务端保存任务与 <code>thread_id</code> 的对应关系，前端展示待审核项。审核人提交批准、修改或拒绝后，服务端先验证身份、权限和方案版本，再使用同一个 <code>thread_id</code>，通过 <code>Command(resume=...)</code> 恢复图执行。</p>
+<p>恢复内容可以包含审核动作和修改意见，图中的条件边再决定执行、重新校验、重新规划或终止。<code>thread_id</code> 用于定位工作流，不等于权限凭证；<code>interrupt()</code> 本身也不会自动提供审核页面、身份鉴权和审计记录。</p>
+<p><strong>追问三：恢复后会不会重复执行设备操作？</strong></p>
+<p>被中断节点在恢复时会从节点开头重新执行，<code>interrupt()</code> 之前的代码可能再次运行。因此，审核节点应主要读取和展示计划，设备提交放在批准后的独立执行节点，并使用幂等键和外部任务状态核对。仅仅分成两个节点还不能保证外部操作恰好一次。</p>
+<p><strong>追问四：如何保证批准的就是实际执行的版本？</strong></p>
+<p>审核记录应关联任务、计划版本或配置哈希、参数范围、预算、审核人和时间。执行前再次比对，如果配置在批准后改变，旧批准不应继续生效。人工修改会生成新版本，重新校验，必要时再次审批；过期或重复提交的审核回复要被识别和处理。</p>
+<p><strong>追问五：一直没人审核怎么办？HIL 会不会拖慢系统？</strong></p>
+<p>为待审核状态定义有效期、取消与提醒机制。到期后保持未授权状态并受控结束或继续等待，不能把“无人回复”当作批准。等待期间避免占用不必要的设备资源，恢复时重新检查外部条件。评测时分别统计人工等待时间和自动执行时间，同时报告干预率、人工活跃处理时长和全自动达成率，不能只展示扣除人工等待后的总耗时。</p>
+<p><strong>追问六：如果面试官说的是 Hardware-in-the-loop 呢？</strong></p>
+<p>需要先确认缩写含义。硬件在环接在候选配置生成与编译之后：真实设备加载配置、执行采集，QCATS 返回实际指标，后端再据此推荐下一轮调整。它强调用真实硬件反馈形成闭环，与人工审核的 Human-in-the-loop 是两个不同概念。</p>
+<p>**准备要求：**上述审核节点、持久化恢复和版本绑定目前未被确认已经落地；按实际情况使用“已经实现”或“我会这样设计”。准备一份真实审核样例或设计稿，说明审核输入、可选动作及恢复后的节点路径。</p>
+<p><span id="memory-management"></span></p>
+<h2 id="五、上下文、运行时内存与长期记忆"><a href="#五、上下文、运行时内存与长期记忆" class="headerlink" title="五、上下文、运行时内存与长期记忆"></a>五、上下文、运行时内存与长期记忆</h2><p>先分清五类存储，再讲上下文预算、恢复和记忆生命周期，最后讲 RAM&#x2F;显存定位。Q25 负责项目口述，Q72 负责预算细节。</p>
+<p>本节区分程序资源管理与 Agent 知识管理。下面的分层、记忆字段和验证方法是设计参考，未确认全部在当前项目或用户使用的 Hermes 版本中实现。</p>
+<p><strong>本章题目：</strong><a href="#q70">Q70</a>、<a href="#q25">Q25</a>、<a href="#q72">Q72</a>、<a href="#q76">Q76</a>、<a href="#q73">Q73</a>、<a href="#q74">Q74</a>、<a href="#q75">Q75</a>、<a href="#q77">Q77</a>、<a href="#q71">Q71</a>、<a href="#q78">Q78</a>、<a href="#q79">Q79</a>。</p>
+<p><span id="q70"></span></p>
+<h3 id="Q70：内存、上下文、State、长期记忆和-KV-cache-有什么区别？"><a href="#Q70：内存、上下文、State、长期记忆和-KV-cache-有什么区别？" class="headerlink" title="Q70：内存、上下文、State、长期记忆和 KV cache 有什么区别？"></a>Q70：内存、上下文、State、长期记忆和 KV cache 有什么区别？</h3><p><strong>备考定位：A · 核心必答｜基础。</strong> 答题抓手：RAM、上下文、State、长期记忆与 KV cache 分层。</p>
+<p><strong>参考答案（可直接口述）：</strong></p>
+<p>我先把运行资源和业务信息分开。程序内存是 Python 对象、图像数组、请求缓冲等占用的 RAM；模型上下文是本次调用实际接收到的消息、工具结果和检索内容；State 是工作流用来推进任务的结构化状态。State 可以持久化，但不必全部传给模型。</p>
+<p>长期记忆用于跨任务或跨会话复用信息，例如用户偏好、经过验证的经验。领域 RAG 则管理有来源的专业知识，二者可以共享存储技术，但权限、权威性和生命周期不同。KV cache 是推理过程中缓存注意力键值的计算优化，不等于用户记忆，也不自动成为长期知识。</p>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>内容与用途</th>
+<th>在 Camera 项目中的例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>运行时内存</td>
+<td>进程正在使用的对象和缓冲区</td>
+<td>RAW 图、解码图像、并发请求、检索结果对象</td>
+</tr>
+<tr>
+<td>模型上下文</td>
+<td>本次模型调用的可见输入</td>
+<td>当前需求、参数描述、必要的实验历史摘要</td>
+</tr>
+<tr>
+<td>工作流 State</td>
+<td>程序控制任务的结构化状态</td>
+<td>意图版本、参数 ID、当前阶段、外部任务 ID</td>
+</tr>
+<tr>
+<td>Checkpoint</td>
+<td>恢复流程需要的状态与执行元数据</td>
+<td>审核暂停点及恢复时的任务状态</td>
+</tr>
+<tr>
+<td>长期记忆</td>
+<td>跨会话可复用的信息</td>
+<td>稳定用户偏好、已验证的流程经验</td>
+</tr>
+<tr>
+<td>领域知识库</td>
+<td>有来源、版本和适用范围的专业知识</td>
+<td>参数定义、方案关系、版本说明</td>
+</tr>
+<tr>
+<td>KV cache</td>
+<td>推理后端复用的注意力计算状态</td>
+<td>受模型结构、上下文长度和服务配置影响</td>
+</tr>
+</tbody></table>
+<p>这些是逻辑职责，并非必须部署七套数据库。选择存储时看查询、更新、恢复与隔离要求，不能只因为都叫 memory 就混在一起。</p>
+<p>**常见追问：**把聊天历史存到数据库，模型就记住了吗？</p>
+<p>**回答：**没有。只有应用在后续调用中检索或组装相关信息，模型才有机会使用它。持久化解决保存问题，记忆系统还要解决该存什么、何时取用、如何更新和失效。</p>
+<p><span id="q25"></span></p>
+<h3 id="Q25：历史不断增加，如何控制上下文？"><a href="#Q25：历史不断增加，如何控制上下文？" class="headerlink" title="Q25：历史不断增加，如何控制上下文？"></a>Q25：历史不断增加，如何控制上下文？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：前端上下文保留什么，后端完整历史存哪里。</p>
+<p><strong>参考答案：</strong></p>
+<p>对当前主线，模型主要需要当前需求、有效的会话上下文和本次召回结果，不必读取现有流程全部实验记录。多轮用户修改需求时，要保留仍然有效的条件，并记录哪些新信息替换了旧条件。</p>
+<p>原始需求、结构化意图和参数标识应单独保存。长描述可以按检索预算裁剪，但关键约束不能只依赖自由文本摘要。现有流程内部的完整执行历史按其原有方式保存，通过任务 ID 关联即可。</p>
+<p>**常见追问：**怎么检测重复方案？</p>
+<p>**回答重点：**规范化完整参数配置后比较，考虑默认值、字段顺序和数值表示；同时区分误重复与有意重复采样。</p>
+<p><span id="q72"></span></p>
+<h3 id="Q72：对话和实验历史越来越长，怎么控制上下文窗口？"><a href="#Q72：对话和实验历史越来越长，怎么控制上下文窗口？" class="headerlink" title="Q72：对话和实验历史越来越长，怎么控制上下文窗口？"></a>Q72：对话和实验历史越来越长，怎么控制上下文窗口？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：token 预算、关键事实保留与可追溯摘要。</p>
+<p><strong>参考答案：</strong></p>
+<p>根据实际模型限制为输入和输出留预算。输入包括系统规则、工具定义、当前需求、必要消息、检索证据及工具结果，不能只数用户文本。先保留当前任务目标、硬约束和关键参数身份，再按需选择最近消息与相关历史。</p>
+<p>较早的解释可以摘要，原始日志外置；数值、配置版本、审核状态和已执行任务 ID 保存在结构化 State 中，不能只依赖摘要。细扫时可以提供最佳候选、代表性失败和相关趋势，并保留查询完整记录的入口。</p>
+<p>压缩要维护工具调用与结果的协议完整性，不能留下没有对应结果的调用或把过期失败解释当成当前状态。压缩后对照原始记录检查必要事实；反复摘要也会累积失真，因此保留来源并允许重新读取。</p>
+<p><strong>预算示例：</strong></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">输入预算 = 模型允许的上下文预算 - 预留输出 - 协议与安全余量</span><br><span class="line">实际输入 = 固定规则 + 工具定义 + 当前任务 + 选定历史 + 检索证据</span><br></pre></td></tr></table></figure>
+
+<p>不同模型对输出、推理 token 和上下文上限的计费或限制可能不同，应使用实际接口规则和 token 估算，不能假定所有 provider 一致。</p>
+<p>**常见追问：**直接保留最近十轮不就行了吗？</p>
+<p>**回答：**轮数不是 token 大小，也不保证关键约束仍在最近十轮。需要同时考虑长度、相关性和必须保留的任务事实。</p>
+<p><span id="q76"></span></p>
+<h3 id="Q76：LangGraph-State、checkpoint-和跨会话记忆怎么配合？"><a href="#Q76：LangGraph-State、checkpoint-和跨会话记忆怎么配合？" class="headerlink" title="Q76：LangGraph State、checkpoint 和跨会话记忆怎么配合？"></a>Q76：LangGraph State、checkpoint 和跨会话记忆怎么配合？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：当前状态、恢复快照与跨会话知识的边界。</p>
+<p><strong>参考答案：</strong></p>
+<p>State 服务于当前流程，checkpoint 用于保存可恢复的状态和执行信息，跨会话记忆用于未来任务复用。它们可以在基础设施上共用数据库，但键、作用域和读取规则应分别设计。</p>
+<p>恢复一个旧任务时，应该关联原有目标、配置和审核版本，并核对外部执行状态。长期记忆在此期间发生变化，不应无条件改写正在恢复的任务；需要显式判断是否仍适用，必要时重新规划或审核。</p>
+<p>跨会话记忆一般在明确边界读取，例如任务开始或需要查历史时，并在得到验证结论后写入。使用框架提供的持久化或 store 能力时，要确认实际版本和配置，不能认为配置了 checkpointer 就自动实现了长期记忆检索。</p>
+<p>**常见追问：**一个用户可以永远使用同一个 thread_id 吗？</p>
+<p>**回答：**要根据会话和任务边界设计。把所有任务混入一个线程会增加历史污染和恢复歧义；用户标识、项目标识与会话标识应各自有职责，也不能用 thread_id 代替授权校验。</p>
+<p><span id="q73"></span></p>
+<h3 id="Q73：长期记忆应该存什么？怎么决定写入和读取？"><a href="#Q73：长期记忆应该存什么？怎么决定写入和读取？" class="headerlink" title="Q73：长期记忆应该存什么？怎么决定写入和读取？"></a>Q73：长期记忆应该存什么？怎么决定写入和读取？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：记忆写入条件、结构化字段和按需读取。</p>
+<p><strong>参考答案：</strong></p>
+<p>我会把任务经历、稳定事实和流程经验分开管理。任务经历记录发生过什么；稳定事实记录有来源且适用范围明确的信息；流程经验记录如何完成某类任务。不是每句话都值得长期保存，临时猜测、失败中的未证实结论和短期设备状态通常不应自动升级为长期事实。</p>
+<p>写入可以经过候选提取、来源核验、去重和作用域确定，再保存为有版本的记录。适合保存的内容包括用户明确表达的稳定偏好、经过验证且可复用的流程，以及需要后续查询的实验结论。读取时先限制用户、项目、平台和有效版本，再按相关性选择，并保留来源供模型或程序检查。</p>
+<p><strong>建议字段示例：</strong></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>记忆 ID、类型、内容</td>
+<td>稳定定位与分类</td>
+</tr>
+<tr>
+<td>用户&#x2F;项目作用域、访问权限</td>
+<td>防止跨用户混用</td>
+</tr>
+<tr>
+<td>来源任务、证据引用、验证状态</td>
+<td>区分事实、建议与经验</td>
+</tr>
+<tr>
+<td>创建&#x2F;更新时间、适用版本、有效期</td>
+<td>支持更新和过期判断</td>
+</tr>
+<tr>
+<td>替代关系、当前状态</td>
+<td>标识被纠正、撤销或废弃的内容</td>
+</tr>
+</tbody></table>
+<p>**常见追问：**所有记忆都需要向量化吗？</p>
+<p>**回答：**不需要。明确偏好、参数 ID 或状态适合结构化查询；相似历史任务适合语义检索；方案依赖可以用图关系。存储方式应服务查询需求，而不是把一切都做成向量。</p>
+<p><span id="q74"></span></p>
+<h3 id="Q74：新旧记忆冲突怎么办？用户改口以后如何防止旧记忆继续影响？"><a href="#Q74：新旧记忆冲突怎么办？用户改口以后如何防止旧记忆继续影响？" class="headerlink" title="Q74：新旧记忆冲突怎么办？用户改口以后如何防止旧记忆继续影响？"></a>Q74：新旧记忆冲突怎么办？用户改口以后如何防止旧记忆继续影响？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：事实来源、作用域、版本冲突与旧信息失效。</p>
+<p><strong>参考答案：</strong></p>
+<p>先区分信息权威性和作用域：权限与执行规则不被普通记忆覆盖；领域参数事实由有效版本的权威知识源决定；当前用户明确的任务要求优先于旧偏好。时间新不一定更正确，需要结合来源、适用条件和验证状态。</p>
+<p>用户明确纠正某项信息后，创建新版本并把旧版本标为已替代，更新结构化存储和检索索引。读取时过滤失效记录；索引异步更新尚未完成时，也可以在最终读取阶段核查权威记录状态，避免旧向量命中重新污染上下文。</p>
+<p>对于无法自动判断的冲突，保留双方来源并请求澄清，而不是让模型任选其一。如果变化影响已经批准的实验计划，还要使旧批准失效，重新校验和审核。</p>
+<p>**常见追问：**能不能只在 prompt 中写“忽略旧记忆”？</p>
+<p>**回答：**不够。旧内容仍在上下文里可能持续干扰，应该在存储和检索层处理版本与状态，提示词只是补充说明。</p>
+<p><span id="q75"></span></p>
+<h3 id="Q75：长期记忆如何做隔离、过期和删除？"><a href="#Q75：长期记忆如何做隔离、过期和删除？" class="headerlink" title="Q75：长期记忆如何做隔离、过期和删除？"></a>Q75：长期记忆如何做隔离、过期和删除？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：权限、过期、索引与缓存中的删除传播。</p>
+<p><strong>参考答案：</strong></p>
+<p>按用户、项目或任务作用域保存和检索，不能通过相似度把其他用户的信息带进上下文。共享经验需要单独审核并明确共享范围；服务凭据由凭据系统管理，不作为可供模型检索的普通记忆。</p>
+<p>记忆根据用途设置有效期或失效条件。例如环境版本变化可能使某条经验失效，长期偏好可以由用户修改。用户请求删除时，要追踪权威记录、向量索引、缓存以及由它派生的摘要等副本，避免删掉原文后仍从其他路径召回。</p>
+<p>备份和审计保留需要明确生命周期，删除状态应对在线读取立即生效，物理清理按约定执行。已经在某个活跃会话中的副本也要处理，不能声称删除数据库一行就瞬间抹除了所有使用痕迹。</p>
+<p>**常见追问：**删除记忆是不是让模型权重忘记了它？</p>
+<p>**回答：**这里删除的是应用保存和提供的内容，不代表修改模型权重。除非另有训练机制，否则不能把应用记忆读写与模型训练混为一谈。</p>
+<p><span id="q77"></span></p>
+<h3 id="Q77：如何评价记忆系统有效，而不是“存得越多越好”？"><a href="#Q77：如何评价记忆系统有效，而不是“存得越多越好”？" class="headerlink" title="Q77：如何评价记忆系统有效，而不是“存得越多越好”？"></a>Q77：如何评价记忆系统有效，而不是“存得越多越好”？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：记忆命中、污染、冲突、删除和成本评测。</p>
+<p><strong>参考答案：</strong></p>
+<p>构建跨会话任务：前一会话提供事实或偏好，后一会话在相关问题中应正确使用；同时加入不相关任务，检查系统不会强行套用旧信息。还要测试用户纠正、事实过期、删除请求和跨用户隔离。</p>
+<p>在同样模型、任务预算和知识条件下比较无记忆、仅最近历史、带长期记忆等方案，关注最终任务效果及新增成本。评价时最好使用未参与经验沉淀的新任务，避免只记住测试答案。</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>相关记忆召回率</td>
+<td>需要的、仍有效的记忆是否进入候选</td>
+</tr>
+<tr>
+<td>正确使用率</td>
+<td>最终行为是否准确使用了适用记忆</td>
+</tr>
+<tr>
+<td>无关记忆干扰率</td>
+<td>无需记忆时是否被旧内容错误影响</td>
+</tr>
+<tr>
+<td>纠正生效率</td>
+<td>用户更正后是否使用新值并排除失效值</td>
+</tr>
+<tr>
+<td>过期&#x2F;删除后命中率</td>
+<td>不应继续使用的内容是否仍被取用</td>
+</tr>
+<tr>
+<td>跨作用域泄漏</td>
+<td>是否读取或输出了无权访问的信息</td>
+</tr>
+<tr>
+<td>任务效果与代价</td>
+<td>成功率、人工纠正、输入 token、检索延迟和存储增长</td>
+</tr>
+</tbody></table>
+<p>**常见追问：**用户偏好答对了，但用了错误来源，也算成功吗？</p>
+<p>**回答：**应分开记录答案正确与来源&#x2F;权限正确。碰巧答对不能掩盖错误取用，尤其是跨用户或已经失效的内容。</p>
+<p><span id="q71"></span></p>
+<h3 id="Q71：Agent-服务跑久了内存持续上涨，怎么定位和处理？"><a href="#Q71：Agent-服务跑久了内存持续上涨，怎么定位和处理？" class="headerlink" title="Q71：Agent 服务跑久了内存持续上涨，怎么定位和处理？"></a>Q71：Agent 服务跑久了内存持续上涨，怎么定位和处理？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：持有引用、无界集合、native 内存与负载剖析。</p>
+<p><strong>参考答案：</strong></p>
+<p>先判断增长来自什么：同时运行的任务更多、缓存正常填充、历史列表无界增长、未完成协程持有对象，还是 native 库分配没有释放。记录进程 RSS、容器用量、活动任务数、队列长度和缓存大小，在相同负载下做运行前后对比。</p>
+<p>Python 分配可以用 <code>tracemalloc</code> 快照比较；RSS 包含它未必覆盖的 native 分配，例如图像库和部分数组缓冲。对象已释放后，内存分配器也可能保留空间，因此 RSS 不马上下降不等于一定泄漏。要结合对象引用、负载停止后的状态和多轮趋势判断。</p>
+<p>控制措施包括限制并发与队列、使用有大小上限的缓存、分页读取历史、及时关闭文件和响应、清理完成任务的引用。大图像或原始日志放外部存储，State 只留引用，避免每个节点复制和序列化整份数据。对 RAW 解码、格式转换和 base64 编码都要注意额外副本。</p>
+<p>**常见追问：**调用 <code>gc.collect()</code> 能解决吗？</p>
+<p>**回答：**不能替代引用和生命周期管理。仍被引用的对象不会因此释放，native 缓冲和分配器也有自己的行为。先找到无界增长或持有链，再决定优化措施。</p>
+<p><span id="q78"></span></p>
+<h3 id="Q78：模型推理显存和应用内存如何控制？KV-cache-算长期记忆吗？"><a href="#Q78：模型推理显存和应用内存如何控制？KV-cache-算长期记忆吗？" class="headerlink" title="Q78：模型推理显存和应用内存如何控制？KV cache 算长期记忆吗？"></a>Q78：模型推理显存和应用内存如何控制？KV cache 算长期记忆吗？</h3><p><strong>备考定位：C · 按岗扩展｜难点。</strong> 答题抓手：推理显存组成、并发与 KV cache 生命周期。</p>
+<p><strong>参考答案：</strong></p>
+<p>应用 RAM 主要受进程、并发任务、图像和缓存影响；自建推理服务的 GPU 显存还包括模型权重、KV cache、计算工作区等。长上下文和更多并发序列通常会增加 KV cache 压力，具体规模还取决于模型层数、KV 头数、数据类型和服务实现。</p>
+<p>控制方式包括限制单请求上下文与输出、设置合理并发和排队、减少不必要图像副本，并根据任务评测选择批处理、缓存或量化策略。要一起看峰值内存、首 token 延迟、尾延迟和正确率，不能只看平均占用。</p>
+<p>KV cache 用于复用推理计算，可能在服务内保留或复用相同前缀，但它不负责长期事实的版本、权限、纠正和检索，因此不能充当完整的长期记忆系统。只通过 QGenie 调用模型时，底层显存由平台管理，应用负责请求预算、并发和调用观测，不声称自己完成了推理端显存优化。</p>
+<p>**常见追问：**减少上下文就一定能解决 OOM 吗？</p>
+<p>**回答：**不一定。权重、并发、其他 GPU 进程和工作区都可能占用显存；先测量分配与负载，再定位具体瓶颈。</p>
+<p><span id="q79"></span></p>
+<h3 id="Q79：如何把内存和记忆管理应用到-Camera-Agent-或-Hermes-使用经验中？"><a href="#Q79：如何把内存和记忆管理应用到-Camera-Agent-或-Hermes-使用经验中？" class="headerlink" title="Q79：如何把内存和记忆管理应用到 Camera Agent 或 Hermes 使用经验中？"></a>Q79：如何把内存和记忆管理应用到 Camera Agent 或 Hermes 使用经验中？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：结合项目设计可验证的记忆与资源管理案例。</p>
+<p><strong>参考答案：</strong></p>
+<p>对于 Camera Agent，我会让任务 State 保存意图、参数身份、配置版本和任务引用，大图和完整实验日志放外部存储；模型每轮只接收必要目标、参数说明和相关实验摘要。领域事实由 GraphRAG 管理，经过验证的流程经验才考虑沉淀为 Skill 或长期记忆。</p>
+<p>用户纠正场景后更新意图版本并重新检索，不让旧场景记忆覆盖本次要求；参数知识升级后检查旧经验的适用范围；任务结束后释放进程内对象，并按留存策略维护记录。这样同时控制资源增长和信息污染。</p>
+<p>对于 Hermes，先说明自己实际使用版本中启用了哪些记忆或 Skills 功能，再展示一次跨会话复用、一次纠正或删除后的验证。不要因为官方介绍有记忆就声称它自动做了正确的隔离、过期和冲突解决；这些行为需要实际检查。</p>
+<p>**常见追问：**面试官让你现场验证，你会做什么？</p>
+<p>**回答：**准备五步演示：保存一项明确偏好；新会话在相关任务中正确使用；在无关任务中不干扰；修改后只使用新版本；删除后不再通过在线检索取用。另用固定并发连续运行任务，记录 RAM、上下文 token 和存储增长，验证任务结束后的引用释放及历史裁剪。这里是演示设计，不是已经完成的测试结论。</p>
+<p><span id="application-engineering"></span></p>
+<h2 id="六、Python-服务化、并发与工程交付"><a href="#六、Python-服务化、并发与工程交付" class="headerlink" title="六、Python 服务化、并发与工程交付"></a>六、Python 服务化、并发与工程交付</h2><p>把 Agent 看作一个需要长期运行的服务：任务 API → 并发模型 → 消息一致性 → 进度 → 权限与缓存 → 发布运维。</p>
+<p>本节按常见 JD 补充 Python 后端与模型应用工程能力。FastAPI、Redis、容器、MCP、推理部署等是可选实现或学习主题，未确认在当前项目中使用。面试时先回答原理，再用真正做过的技术举例。</p>
+<p><strong>本章题目：</strong><a href="#q46">Q46</a>、<a href="#q47">Q47</a>、<a href="#q48">Q48</a>、<a href="#q49">Q49</a>、<a href="#q50">Q50</a>、<a href="#q51">Q51</a>、<a href="#q55">Q55</a>、<a href="#q56">Q56</a>、<a href="#q57">Q57</a>。</p>
+<p><span id="q46"></span></p>
+<h3 id="Q46：如何把这个系统做成可供前端调用的服务？"><a href="#Q46：如何把这个系统做成可供前端调用的服务？" class="headerlink" title="Q46：如何把这个系统做成可供前端调用的服务？"></a>Q46：如何把这个系统做成可供前端调用的服务？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：API、持久化任务、worker 与取消语义。</p>
+<p><strong>参考答案：</strong></p>
+<p>可以用 FastAPI 等框架提供任务创建、状态查询、结果获取、审核和取消接口。接收请求时做身份校验和结构校验，创建持久化任务记录；需要长时间执行的操作提交给任务执行端，返回任务 ID，前端后续查询或订阅进度。</p>
+<p>业务接口与模型适配、检索服务、工作流和设备执行分层，避免把全部逻辑写在一个 HTTP 路由中。请求使用明确的数据模型，错误区分输入非法、权限不足、容量限制和内部失败，客户端可以据此决定修正还是重试。</p>
+<p><strong>接口设计示例：</strong></p>
+<table>
+<thead>
+<tr>
+<th>接口</th>
+<th>作用</th>
+<th>关键约束</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>POST /tasks</code></td>
+<td>创建需求任务</td>
+<td>校验请求，支持请求幂等；受理成功可返回 202 和任务 ID</td>
+</tr>
+<tr>
+<td><code>GET /tasks/&#123;id&#125;</code></td>
+<td>查询任务状态</td>
+<td>校验任务归属，返回阶段与更新时间</td>
+</tr>
+<tr>
+<td><code>GET /tasks/&#123;id&#125;/result</code></td>
+<td>获取结果及产物引用</td>
+<td>区分未完成、失败和已完成</td>
+</tr>
+<tr>
+<td><code>GET /tasks/&#123;id&#125;/events</code></td>
+<td>获取流式进度</td>
+<td>支持事件序号和断线恢复策略</td>
+</tr>
+<tr>
+<td><code>POST /tasks/&#123;id&#125;/reviews</code></td>
+<td>提交 HIL 决定</td>
+<td>审核权限、任务状态和方案版本校验</td>
+</tr>
+<tr>
+<td><code>POST /tasks/&#123;id&#125;/cancel</code></td>
+<td>请求取消</td>
+<td>取消受理与外部设备真正停止要分开</td>
+</tr>
+</tbody></table>
+<p>**常见追问：**用 FastAPI 的 BackgroundTasks 就能做长任务吗？</p>
+<p>**回答：**它适合轻量的进程内后台工作，不提供可靠队列和进程退出后的恢复保障。长实验应考虑持久化任务与独立 worker。</p>
+<p><span id="q47"></span></p>
+<h3 id="Q47：Python-async-await、线程和进程怎么选？"><a href="#Q47：Python-async-await、线程和进程怎么选？" class="headerlink" title="Q47：Python async&#x2F;await、线程和进程怎么选？"></a>Q47：Python async&#x2F;await、线程和进程怎么选？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：I&#x2F;O 与 CPU 工作划分，以及取消的外部边界。</p>
+<p><strong>参考答案：</strong></p>
+<p>网络模型调用、数据库和消息等待主要是 I&#x2F;O，可以使用真正的异步客户端，减少阻塞等待。<code>async def</code> 只是函数形式，内部调用同步阻塞 SDK 仍会阻塞事件循环；可以使用受控线程池隔离同步 I&#x2F;O，或迁移到独立 worker。</p>
+<p>纯 Python 的 CPU 密集工作在常见带 GIL 的 CPython 运行环境中通常适合多进程或外部计算服务；部分图像或数值库会释放 GIL，需要结合实现测试。外部编译器是子进程，应控制并发、超时、退出码和资源。</p>
+<p>并发还需要连接池、信号量和背压。一次创建数千个协程并不等于服务能承担数千个模型请求，配额、内存和设备资源都有限制。</p>
+<p>**常见追问：**取消协程以后，设备操作也取消了吗？</p>
+<p>**回答：**不一定。任务取消只影响本地等待，外部服务和在线程中运行的阻塞函数可能仍在执行，必须跟踪任务状态并调用明确的取消或补偿接口。</p>
+<p><span id="q48"></span></p>
+<h3 id="Q48：数据库写任务和消息队列发任务，怎样保持一致？"><a href="#Q48：数据库写任务和消息队列发任务，怎样保持一致？" class="headerlink" title="Q48：数据库写任务和消息队列发任务，怎样保持一致？"></a>Q48：数据库写任务和消息队列发任务，怎样保持一致？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：outbox、重复投递与外部副作用一致性。</p>
+<p><strong>参考答案：</strong></p>
+<p>直接先写数据库再发消息，可能出现记录存在但消息没发出去；反过来也可能出现执行端收到任务但数据库没有记录。一个常见设计是在同一数据库事务里写任务和 outbox 事件，再由投递器把事件发送到消息队列。</p>
+<p>发送端确认、消费者确认和业务执行成功是不同概念。投递和消费可能重复，消费者需要按任务或步骤标识去重，持久化状态后再确认；外部设备副作用仍通过幂等键和状态核对管理。</p>
+<p>失败按类型有限重试，超过限制进入可追踪的失败或死信处理，不能无限重新入队。不要为了得到“本轮结果”清空共享接收队列，这会破坏其他任务的数据。</p>
+<p>**常见追问：**用了 outbox 是否就获得 exactly-once？</p>
+<p>**回答：**没有。它缩小了数据库与投递之间的一致性缺口，但重复投递和外部操作副作用仍需处理。这里是生产化设计建议，不能当作当前脚本已经实现的机制。</p>
+<p><span id="q49"></span></p>
+<h3 id="Q49：怎么给前端实时显示进度？SSE-与-WebSocket-如何选？"><a href="#Q49：怎么给前端实时显示进度？SSE-与-WebSocket-如何选？" class="headerlink" title="Q49：怎么给前端实时显示进度？SSE 与 WebSocket 如何选？"></a>Q49：怎么给前端实时显示进度？SSE 与 WebSocket 如何选？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：事件流、断线恢复和首个有效进度。</p>
+<p><strong>参考答案：</strong></p>
+<p>如果主要是服务端向浏览器发送阶段、日志摘要或模型文本，SSE 通常比较简单；客户端提交需求、审核和取消仍可以走普通 HTTP。需要持续双向低延迟交互时，再考虑 WebSocket。</p>
+<p>进度事件要包含任务 ID、事件序号、阶段、时间和可公开的内容。客户端断线后可根据事件序号补读，或者重新查询最新状态。浏览器断线不应默认取消后台硬件任务，事件重复时前端也要能够去重。</p>
+<p>对于模型输出的工具参数或 JSON，流式片段不一定完整，不能收到一半就执行动作。完整解析、校验并得到必要授权后再调用工具。界面可以展示简短状态，不需要暴露内部思维链或原始敏感日志。</p>
+<p>**常见追问：**有 token 输出就说明整个任务响应快吗？</p>
+<p>**回答：**不代表。分别测首个有效事件、模型首 token、参数请求准备好和最终任务完成时间，避免用早期提示掩盖实际等待。</p>
+<p><span id="q50"></span></p>
+<h3 id="Q50：多人使用时如何保证数据和任务权限隔离？"><a href="#Q50：多人使用时如何保证数据和任务权限隔离？" class="headerlink" title="Q50：多人使用时如何保证数据和任务权限隔离？"></a>Q50：多人使用时如何保证数据和任务权限隔离？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：对象级授权、检索权限与任务隔离。</p>
+<p><strong>参考答案：</strong></p>
+<p>身份认证确定请求者，授权决定他能查询哪些知识、使用哪些设备以及审核哪些任务。任务表、知识条目、图节点或关系、产物引用都要带必要的项目或租户范围，查询和执行阶段都检查权限。</p>
+<p>检索时尽量在候选产生前限制授权范围，图扩展不能越过权限边界；进入模型前再确认上下文只包含允许的数据。缓存、日志、checkpoint 和下载链接也要考虑隔离，不能只保护 HTTP 页面。</p>
+<p>数据库、图查询或工具执行不依赖模型自行遵守权限。审核人与提交人的权限是否分离、产物链接是否过期，按业务要求设计。</p>
+<p>**常见追问：**知道别人的 task_id 或 thread_id 能访问任务吗？</p>
+<p>**回答：**这些 ID 只是定位信息，每次请求仍必须做对象级授权检查；不能把难猜的 ID 当成权限机制。</p>
+<p><span id="q51"></span></p>
+<h3 id="Q51：哪些内容可以缓存？如何避免命中错误结果？"><a href="#Q51：哪些内容可以缓存？如何避免命中错误结果？" class="headerlink" title="Q51：哪些内容可以缓存？如何避免命中错误结果？"></a>Q51：哪些内容可以缓存？如何避免命中错误结果？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：缓存键、知识版本、权限与失效条件。</p>
+<p><strong>参考答案：</strong></p>
+<p>参数定义、固定版本文档的 embedding 和符合条件的检索结果比较适合缓存。缓存键应覆盖知识版本、查询条件、权限范围、模型或检索配置。语义缓存还要防止两个近似表达在平台、目标或约束上实际不同。</p>
+<p>设备操作和新实验结果不能因请求文字相同就直接跳过执行。有意重复采样属于新实验，不能误判为重试。LLM 输出缓存也可能保留过时解释，需要明确适用范围、有效期和失效策略。</p>
+<p>Redis 可以用于缓存、速率限制或协调，但不能不加设计地当作全部任务事实的唯一存储。缓存击穿时可以合并同类请求或限制重建并发，失效更新要跟随知识与配置版本。</p>
+<p>**常见追问：**怎样测缓存收益？</p>
+<p>**回答：**分别报告冷缓存和热缓存的延迟、命中率与质量，验证命中没有跨用户或跨版本污染，而不是只报告最好的一次响应。</p>
+<p><span id="q55"></span></p>
+<h3 id="Q55：如果让模型同时看图片和-QCATS-报告，怎么设计？"><a href="#Q55：如果让模型同时看图片和-QCATS-报告，怎么设计？" class="headerlink" title="Q55：如果让模型同时看图片和 QCATS 报告，怎么设计？"></a>Q55：如果让模型同时看图片和 QCATS 报告，怎么设计？</h3><p><strong>备考定位：C · 按岗扩展｜进阶。</strong> 答题抓手：图片和报告的版本关联及验收冲突。</p>
+<p><strong>参考答案：</strong></p>
+<p>先确认模型支持图像输入，以及输入分辨率、数量、成本和数据边界。把图像、裁剪区域、评测指标与同一实验和配置关联，明确哪些内容是原图、局部区域或经过缩放的预览。</p>
+<p>视觉模型适合辅助描述现象、组织检查方向，不能把它给出的主观判断直接替代可重复的指标计算。对细节判断，缩放可能丢失信息；必要时选择保留有效分辨率的区域输入，并对同类任务评测一致性和错误。</p>
+<p>如果当前模型只分析指标和文本，就准确描述为结构化结果分析。未来增加视觉输入，应通过受控对照验证是否改善诊断或减少实验次数。</p>
+<p>**常见追问：**模型说图像更清晰，但 QCATS 指标下降，信谁？</p>
+<p>**回答：**先确认两者评价目标和输入版本是否一致，再按事先定义的验收规则与必要的人评处理冲突，保留证据，不能选择对方案有利的结果。</p>
+<p><span id="q56"></span></p>
+<h3 id="Q56：如何部署、测试并发布一个-AI-应用版本？"><a href="#Q56：如何部署、测试并发布一个-AI-应用版本？" class="headerlink" title="Q56：如何部署、测试并发布一个 AI 应用版本？"></a>Q56：如何部署、测试并发布一个 AI 应用版本？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：应用与知识版本、发布回归和 worker 排空。</p>
+<p><strong>参考答案：</strong></p>
+<p>可以将 API、任务 worker、检索服务和外部工具适配分开部署，锁定依赖与配置版本，凭据由运行环境注入。容器便于环境一致，但不会自动提供扩缩容或故障恢复；是否需要 Kubernetes 要看规模和运维条件。</p>
+<p>测试分层进行：单元测试校验数据映射和路由；契约测试检查模型适配、检索和工具接口；受控集成测试验证持久化与恢复；固定评测集验证模型输出质量。CI 中使用替身控制成本，发布前用小规模真实依赖验证，测试记录要说明使用了哪些真实组件。</p>
+<p>一个发布版本不仅包括代码，还包括 prompt、模型配置、知识&#x2F;索引版本和 schema。灰度时观察成功率、质量、延迟、费用和错误类型，出现回归回滚到兼容组合。正在执行的长任务尽量固定版本，避免途中切换导致历史状态不兼容。</p>
+<p>**常见追问：**滚动发布时 worker 被停止，正在做的设备实验怎么办？</p>
+<p>**回答：**停止接收新任务，保存可恢复状态，在合理期限内排空；未完成任务由新 worker 结合外部任务标识核对。不能简单把进程退出等同于设备实验已经取消。</p>
+<p><span id="q57"></span></p>
+<h3 id="Q57：AI-应用工程师需要掌握哪些模型推理基础？"><a href="#Q57：AI-应用工程师需要掌握哪些模型推理基础？" class="headerlink" title="Q57：AI 应用工程师需要掌握哪些模型推理基础？"></a>Q57：AI 应用工程师需要掌握哪些模型推理基础？</h3><p><strong>备考定位：C · 按岗扩展｜进阶。</strong> 答题抓手：推理采样、上下文、延迟与部署基础。</p>
+<p><strong>参考答案：</strong></p>
+<p>需要理解 token、上下文窗口、生成阶段与资源成本。模型通常先处理输入上下文，也就是 prefill，再逐步生成 token，也就是 decode。长检索上下文会增加输入处理和缓存压力，长输出会增加生成时间，因此要区分首 token 延迟和完整响应延迟。</p>
+<p>常见 Transformer 的注意力用于根据上下文形成表示；embedding 模型用于构建检索表示，reranker 比较查询与候选，生成模型负责理解或输出，这些角色不能互相混同。KV cache 缓存生成过程中已有 token 的键值以避免重复计算，不等于业务层答案缓存，也不能据此声称模型永久记住了用户。</p>
+<p>如果岗位涉及自建推理服务，还需要比较模型精度、量化、显存、上下文长度、batch、并发与质量损失。连续批处理等机制可以改善利用率，但最终仍要测当前任务下的首 token、吞吐、尾延迟和正确率。只调用 QGenie 服务时，应说明底层部署由平台承担，并讲清自己负责的调用与监控边界。</p>
+<p>**常见追问：**模型上下文很大，为什么不能把整套参数库都放进去？</p>
+<p>**回答：**窗口容量不是质量保证。长输入增加成本和延迟，也可能分散注意、混入不适用知识；检索仍用于挑选当前决策需要的证据和适用范围。</p>
+<p><span id="performance"></span></p>
+<h2 id="七、效果评测、性能分析与成本优化"><a href="#七、效果评测、性能分析与成本优化" class="headerlink" title="七、效果评测、性能分析与成本优化"></a>七、效果评测、性能分析与成本优化</h2><p>Q29—Q32 给出项目层回答；P01 提供完整口述；P02—P07 展开指标与实验设计；P08 说明没有数据时如何准确表达。</p>
+<p>本节是可执行的评测方案与面试参考回答，不是已完成测试的结果。实际面试若尚未实施，使用“我会这样评测”；有日志、样本集和报告后再说“我们实际测得”。</p>
+<p><strong>本章题目：</strong><a href="#q29">Q29</a>、<a href="#q30">Q30</a>、<a href="#q31">Q31</a>、<a href="#q32">Q32</a>、<a href="#p01">P01</a>、<a href="#p02">P02</a>、<a href="#p03">P03</a>、<a href="#p04">P04</a>、<a href="#p05">P05</a>、<a href="#p06">P06</a>、<a href="#p07">P07</a>、<a href="#p08">P08</a>。</p>
+<p><span id="q29"></span></p>
+<h3 id="Q29：如何证明-GraphRAG-降低幻觉、提高准确性？"><a href="#Q29：如何证明-GraphRAG-降低幻觉、提高准确性？" class="headerlink" title="Q29：如何证明 GraphRAG 降低幻觉、提高准确性？"></a>Q29：如何证明 GraphRAG 降低幻觉、提高准确性？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：标注集、消融实验与参数级质量指标。</p>
+<p><strong>参考答案：</strong></p>
+<p>先建立“用户需求—正确意图—相关参数集合”的标注集，保留参数来源与适用条件。评测参数是否召回完整、无关参数是否过多、描述是否对应正确字段，以及返回参数能否接入现有流程。相关集合可以包含必须召回项和可接受的替代项，不能假定所有需求只有唯一答案。</p>
+<p>可以比较关键词检索、普通向量检索和图增强检索。在意图输入、候选数量和下游流程一致的条件下，检索层看 Recall@k、Precision@k、排序指标与关系完整性；交接层看参数标识有效率和接口接收成功率。若有模型输出参数列表，再检查是否存在未被检索证据支持的参数。对图扩展、过滤或 rerank 做消融才能确定各自贡献。</p>
+<p>要同时报告延迟和成本，并使用未参与调优的测试集。没有做过这些对比时，应说“为参数召回提供知识依据”，不直接宣称已量化降低幻觉。</p>
+<p>**常见追问：**检索正确但答案错误，属于哪里的问题？</p>
+<p>**回答重点：**区分入口实体未命中、关系遗漏、上下文组装丢失、模型误用证据和后续校验缺失，按链路定位。</p>
+<p><span id="q30"></span></p>
+<h3 id="Q30：如何评测整个-Agent，而不仅是-RAG？"><a href="#Q30：如何评测整个-Agent，而不仅是-RAG？" class="headerlink" title="Q30：如何评测整个 Agent，而不仅是 RAG？"></a>Q30：如何评测整个 Agent，而不仅是 RAG？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：效果、效率、可靠性的分层评测。</p>
+<p><strong>参考答案：</strong></p>
+<p>我会把系统性能分为任务效果、运行效率和可靠性。效果看意图与参数召回是否正确，最终是否在预算内达到预先定义的目标；效率看前端响应、完整任务的 P50&#x2F;P95 延迟、吞吐量与每个成功任务的成本；可靠性看超时、失败、重试、重复执行和人工干预。</p>
+<p>具体做法是准备有标注的需求集，覆盖不同场景、口语表达、多目标、信息缺失和无答案输入。固定后端执行策略、设备条件和预算，对比规则检索、向量 RAG、GraphRAG，以及人工选参数。每个阶段打点记录时间、模型调用和执行结果；前端检索改进与后端细扫改进分开做消融，避免混淆收益来源。</p>
+<p>测试同时包含离线标注集评测、使用工具替身的负载测试，以及受控实机任务。替身用于检验接口与调度，不代表真实业务耗时；实机失败和超时计入总体统计。详细指标口径、压测方式和口述模板见<a href="#performance">系统性能评测专项问答</a>。</p>
+<p>**常见追问：**LLM-as-a-judge 能做最终评分吗？</p>
+<p>**回答重点：**适合辅助评价解释质量等主观项，但需与人工标注校准；配置合法性、执行事实和客观指标应使用确定性检查。</p>
+<p><span id="q31"></span></p>
+<h3 id="Q31：出问题如何排查？模型升级如何回归？"><a href="#Q31：出问题如何排查？模型升级如何回归？" class="headerlink" title="Q31：出问题如何排查？模型升级如何回归？"></a>Q31：出问题如何排查？模型升级如何回归？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：跨节点 trace、故障定位与版本回归。</p>
+<p><strong>参考答案：</strong></p>
+<p>为一次任务建立统一 trace，串联图节点、模型版本、提示词版本、检索结果、工具调用、配置版本、任务 ID 和评测产物，同时记录各阶段耗时、token、错误及重试。</p>
+<p>定位时先看事实链：输入是否完整、检索是否适用、模型动作是否合法、工具是否实际执行、结果是否属于当前任务，再看最终解释。无需依赖不可观察的内部思维链。</p>
+<p>模型、prompt、检索或工具 schema 更新后，在固定回归任务集上比较成功率、关键错误类型、延迟和成本。通过后分阶段发布，并保留回滚版本。</p>
+<p>**常见追问：**为什么同样输入仍可能得到不同结果？</p>
+<p>**回答重点：**模型采样、服务实现、检索索引和外部设备状态都可能变化；记录版本和条件能提高可追溯性，但不能轻易承诺绝对复现。</p>
+<p><span id="q32"></span></p>
+<h3 id="Q32：怎么降低成本和延迟？项目难点怎么讲？"><a href="#Q32：怎么降低成本和延迟？项目难点怎么讲？" class="headerlink" title="Q32：怎么降低成本和延迟？项目难点怎么讲？"></a>Q32：怎么降低成本和延迟？项目难点怎么讲？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：按实测瓶颈优化，并用真实故障讲项目难点。</p>
+<p><strong>参考答案：</strong></p>
+<p>先测量耗时分布，区分模型、检索、硬件实验和等待时间。减少不必要的模型调用，把等待轮询、参数校验和固定格式处理交给程序；压缩上下文，对稳定定义做版本化缓存，并在无依赖时并行执行。</p>
+<p>缓存要考虑权限和知识版本，动态实验结果不能错误复用。更换小模型或减少检索内容后，还要重新验证任务成功率，不能只看费用下降。</p>
+<p>讲个人难点时选一个真实案例，按“具体故障—如何定位—方案取舍—验证结果—剩余限制”展开。例如回包错配、参数版本混淆或图检索关系不完整。没有解决过的问题不要编造成经历。</p>
+<p>**常见追问：**如果硬件采集占绝大部分时间，优化 prompt 长度有什么意义？</p>
+<p>**回答重点：**先优化主要瓶颈；模型优化也可能降低费用，但不能把它夸大成端到端提速的主要原因。</p>
+<p><span id="p01"></span></p>
+<h3 id="P01：面试官问“你怎么评测整个系统的性能”，怎么完整回答？"><a href="#P01：面试官问“你怎么评测整个系统的性能”，怎么完整回答？" class="headerlink" title="P01：面试官问“你怎么评测整个系统的性能”，怎么完整回答？"></a>P01：面试官问“你怎么评测整个系统的性能”，怎么完整回答？</h3><p><strong>备考定位：A · 核心必答｜进阶。</strong> 答题抓手：两分钟讲清分层指标、对照和测试环境。</p>
+<p><strong>两分钟口述答案：</strong></p>
+<p>我从任务效果、运行效率和可靠性三个方面评测，不能只看模型回答是否通顺。</p>
+<p>首先建立有人工标注的需求集，包含用户场景、正确意图、相关参数及适用条件。意图层检查目标与约束提取，RAG 层检查参数 Recall@k、Precision@k 和不适用参数比例，接口层检查召回参数能否正确映射到配置。端到端成功定义为：任务按需求执行，并在固定预算内达到预先设定的验收目标，有可追溯的配置和评测记录。执行完成和画质达标分别统计。</p>
+<p>其次，我会测前端和全流程两种延迟。前端从用户提交到参数请求准备好；全流程还包括排队、配置编译、硬件采集、QCATS 评测及细扫迭代。记录各阶段耗时，报告 P50、P95、吞吐量和资源利用率。硬件占用比较长时，先定位实际瓶颈，不能把模型响应时间当成整个系统耗时。</p>
+<p>第三，测试模型超时、编译失败、设备断连和回包异常，统计失败率、恢复率、重复执行及人工干预，并记录模型 token、编译资源和设备占用，计算每个成功任务的平均成本。</p>
+<p>为了证明改进有效，固定后端策略、设备条件和实验预算，对比规则或普通向量检索与 GraphRAG；后端模型细扫的收益另做对照。最终报告同时包含成功率、耗时、成本和失败类型，避免只展示成功案例。</p>
+<p><span id="p02"></span></p>
+<h3 id="P02：这些指标怎么计算？“成功率”分母是什么？"><a href="#P02：这些指标怎么计算？“成功率”分母是什么？" class="headerlink" title="P02：这些指标怎么计算？“成功率”分母是什么？"></a>P02：这些指标怎么计算？“成功率”分母是什么？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：成功率分母、目标达成与执行完成的区别。</p>
+<p><strong>参考答案：</strong></p>
+<p>先规定任务单位和统计范围。一次用户需求算一个任务；其中多次候选配置测试算实验，不把它们混入任务成功率分母。任务集合在实验开始前固定，失败和超时仍留在分母中，不能统计到一半排除。</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>计算口径</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>意图槽位 Precision&#x2F;Recall&#x2F;F1</td>
+<td>对照标注的场景、目标、约束分别计数，再报告汇总</td>
+<td>发现漏约束、误解目标</td>
+</tr>
+<tr>
+<td>严格意图正确率</td>
+<td>所有必要字段正确的需求数 &#x2F; 已标注需求数</td>
+<td>衡量完整理解能力</td>
+</tr>
+<tr>
+<td>参数 Recall@k</td>
+<td>前 k 个候选中相关参数数 &#x2F; 标注相关参数总数</td>
+<td>检查漏召回</td>
+</tr>
+<tr>
+<td>参数 Precision@k</td>
+<td>前 k 个候选中相关参数数 &#x2F; 前 k 个实际返回候选数</td>
+<td>检查无关参数占比</td>
+</tr>
+<tr>
+<td>参数适用性错误率</td>
+<td>平台、版本或模块不适用的候选数 &#x2F; 返回候选数</td>
+<td>发现语义相近但不可用的参数</td>
+</tr>
+<tr>
+<td>接口接收成功率</td>
+<td>下游成功解析并接收的合法请求数 &#x2F; 实际提交请求数</td>
+<td>衡量衔接，不等同于执行成功</td>
+</tr>
+<tr>
+<td>执行完成率</td>
+<td>产出有效执行结果的任务数 &#x2F; 受支持任务总数</td>
+<td>反映工程可用性</td>
+</tr>
+<tr>
+<td>目标达成率</td>
+<td>在预算内经独立规则确认达标的任务数 &#x2F; 受支持任务总数</td>
+<td>反映业务效果，失败与超时计入分母</td>
+</tr>
+<tr>
+<td>全自动达成率</td>
+<td>无额外人工介入且达标的任务数 &#x2F; 受支持任务总数</td>
+<td>检验自主程度</td>
+</tr>
+<tr>
+<td>人工干预率</td>
+<td>需要额外人工处理的任务数 &#x2F; 受支持任务总数</td>
+<td>衡量人工工作量</td>
+</tr>
+<tr>
+<td>单任务实验数</td>
+<td>一个任务实际执行的配置候选数</td>
+<td>衡量搜索成本与效率</td>
+</tr>
+<tr>
+<td>每成功任务成本</td>
+<td>全部受支持任务总成本 &#x2F; 达标任务数</td>
+<td>包含失败消耗，避免幸存者偏差</td>
+</tr>
+</tbody></table>
+<p>**计算细节：**不同工具对 Precision@k 的分母可能固定为 k；这里采用实际返回数，需同时报告返回数量和空召回率，不能通过只返回一个候选获得看似很高的精度。无相关答案的样本不计算普通 Recall，单独测正确拒答或补充信息的比例。相关参数可有多组合理答案，需要专家标注可接受集合与必需项。</p>
+<p>多意图指标建议同时报告宏平均和各场景结果，避免高频简单任务掩盖困难场景。零个成功任务时，每成功任务成本不可计算，明确报告无成功任务及总消耗，不填零。</p>
+<p>**常见追问：**用户请求根本不支持，正确拒绝算失败吗？</p>
+<p>**回答：**不与支持任务混算画质达成率。预先分层统计：支持任务看执行和目标达成；不支持、缺信息等任务看路由、澄清或拒答是否正确。同时报告全体输入上的处理正确率及各类样本数量，不能事后移除失败任务。</p>
+<p><span id="p03"></span></p>
+<h3 id="P03：端到端延迟如何测？为什么看-P95？"><a href="#P03：端到端延迟如何测？为什么看-P95？" class="headerlink" title="P03：端到端延迟如何测？为什么看 P95？"></a>P03：端到端延迟如何测？为什么看 P95？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：阶段打点、排队时间与尾延迟样本量。</p>
+<p><strong>参考答案：</strong></p>
+<p>我会设置三个边界：请求接收后返回任务标识的受理时间；完成意图识别、参数召回和请求适配的前端时间；从提交到拿到最终有效结果或终止状态的全流程时间。用户体验需要看后两者，快速返回任务 ID 不等于任务完成。</p>
+<p>串行单任务的时间可分解为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">T_total = T_intent + T_retrieval + T_adapter + T_queue</span><br><span class="line">        + T_coarse_stage + Σ(T_fine_round) + T_report</span><br><span class="line"></span><br><span class="line">每个实验阶段包含：规划/模型调用、配置修改、编译、传输、设备执行、评测和结果处理。</span><br></pre></td></tr></table></figure>
+
+<p>存在并行编译或并行实验时，总时间按实际起止时间和关键路径计算，不能简单把所有候选的耗时相加。单机阶段耗时用单调时钟测量；跨服务用 trace 关联事件，保证时间同步并避免把时钟偏差当成网络延迟。</p>
+<p>P50 表示典型体验，P95 暴露慢请求和排队问题。需要分别报告冷启动&#x2F;热缓存、不同轮数和不同负载下的结果。超时请求单独报告比例、截止时间与终止耗时，不能把超时时间当成真实完成时间，也不能只展示成功任务的延迟而隐去失败。</p>
+<p>**常见追问：**只有十个实机任务，P95 有意义吗？</p>
+<p>**回答：**样本太少时尾部估计不稳定。报告样本数、具体范围和不确定性，积累更多任务后再比较稳定分位数，不用少量样本给出精确性能承诺。</p>
+<p><span id="p04"></span></p>
+<h3 id="P04：怎么做并发和吞吐量测试？硬件不够怎么办？"><a href="#P04：怎么做并发和吞吐量测试？硬件不够怎么办？" class="headerlink" title="P04：怎么做并发和吞吐量测试？硬件不够怎么办？"></a>P04：怎么做并发和吞吐量测试？硬件不够怎么办？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：硬件容量、负载模型和队列背压。</p>
+<p><strong>参考答案：</strong></p>
+<p>分两层测。第一层用工具替身隔离硬件，施加可控执行时间和错误，逐级增加请求到达率或并发数，观察前端吞吐、P95、队列积压、模型限流和错误率。测试要说明采用固定并发还是固定到达率、运行时长及预热方式。</p>
+<p>第二层用真实设备执行受控任务，测每小时完成任务数、每台设备的候选实验数、设备占用、排队时间和实际错误。不同任务轮数差异很大，所以还要报告每任务实验数分布，避免“任务数”隐藏工作量变化。</p>
+<p>受理吞吐、完成吞吐和成功完成吞吐分别统计。压力下只有受理量增加、队列持续增长，说明不能稳定承载该流量。并行编译可能提速，但设备独占或评测端也可能成为瓶颈。</p>
+<p>原代码的接收队列处理尚不能证明多任务并发安全；正式并发实机前，应先完善结果关联与队列隔离，避免清队列导致其他任务回包丢失。当前只能报告实际验证过的单任务或受控运行能力。</p>
+<p>**常见追问：**多加 Agent 就能提高吞吐吗？</p>
+<p>**回答：**不能。如果瓶颈是设备占用或模型配额，多开决策循环只会增加排队和成本。应根据瓶颈增加对应资源或调整调度。</p>
+<p><span id="p05"></span></p>
+<h3 id="P05：评测数据集和对照实验怎么设计？"><a href="#P05：评测数据集和对照实验怎么设计？" class="headerlink" title="P05：评测数据集和对照实验怎么设计？"></a>P05：评测数据集和对照实验怎么设计？</h3><p><strong>备考定位：A · 核心必答｜难点。</strong> 答题抓手：数据切分、基线、消融和实机条件控制。</p>
+<p><strong>参考答案：</strong></p>
+<p>从真实需求中脱敏采样，再补充同义表达、多个目标、约束冲突、信息缺失、无对应参数和平台不匹配等边界样本。由领域人员标注意图、相关参数、适用条件、预期路由和验收规则，争议样本复核后保留标注依据。</p>
+<p>数据按任务或方案家族划分开发集和冻结测试集，避免同一需求改写后分别进入两边。调参和提示词优化只用开发集；测试时固定知识库、模型、提示词、工具和评测版本。知识库本来就包含参数文档是正常设置，但不能把测试题答案或测试运行结果泄露进检索内容。</p>
+<table>
+<thead>
+<tr>
+<th>对照</th>
+<th>固定什么</th>
+<th>改变什么</th>
+<th>要回答的问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>人工标注意图 vs 模型意图</td>
+<td>检索与后端</td>
+<td>意图输入</td>
+<td>错误主要来自理解还是检索？</td>
+</tr>
+<tr>
+<td>向量检索 vs 图增强检索</td>
+<td>同一意图、后端、返回预算</td>
+<td>检索方式</td>
+<td>图关系是否提高相关参数覆盖？</td>
+</tr>
+<tr>
+<td>人工选参数 vs 自动召回</td>
+<td>后端目标、预算与策略</td>
+<td>参数选择方式</td>
+<td>自动入口节约人工后是否保持效果？</td>
+</tr>
+<tr>
+<td>固定细扫策略 vs 模型细扫</td>
+<td>同一召回集合、起始配置和预算</td>
+<td>后端推荐策略</td>
+<td>模型建议是否减少无效实验？</td>
+</tr>
+</tbody></table>
+<p>真实设备对照要控制或记录场景与设备状态，随机或交错执行方案以减小时间漂移影响。重复运行并报告差异区间；总体成功率可报告二项比例区间，成对任务的差异可用配对 bootstrap 等方法估计。样本量根据成本和希望识别的效果大小决定，不为了凑一个漂亮数字。</p>
+<p>**常见追问：**能不能同时换模型、加图检索、改细扫，再说提升来自 GraphRAG？</p>
+<p>**回答：**不能。组合改进可以报告整体结果，单组件收益要通过固定其他条件的对照或消融确认。</p>
+<p><span id="p06"></span></p>
+<h3 id="P06：系统可靠性怎么测？"><a href="#P06：系统可靠性怎么测？" class="headerlink" title="P06：系统可靠性怎么测？"></a>P06：系统可靠性怎么测？</h3><p><strong>备考定位：B · 重点追问｜难点。</strong> 答题抓手：故障注入、预期状态与重复副作用检查。</p>
+<p><strong>参考答案：</strong></p>
+<p>在受控测试环境注入故障，检查实际状态变化、恢复行为和副作用，而不只检查有没有抛异常。</p>
+<table>
+<thead>
+<tr>
+<th>故障场景</th>
+<th>预期行为</th>
+<th>验证证据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>意图输出缺字段、RAG 空召回</td>
+<td>有界修正、澄清或结束，不编造参数进入执行</td>
+<td>路由状态与下游零提交记录</td>
+</tr>
+<tr>
+<td>XML 映射失败或编译失败</td>
+<td>停止该候选，明确失败阶段</td>
+<td>配置差异、编译日志、未部署记录</td>
+</tr>
+<tr>
+<td>模型超时或限流</td>
+<td>有界退避重试或返回失败</td>
+<td>调用次数、等待时间、费用</td>
+</tr>
+<tr>
+<td>提交成功但响应丢失</td>
+<td>通过原请求身份查询，不重复操作</td>
+<td>任务记录与实际执行计数</td>
+</tr>
+<tr>
+<td>设备断连或采集中断</td>
+<td>记录执行失败，处理资源占用</td>
+<td>设备状态、任务状态与恢复记录</td>
+</tr>
+<tr>
+<td>重复、迟到或其他任务回包</td>
+<td>校验关联并去重，不污染当前结果</td>
+<td>实验标识与结果入库记录</td>
+</tr>
+<tr>
+<td>工作流重启</td>
+<td>按持久化状态与外部事实核对</td>
+<td>恢复点和执行副作用计数</td>
+</tr>
+</tbody></table>
+<p>统计各类故障发生数、正确处理率、恢复率、恢复耗时和人工干预，注明哪些机制已实现。没有 checkpoint 或幂等机制时，测试结论可以是“当前不支持自动恢复”，不能用模拟成功路径代替故障验证。</p>
+<p>**常见追问：**什么叫可靠性测试通过？</p>
+<p>**回答：**预期状态、数据完整性和副作用都符合规则。例如超时能够结束还不够，还必须检查是否多执行一次、是否错用了其他候选结果。</p>
+<p><span id="p07"></span></p>
+<h3 id="P07：怎么统计成本，如何决定先优化哪里？"><a href="#P07：怎么统计成本，如何决定先优化哪里？" class="headerlink" title="P07：怎么统计成本，如何决定先优化哪里？"></a>P07：怎么统计成本，如何决定先优化哪里？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：token、设备占用与每成功任务成本。</p>
+<p><strong>参考答案：</strong></p>
+<p>分开记录前端识别&#x2F;检索和后端细扫的模型调用，包括输入输出 token、重试、embedding 与 rerank 调用；再记录编译计算资源、存储和设备占用分钟数。有内部计费单价时换算费用，没有单价时报告资源单位，不虚构金额。</p>
+<p>优化前先看成本与延迟分布。模型成本高时减少不必要上下文与重试；设备时间占主导时，更准确的召回和更有效的候选选择可能减少实验次数。缓存参数定义要绑定知识版本，不能缓存动态实验结果后误当成新测试。</p>
+<p>最终同时比较目标达成率、总成本、每任务成本和每成功任务成本。一个方案少调几次模型但让更多任务失败，可能使每成功任务成本反而更高。</p>
+<p>**常见追问：**召回更多参数能提高 Recall，为什么不全部返回？</p>
+<p>**回答：**候选越多可能增加无关配置和实验成本。要在固定验收目标下比较覆盖率、Precision、实验次数和达成率，选择合理的候选规模。</p>
+<p><span id="p08"></span></p>
+<h3 id="P08：没有完整线上数据，面试时应该怎么回答“效果怎么样”？"><a href="#P08：没有完整线上数据，面试时应该怎么回答“效果怎么样”？" class="headerlink" title="P08：没有完整线上数据，面试时应该怎么回答“效果怎么样”？"></a>P08：没有完整线上数据，面试时应该怎么回答“效果怎么样”？</h3><p><strong>备考定位：A · 核心必答｜基础。</strong> 答题抓手：区分实测结论、待验证假设和评测方案。</p>
+<p><strong>参考答案：</strong></p>
+<p>“我会把已验证结果和下一步评测分开说明。目前能提供的是实际完成的需求识别、参数召回或流程联调记录；没有做过大规模压测的部分，我不会给出吞吐量和 P95 的虚构数字。完整评测会按固定任务集、固定预算和对照方案执行，统计效果、延迟、成本和失败类型。”</p>
+<p><strong>有实测数据后使用的报告模板：</strong></p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>填写内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>测试范围</td>
+<td>日期、环境、模型&#x2F;知识库&#x2F;代码版本、任务类型</td>
+</tr>
+<tr>
+<td>样本与资源</td>
+<td>支持&#x2F;不支持&#x2F;缺信息样本数，实机任务数，设备数，重复次数</td>
+</tr>
+<tr>
+<td>对照条件</td>
+<td>基线方式、固定后端策略、配置起点、预算、候选数量</td>
+</tr>
+<tr>
+<td>识别与检索</td>
+<td>意图 F1、严格正确率、Recall@k、Precision@k、空召回与不适用参数比例</td>
+</tr>
+<tr>
+<td>全流程效果</td>
+<td>执行完成率、目标达成率、全自动达成率、人工干预率</td>
+</tr>
+<tr>
+<td>延迟</td>
+<td>前端与全流程 P50&#x2F;P95、样本数、失败&#x2F;超时比例、排队时间</td>
+</tr>
+<tr>
+<td>吞吐</td>
+<td>完成任务&#x2F;小时、成功任务&#x2F;小时、实验&#x2F;设备小时、实际负载</td>
+</tr>
+<tr>
+<td>成本</td>
+<td>模型 token、调用次数、设备分钟数、每成功任务成本</td>
+</tr>
+<tr>
+<td>结论</td>
+<td>相比基线的实际差异、不确定性、主要失败原因与适用范围</td>
+</tr>
+</tbody></table>
+<p>例如从“80% 提高到 90%”应说提高 10 个百分点，相对提升为 12.5%；这只是计算示例，不是本项目结果。汇报时同时给出分子、分母和测试条件，便于面试官判断结论是否可信。</p>
+<p><span id="harness-engineering"></span></p>
+<h2 id="八、Harness-Engineering-驾驭工程"><a href="#八、Harness-Engineering-驾驭工程" class="headerlink" title="八、Harness Engineering 驾驭工程"></a>八、Harness Engineering 驾驭工程</h2><p>从运行环境定义，过渡到项目实践、固定模型的对照验证、经验沉淀和个人交付能力。</p>
+<p>这里按 AI Agent 语境中的 Harness Engineering 理解“驾驭工程”：围绕模型搭建能执行、能观察、能验证并约束行为的运行环境。它没有一套唯一固定的组件清单。若面试官指的是特定公司的框架或测试 harness，应先对齐范围。</p>
+<p><strong>本章题目：</strong><a href="#q58">Q58</a>、<a href="#q59">Q59</a>、<a href="#q60">Q60</a>、<a href="#q61">Q61</a>、<a href="#q62">Q62</a>、<a href="#q63">Q63</a>。</p>
+<p><span id="q58"></span></p>
+<h3 id="Q58：什么是-Harness-Engineering？和写提示词有什么区别？"><a href="#Q58：什么是-Harness-Engineering？和写提示词有什么区别？" class="headerlink" title="Q58：什么是 Harness Engineering？和写提示词有什么区别？"></a>Q58：什么是 Harness Engineering？和写提示词有什么区别？</h3><p><strong>备考定位：B · 重点追问｜基础。</strong> 答题抓手：工具、上下文、约束和验证组成的运行环境。</p>
+<p><strong>参考答案：</strong></p>
+<p>我理解的 Harness Engineering，是把模型放进一个能持续完成任务的工程环境：明确任务和验收条件，提供合适的上下文与工具，管理执行状态、权限和预算，再用真实反馈验证结果、处理失败。</p>
+<p>提示词是其中一个部分。即使模型理解了目标，如果拿不到正确文件、工具返回不可读、执行环境不一致或没有验证反馈，也可能无法完成任务。因此改进 Agent 时，既看模型能力，也看模型周围的工作系统是否支持它正确行动。</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>主要关注</th>
+<th>本项目中的例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Prompt Engineering</td>
+<td>如何表达当前任务和输出要求</td>
+<td>提取场景、目标与约束的提示词</td>
+</tr>
+<tr>
+<td>Context Engineering</td>
+<td>当前步骤需要哪些信息、如何组织和加载</td>
+<td>参数描述、来源、实验历史摘要</td>
+</tr>
+<tr>
+<td>Harness Engineering</td>
+<td>模型怎样在环境中执行、验证并受控推进</td>
+<td>LangGraph 状态、检索工具、配置校验、设备接口、HIL、评测与恢复</td>
+</tr>
+</tbody></table>
+<p>三者有交集，不能把 Harness 简单等同于更长的系统提示词，也不能认为引入某个框架就自动完成了驾驭工程。</p>
+<p>**常见追问：**和测试 harness 有什么关系？</p>
+<p>**回答：**传统测试 harness 组织测试环境、输入与执行结果；Agent harness 的范围通常还包含上下文、工具和任务生命周期。测试验证是其中关键部分，具体术语范围仍以讨论场景为准。</p>
+<p><span id="q59"></span></p>
+<h3 id="Q59：你的-Camera-Agent-项目有哪些-Harness-Engineering-实践？"><a href="#Q59：你的-Camera-Agent-项目有哪些-Harness-Engineering-实践？" class="headerlink" title="Q59：你的 Camera Agent 项目有哪些 Harness Engineering 实践？"></a>Q59：你的 Camera Agent 项目有哪些 Harness Engineering 实践？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：把项目机制映射到 Harness，并区分现状和设计。</p>
+<p><strong>参考答案：</strong></p>
+<p>可以沿完整链路解释：前端用结构化意图减少歧义，用 RAG 提供参数证据；后端把参数映射到实际配置，调用编译与实验工具，并把 QCATS 反馈交回迭代过程。LangGraph 表达状态与流转，这些构成模型开展工作的环境。</p>
+<p>如果进一步完善，我会加入独立校验、任务身份关联、预算限制、HIL 审核、幂等执行和恢复机制，并明确每一步的输入输出与完成条件。哪些已经实现就用实际代码和轨迹证明，哪些仍是原脚本的不足就列为改进项。</p>
+<p>核心是让模型的建议经过真实执行和可检查的反馈，而不是只要求它“认真分析”。例如召回参数后校验字段身份，执行后核对配置和结果归属，停止时分别报告流程状态与目标达成状态。</p>
+<p>**常见追问：**最能体现驾驭工程价值的一次改进是什么？</p>
+<p>**回答：**挑一个真实问题，例如错误参数映射、反馈错配或重复执行，解释你改变了哪项环境约束或反馈机制，以及相同模型下错误率如何变化。没有做过对照时，不编造提升数据。</p>
+<p><span id="q60"></span></p>
+<h3 id="Q60：同一个模型换了-Harness，为什么表现会差很多？怎么证明？"><a href="#Q60：同一个模型换了-Harness，为什么表现会差很多？怎么证明？" class="headerlink" title="Q60：同一个模型换了 Harness，为什么表现会差很多？怎么证明？"></a>Q60：同一个模型换了 Harness，为什么表现会差很多？怎么证明？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：固定模型，比较运行环境改动的质量与成本。</p>
+<p><strong>参考答案：</strong></p>
+<p>模型的实际表现取决于它能看到的信息、可执行的动作，以及是否及时得到正确反馈。例如检索结果没有版本信息、工具错误只返回“失败”，会使模型难以纠正；提供准确字段、错误分类和可重试条件，可能让同一个模型更有效地推进任务。</p>
+<p>验证时固定模型、任务集、预算和外部条件，分别改变上下文组织、工具接口或验证反馈，比较任务成功率、无效调用、人工接管和总成本。一次修改多个部分时，只能先报告整体效果，不能把全部收益归到一个组件。</p>
+<p>还要避免把测试答案写进提示词、让验证器只检查模型偏好的结果，或者增加预算后宣称架构更有效。模型能力仍有上限，好的 Harness 能改善信息和执行条件，但不能保证所有任务可解。</p>
+<p>**常见追问：**提高成功率但调用次数翻倍，算改进吗？</p>
+<p>**回答：**要看业务目标和成本约束，同时报告质量、延迟、费用及每成功任务成本，比较是否值得，而不是只选一个有利指标。</p>
+<p><span id="q61"></span></p>
+<h3 id="Q61：如果用-Agent-写代码，怎样设计仓库和开发环境？"><a href="#Q61：如果用-Agent-写代码，怎样设计仓库和开发环境？" class="headerlink" title="Q61：如果用 Agent 写代码，怎样设计仓库和开发环境？"></a>Q61：如果用 Agent 写代码，怎样设计仓库和开发环境？</h3><p><strong>备考定位：C · 按岗扩展｜进阶。</strong> 答题抓手：仓库入口、可复现环境和可验证任务边界。</p>
+<p><strong>参考答案：</strong></p>
+<p>让 Agent 容易找到入口、运行项目并验证修改。提供简洁的项目说明、目录职责、依赖安装方式、构建与测试命令，以及必须遵守的接口边界；具体模块文档按需加载，避免把全部知识塞进一个超长文件。</p>
+<p>对格式、类型、接口和依赖方向等可以机器检查的规则，放进 formatter、lint、类型检查或测试中。工具错误要明确到失败原因与相关位置，给 Agent 可用反馈；文件修改通过 diff 审查，重要行为用验收测试或独立评估验证。</p>
+<p>执行环境应可复现，必要时用隔离工作目录或容器限制影响范围。仓库说明是指导，不能替代运行时权限。模型说“测试通过”时，要检查真实命令、退出码和结果，并确认没有删掉或弱化测试来通过检查。</p>
+<p>**常见追问：**Agent 修复失败后，你会不断追加提示词吗？</p>
+<p>**回答：**先定位是目标不清、上下文缺失、环境错误还是代码缺陷，改进相应环节。反复补文字而不修复工具或环境，会让提示词越来越复杂但问题仍在。</p>
+<p><span id="q62"></span></p>
+<h3 id="Q62：怎样把一次成功经验沉淀成可复用能力？"><a href="#Q62：怎样把一次成功经验沉淀成可复用能力？" class="headerlink" title="Q62：怎样把一次成功经验沉淀成可复用能力？"></a>Q62：怎样把一次成功经验沉淀成可复用能力？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：将经验沉淀为有触发条件、步骤和验证的 Skill。</p>
+<p><strong>参考答案：</strong></p>
+<p>可以把稳定过程整理成 Skill 或运行手册，写清触发条件、输入要求、步骤、工具接口、验证方式、失败处理和适用边界。确定性且重复的步骤可以抽成脚本，领域事实保存在有来源的知识库，不能只保存一段成功聊天记录。</p>
+<p>经验要先经过复查和新任务验证，再推广使用。避免保存凭据、偶然的路径、某台设备的临时状态，或把一次成功的参数值当成普适规则。新版本保留变更和回滚方式，失效经验可以撤销。</p>
+<p>在这个项目里，参数事实更适合进入 RAG&#x2F;GraphRAG，如何查询、校验、提交和处理结果的流程经验可以进入 Skill；两类内容关联使用，但职责不同。</p>
+<p>**常见追问：**Skill 写得越多，Agent 就越强吗？</p>
+<p>**回答：**不一定。重复、冲突或触发范围过宽会增加干扰，需要维护检索或加载规则、验证样例和版本，衡量实际复用收益。</p>
+<p><span id="q63"></span></p>
+<h3 id="Q63：如何评价自己“驾驭-Agent”的能力，而不是只说会用工具？"><a href="#Q63：如何评价自己“驾驭-Agent”的能力，而不是只说会用工具？" class="headerlink" title="Q63：如何评价自己“驾驭 Agent”的能力，而不是只说会用工具？"></a>Q63：如何评价自己“驾驭 Agent”的能力，而不是只说会用工具？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：用实际交付、失败定位和纠正成本说明能力。</p>
+<p><strong>参考答案：</strong></p>
+<p>我会展示一个可复查的任务链：如何明确目标和约束，准备上下文与工具，观察执行结果，定位失败，调整环境或流程，并独立验证最终产物。说明哪些工作由 Agent 完成，哪些判断和修复由我完成。</p>
+<p>指标可以包括在固定任务集上的完成率、人工活跃处理时间、纠正次数、无效工具调用、总耗时和成本。还要展示失败案例，解释模型建议为何被拒绝、什么时候切换方法或交给人工。</p>
+<p>“输入一句话就生成了代码”只能证明工具使用，不足以证明工程能力。能复现问题、设计边界、验证结果并把经验转成可维护流程，才是更有说服力的证据。</p>
+<p>**常见追问：**是不是人工越少越好？</p>
+<p>**回答：**要结合任务风险和验收标准。有些环节需要人的业务判断，目标是减少不必要的重复劳动，并让关键决策有证据，而不是单纯追求零接管。</p>
+<p><span id="hermes-agent"></span></p>
+<h2 id="九、Hermes-Agent-使用与迁移经验"><a href="#九、Hermes-Agent-使用与迁移经验" class="headerlink" title="九、Hermes Agent 使用与迁移经验"></a>九、Hermes Agent 使用与迁移经验</h2><p>先讲实际使用任务和个人贡献，再解释机制与迁移取舍。若简历写了 Hermes，Q64—Q66 应提升为必答题。</p>
+<p>名称说明：本节暂按 Nous Research 的 <strong>Hermes Agent</strong> 理解“harmes agent”。用户确认用过 Agent，但尚未提供具体版本、任务和配置，因此下面区分官方能力、使用经验模板和扩展设计；不把软件支持的功能写成个人已做过的工作。</p>
+<p>资料核对：本节的产品能力依据官方 README 和 Skills 文档。Skills 文档对应提交 <code>9de894da2191907c2716130dcc1b574e055173cb</code>；具体安装路径、命令和行为可能随版本变化，面试应以自己实际使用版本为准。</p>
+<ul>
+<li><a href="https://github.com/NousResearch/hermes-agent">Hermes Agent 官方仓库与 README</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/">Hermes Agent 官方文档</a></li>
+<li><a href="https://github.com/NousResearch/hermes-agent/blob/9de894da2191907c2716130dcc1b574e055173cb/website/docs/user-guide/features/skills.md">已核对的 Skills 文档版本</a></li>
+</ul>
+<p><strong>本章题目：</strong><a href="#q64">Q64</a>、<a href="#q65">Q65</a>、<a href="#q66">Q66</a>、<a href="#q67">Q67</a>、<a href="#q68">Q68</a>、<a href="#q69">Q69</a>。</p>
+<p><span id="q64"></span></p>
+<h3 id="Q64：Hermes-Agent-是什么？它和-LangGraph-有什么区别？"><a href="#Q64：Hermes-Agent-是什么？它和-LangGraph-有什么区别？" class="headerlink" title="Q64：Hermes Agent 是什么？它和 LangGraph 有什么区别？"></a>Q64：Hermes Agent 是什么？它和 LangGraph 有什么区别？</h3><p><strong>备考定位：B · 重点追问｜基础。</strong> 答题抓手：开源 Agent 应用与工作流框架的职责差异。</p>
+<p><strong>参考答案：</strong></p>
+<p>Hermes Agent 是 Nous Research 开源的 Agent 应用，提供模型接入、工具执行、会话、Skills、记忆和自动化等能力。它可以作为现成助手使用和配置，官方 README 还介绍了消息入口、定时任务和不同工具执行后端。</p>
+<p>LangGraph 更适合用来构建显式状态与控制流的应用工作流。两者不是完全相同层次的替代品：使用 Hermes 可以复用现成 Agent 的交互和能力组织；构建 Camera 业务系统时，仍需要领域参数契约、设备调度、校验和验收流程。不能因为两者都能调用工具就认为架构一样。</p>
+<p>**常见追问：**既然 Hermes 已经能执行任务，为什么还做自己的系统？</p>
+<p>**回答：**业务系统有固定的数据和执行约束、可追溯要求与评测标准。可以复用通用 Agent 能力，但是否让其进入生产执行链，要看适配成本和验证结果。</p>
+<p><span id="q65"></span></p>
+<h3 id="Q65：你具体用-Hermes-做过什么？你自己的贡献是什么？"><a href="#Q65：你具体用-Hermes-做过什么？你自己的贡献是什么？" class="headerlink" title="Q65：你具体用 Hermes 做过什么？你自己的贡献是什么？"></a>Q65：你具体用 Hermes 做过什么？你自己的贡献是什么？</h3><p><strong>备考定位：B · 重点追问｜基础。</strong> 答题抓手：真实使用任务、个人改动、成功和失败证据。</p>
+<p><strong>参考答案模板：</strong></p>
+<p>“我使用的版本或时间范围是【实际版本&#x2F;日期】，通过【实际入口】完成【真实任务】。我配置了【实际模型与工具】，准备了【上下文或 Skill】，它执行了【实际步骤】。过程中遇到【真实问题】，我通过【日志、配置或输出】定位并做了【本人修改】，最后用【测试、人工核对或业务指标】验证结果。”</p>
+<p>接着明确使用深度：只是安装和使用，就讲任务、配置和验证；写过 Skill 或集成工具，就展示相关文件和调用；改过源码，再讲修改位置和测试。不把“官方支持子 Agent、记忆或定时任务”当成自己已经用过这些功能。</p>
+<p>**常见追问：**效果如何？给一个失败例子。</p>
+<p>**回答：**准备一个成功轨迹和一个失败轨迹，包含脱敏输入、实际动作、产物和验收证据。没有统计过效率时，可以说明具体节省的步骤，不虚构百分比。</p>
+<p><strong>个人使用记录待补充：</strong></p>
+<table>
+<thead>
+<tr>
+<th>信息</th>
+<th>需要填写的真实内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>版本与环境</td>
+<td>安装方式、操作系统、版本或提交</td>
+</tr>
+<tr>
+<td>模型和入口</td>
+<td>实际 provider&#x2F;model，以及 CLI、消息端或其他入口</td>
+</tr>
+<tr>
+<td>任务</td>
+<td>输入、目标、工具、产物与完成标准</td>
+</tr>
+<tr>
+<td>本人工作</td>
+<td>配置、Skill、接口适配、源码修改或排错</td>
+</tr>
+<tr>
+<td>验证</td>
+<td>命令结果、测试、人工核查和可复现记录</td>
+</tr>
+<tr>
+<td>限制</td>
+<td>一次失败及是否解决，哪些能力没有使用</td>
+</tr>
+</tbody></table>
+<p><span id="q66"></span></p>
+<h3 id="Q66：Hermes-的-Skills、记忆和-RAG-有什么区别？"><a href="#Q66：Hermes-的-Skills、记忆和-RAG-有什么区别？" class="headerlink" title="Q66：Hermes 的 Skills、记忆和 RAG 有什么区别？"></a>Q66：Hermes 的 Skills、记忆和 RAG 有什么区别？</h3><p><strong>备考定位：B · 重点追问｜进阶。</strong> 答题抓手：Skills、长期记忆与领域 RAG 的职责。</p>
+<p><strong>参考答案：</strong></p>
+<p>官方 Skills 文档把 Skill 描述为按需加载的知识文档，使用渐进披露减少不必要的上下文。它适合组织完成某类任务的方法、检查项和参考材料；文档也说明了从材料或已有流程整理 Skill 的能力。</p>
+<p>记忆更偏向跨会话保留有用信息或用户背景，历史会话检索用于找回过去的经历。领域 RAG 则从知识库检索当前任务所需的事实与来源，例如本项目的方案、参数及描述。三者都可能使用检索和文件，但保存对象与生命周期不同。</p>
+<p>在 Camera 场景，参数定义及版本应由领域知识源管理；如何执行某个流程可作为 Skill；个人偏好或稳定环境信息才考虑记忆。不能把一次失败实验的临时判断写成长期可靠事实。</p>
+<p>**常见追问：**按需加载为什么有帮助？</p>
+<p>**回答：**先用简短描述匹配任务，再读取相关步骤和参考内容，减少无关信息与 token。但加载是否准确、是否遗漏必要约束仍需要验证，不能把“渐进披露”当成质量保证。</p>
+<p><span id="q67"></span></p>
+<h3 id="Q67：Hermes-宣称会持续学习，是否意味着它在训练模型？"><a href="#Q67：Hermes-宣称会持续学习，是否意味着它在训练模型？" class="headerlink" title="Q67：Hermes 宣称会持续学习，是否意味着它在训练模型？"></a>Q67：Hermes 宣称会持续学习，是否意味着它在训练模型？</h3><p><strong>备考定位：C · 按岗扩展｜基础。</strong> 答题抓手：经验积累与更新模型权重的区别。</p>
+<p><strong>参考答案：</strong></p>
+<p>依据官方 README 中的能力描述，这里的持续学习主要包括积累或改进 Skills、维护记忆、检索历史会话，并在后续任务中复用经验。这些属于应用侧的持久化知识和行为上下文变化，不能直接理解成每次对话都更新模型权重。</p>
+<p>训练或微调需要单独的数据、训练过程和模型版本证据。一个 Agent 更了解用户或能复用流程，可能只是拿到了更合适的上下文，而不是底层模型参数改变。</p>
+<p>经验自动写入也可能积累错误，所以要关注来源、适用范围、审核、撤销和回归验证。把生成的 Skill 在新样本上试验，比只观察原任务再次成功更能说明复用效果。</p>
+<p>**常见追问：**如何证明所谓自改进真的有用？</p>
+<p>**回答：**固定模型与任务预算，对比有无这份经验或 Skill 的表现，在不同任务上检查成功率、纠正次数和成本，并确认没有把测试答案直接写进经验。</p>
+<p><span id="q68"></span></p>
+<h3 id="Q68：Hermes-的工具执行环境和自动化能力，你会怎么评估？"><a href="#Q68：Hermes-的工具执行环境和自动化能力，你会怎么评估？" class="headerlink" title="Q68：Hermes 的工具执行环境和自动化能力，你会怎么评估？"></a>Q68：Hermes 的工具执行环境和自动化能力，你会怎么评估？</h3><p><strong>备考定位：C · 按岗扩展｜进阶。</strong> 答题抓手：工具后端、隔离、持久化及自动化验证。</p>
+<p><strong>参考答案：</strong></p>
+<p>官方 README 描述了本地、容器和远程等工具执行后端，以及定时任务和消息入口。使用时首先确认当前工具在哪里运行、能访问哪些文件和网络、采用什么凭据、出了问题如何停止和核查。</p>
+<p>容器或远程后端不自动等于安全隔离，挂载目录、网络访问和授权工具决定实际边界。定时任务还需要明确时区、任务重叠、重复执行、失败通知和成本限制；这些是需要核验的使用条件，不能假设软件替用户全部处理。</p>
+<p>在个人使用经验中，只讲实际启用的后端与入口。如果是本地终端使用，就不声称已做多平台消息接入或生产级调度。</p>
+<p>**常见追问：**为什么这也属于 Harness Engineering？</p>
+<p>**回答：**因为执行后端、文件可见性、工具范围、反馈和预算直接影响 Agent 能否正确完成任务，属于模型周围的工作环境设计。</p>
+<p><span id="q69"></span></p>
+<h3 id="Q69：如果将-Hermes-的经验引入-Camera-Agent，你会怎么做？"><a href="#Q69：如果将-Hermes-的经验引入-Camera-Agent，你会怎么做？" class="headerlink" title="Q69：如果将 Hermes 的经验引入 Camera Agent，你会怎么做？"></a>Q69：如果将 Hermes 的经验引入 Camera Agent，你会怎么做？</h3><p><strong>备考定位：C · 按岗扩展｜进阶。</strong> 答题抓手：将通用经验适配到受控业务链路。</p>
+<p><strong>参考答案：</strong></p>
+<p>先借鉴能力组织方式：将稳定流程沉淀成可审查的 Skill，按需加载上下文，把任务执行与模型建议分开，并保留实际轨迹用于验证。参数事实仍从领域 RAG 召回，硬件操作仍通过现有受控接口执行。</p>
+<p>如果确实需要让 Hermes 成为入口，可以封装“查询参数、提交受约束任务、查询状态、获取报告”等工具。参数映射、权限、HIL、设备独占与验收规则保留在业务服务侧，不能用通用终端权限替代这些约束。整个集成属于设计方案，尚未确认已经接入。</p>
+<p>我会在固定任务上比较直接使用原入口与新增 Agent 入口后的成功率、调用成本、人工干预和错误类型。只有带来可测的使用或工程收益，才值得增加这一层。</p>
+<p>**常见追问：**用过 Hermes 和理解 Agent 架构之间差在哪里？</p>
+<p>**回答：**用过说明能完成配置与任务；理解架构还需要解释状态、上下文、工具执行和验证边界，能定位失败并判断哪些能力该复用、哪些应留在业务系统中。</p>
+<p><span id="evidence"></span></p>
+<h2 id="十、面试前需要补齐的证据"><a href="#十、面试前需要补齐的证据" class="headerlink" title="十、面试前需要补齐的证据"></a>十、面试前需要补齐的证据</h2><p>下面的信息决定你能否承受进一步追问。优先从实际项目记录补齐，不凭印象编造。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>需要准备的真实信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>个人职责</td>
+<td>独立设计或实现的模块、与团队的分工</td>
+</tr>
+<tr>
+<td>模型接入</td>
+<td>QGenie 的角色、实际模型版本、接口能力、一次调用样例</td>
+</tr>
+<tr>
+<td>意图识别</td>
+<td>一条原始需求及提取出的场景、问题、目标和约束</td>
+</tr>
+<tr>
+<td>LangGraph</td>
+<td>实际节点图、State 字段、条件边、停止条件</td>
+</tr>
+<tr>
+<td>工具执行</td>
+<td>工具 schema、成功与失败回包、同步&#x2F;异步方式</td>
+</tr>
+<tr>
+<td>GraphRAG 存储</td>
+<td>图数据库或存储实现、向量索引是否存在、使用的库</td>
+</tr>
+<tr>
+<td>图谱建模</td>
+<td>一份真实方案及其参数、取值、描述、关系和版本</td>
+</tr>
+<tr>
+<td>检索链路</td>
+<td>一次意图到召回参数的完整例子，含来源及实际过滤方式</td>
+</tr>
+<tr>
+<td>流程交接</td>
+<td>召回结果如何映射到现有入口，参数值和范围由谁提供</td>
+</tr>
+<tr>
+<td>知识更新</td>
+<td>数据来源、导入方式、去重、版本和回写策略</td>
+</tr>
+<tr>
+<td>可靠性</td>
+<td>已落地的超时、重试、幂等、恢复机制及未覆盖情况</td>
+</tr>
+<tr>
+<td>HIL 人工介入</td>
+<td>实际审核位置、展示内容、批准范围、恢复路径及方案版本绑定；未实现时准备设计说明</td>
+</tr>
+<tr>
+<td>效果数据</td>
+<td>样本数、对照组、成功率、实验次数、耗时和成本</td>
+</tr>
+<tr>
+<td>失败案例</td>
+<td>一个真实问题及定位、修复和验证过程</td>
+</tr>
+</tbody></table>
+<h3 id="如何使用这份证据清单"><a href="#如何使用这份证据清单" class="headerlink" title="如何使用这份证据清单"></a>如何使用这份证据清单</h3><p>按照<a href="#study-guide">备考总览</a>的核心题与难点顺序补材料；同一份脱敏 trace 可以同时支撑架构、工具调用、故障定位与评测回答。未实现的机制保留为设计稿，未测量的指标保留为待验证项。</p>
+<h3 id="三个容易混淆的表述"><a href="#三个容易混淆的表述" class="headerlink" title="三个容易混淆的表述"></a>三个容易混淆的表述</h3><table>
+<thead>
+<tr>
+<th>容易夸大的表述</th>
+<th>更准确的表达</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>“用了 LangGraph，所以有断点恢复”</td>
+<td>“配置了什么持久化机制，并如何核对外部任务状态”；若未实现则直接说明</td>
+</tr>
+<tr>
+<td>“GraphRAG 存了参数，所以消除了幻觉”</td>
+<td>“图存储组织参数关系，检索提供证据，执行层继续校验；效果需要对照评测”</td>
+</tr>
+<tr>
+<td>“模型直接生成所有调参参数”</td>
+<td>模型识别需求，通过 RAG 召回已有参数及描述，再交给现有流程</td>
+</tr>
+</tbody></table>
+<h3 id="与当前链路一致的简历表述"><a href="#与当前链路一致的简历表述" class="headerlink" title="与当前链路一致的简历表述"></a>与当前链路一致的简历表述</h3><p><strong>项目：基于 LangGraph 与 GraphRAG 的 Camera Tuning 需求理解与参数召回系统。</strong></p>
+<ul>
+<li>使用 QGenie 识别需求场景，通过 LangGraph 串联意图识别、参数召回、plan JSON 生成与执行，采用外层 Plan-and-Execute、内层 ReAct 式反馈迭代的组织方式。</li>
+<li>使用 GraphRAG 组织调参方案、参数及参数描述，基于用户意图召回相关参数，支持从自然语言需求到业务参数的映射。</li>
+<li>将参数召回结果接入现有 Camera Tuning 流程，衔接参数配置定位、粗扫、bin 编译、设备采集、QCATS 评测和模型辅助细扫，记录候选配置与实验结果。</li>
+</ul>
+<p>说明高层计划中的步骤、方法及参数来源，并用细扫的“观测—模型推荐—工具执行—新观测”轨迹支撑 ReAct 式闭环。外层自动重规划、计划版本管理和审批机制是否已实现，仍按事实填写。</p>
+<h3 id="最后自测题"><a href="#最后自测题" class="headerlink" title="最后自测题"></a>最后自测题</h3><p>面试官让你现场画架构，然后提出：“用户要求降低噪声但保留细节，意图识别漏掉了后半句；RAG 召回了一个旧版本参数；现有流程提交超时。”</p>
+<p>你应能分别指出处理位置：对照原始需求检查意图中的约束完整性；检索适用条件与交接校验识别参数版本问题；通过现有流程的任务标识和执行状态核对提交结果。再明确其中哪些机制已经实现，哪些是下一步工程设计。</p>
+<p><span id="jd-preparation"></span></p>
+<h2 id="十一、岗位要求与备考证据对照"><a href="#十一、岗位要求与备考证据对照" class="headerlink" title="十一、岗位要求与备考证据对照"></a>十一、岗位要求与备考证据对照</h2><h3 id="常见-JD-方向与本手册对应关系"><a href="#常见-JD-方向与本手册对应关系" class="headerlink" title="常见 JD 方向与本手册对应关系"></a>常见 JD 方向与本手册对应关系</h3><p>不同岗位对模型训练、后端和 Agent 的比重不同。以下是准备范围映射，不是对某个未提供 JD 的逐项符合承诺。</p>
+<table>
+<thead>
+<tr>
+<th>常见要求</th>
+<th>建议重点题目</th>
+<th>应能展示的证据或练习成果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Python、API 与后端工程</td>
+<td>Q46、Q47、Q48、Q49</td>
+<td>可运行的任务 API、参数校验、异步执行和错误处理</td>
+</tr>
+<tr>
+<td>LLM 接入与 Prompt Engineering</td>
+<td>Q08、Q09、Q52、Q53、Q57</td>
+<td>模型适配器、结构化输出样例、prompt 版本与评测对比</td>
+</tr>
+<tr>
+<td>RAG、embedding、向量数据库</td>
+<td>Q29、Q34—Q38、Q42</td>
+<td>标注查询集、切分依据、混合检索和重排消融</td>
+</tr>
+<tr>
+<td>GraphRAG 与领域知识建模</td>
+<td>Q15—Q24、Q39</td>
+<td>一份真实方案的节点关系、查询路径和参数来源</td>
+</tr>
+<tr>
+<td>LangGraph、Agent、工具集成</td>
+<td>Q04—Q14、Q26、Q54</td>
+<td>状态图、工具 schema、执行记录及故障案例</td>
+</tr>
+<tr>
+<td>HIL、可靠性与权限</td>
+<td>Q13、Q27、Q28、Q33、Q48、Q50</td>
+<td>审核流程、幂等设计、恢复与越权测试</td>
+</tr>
+<tr>
+<td>多轮对话与上下文管理</td>
+<td>Q25、Q40、Q41、Q51</td>
+<td>纠正需求后的状态变化、缓存失效与历史裁剪案例</td>
+</tr>
+<tr>
+<td>内存与长期记忆工程</td>
+<td>Q70—Q79</td>
+<td>内存剖析、上下文预算、记忆更新与删除、冲突及隔离评测</td>
+</tr>
+<tr>
+<td>效果评测与性能优化</td>
+<td>Q29—Q32、P01—P08</td>
+<td>有分母与对照条件的评测报告、trace 与瓶颈分析</td>
+</tr>
+<tr>
+<td>工程交付、部署与运维</td>
+<td>Q31、Q44、Q56</td>
+<td>版本化发布、回归检查、观测面板或复盘记录</td>
+</tr>
+<tr>
+<td>多模态或模型训练&#x2F;部署加分项</td>
+<td>Q42、Q55、Q57</td>
+<td>只展示实际做过的实验；未做过时解释原理与方案</td>
+</tr>
+<tr>
+<td>Harness Engineering 与 Agent 开发实践</td>
+<td>Q58—Q63</td>
+<td>可复现环境、约束与工具设计、失败轨迹、验证和迭代对照</td>
+</tr>
+<tr>
+<td>开源 Agent 使用与选型</td>
+<td>Q64—Q69</td>
+<td>Hermes 实际任务记录、使用版本、配置或 Skill 变更、个人贡献</td>
+</tr>
+</tbody></table>
+<h3 id="如何按-JD-调整优先级"><a href="#如何按-JD-调整优先级" class="headerlink" title="如何按 JD 调整优先级"></a>如何按 JD 调整优先级</h3><p>全篇统一使用<a href="#study-guide">备考总览</a>中的 A&#x2F;B&#x2F;C 分级。拿到具体 JD 后，将明确要求且会写进简历的主题提升为核心准备；相应演示与证据也一并补齐。Harness 与 Hermes 的优先级取决于岗位和个人经历，不能用通用功能介绍替代使用记录。</p>
+<p><span id="practice-tasks"></span></p>
+<h3 id="建议准备的四个可演示任务"><a href="#建议准备的四个可演示任务" class="headerlink" title="建议准备的四个可演示任务"></a>建议准备的四个可演示任务</h3><p>以下是练习建议，不表示本次已新增这些代码或完成相关实验。</p>
+<ul>
+<li>**需求到参数检索：**给出一条正常需求、一条多目标需求和一条无答案需求，展示意图、召回参数、来源和失败处理。</li>
+<li>**长任务服务：**实现创建、查询、取消与事件订阅，用受控工具替身展示提交超时、重复请求和恢复；明确真实设备与替身的边界。</li>
+<li>**HIL 审核：**展示修改方案后旧批准失效，以及恢复审核不会重复提交外部操作。</li>
+<li>**评测报告：**在冻结样本集上比较至少两个检索方案，报告质量、延迟、成本与错误分类，保留可复查记录。</li>
+</ul>
+<h3 id="回答时的统一结构"><a href="#回答时的统一结构" class="headerlink" title="回答时的统一结构"></a>回答时的统一结构</h3><p>先说明具体业务问题，再解释当前实现、选择依据与替代方案，最后给出验证结果和适用边界。没有实测数据时讲评测方法，没有落地的组件讲设计方案，不把扩展学习内容写成已经完成的项目经历。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io">刘元</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://liuyuann.github.io/2026/10/07/camera-tuning-agent-interview/">https://liuyuann.github.io/2026/10/07/camera-tuning-agent-interview/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://liuyuann.github.io" target="_blank">刘元的技术博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E9%9D%A2%E8%AF%95%E9%A2%98/">面试题</a><a class="post-meta__tags" href="/tags/AI-Agent/">AI Agent</a><a class="post-meta__tags" href="/tags/LangGraph/">LangGraph</a><a class="post-meta__tags" href="/tags/RAG/">RAG</a><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8/">大模型应用</a><a class="post-meta__tags" href="/tags/GraphRAG/">GraphRAG</a></div><div class="post-share"><div class="social-share" data-image="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/09/24/camx-driver-claude-code/" title="项目介绍：CamX 摄像头传感器驱动智能生成与调优助手"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80" onerror="onerror=null;src='/'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">项目介绍：CamX 摄像头传感器驱动智能生成与调优助手</div></div><div class="info-2"><div class="info-item-1">基于 Claude Code 打造的高通 CamX 平台摄像头传感器驱动全生命周期辅助工具，用 RAG + 多模态 LLM 自动生成驱动配置，并配套设备部署、测试验证、ISP 调优的完整工具链。   项目背景高通 CamX 平台的摄像头传感器驱动开发，传统流程依赖工程师手动查阅传感器数据手册（PDF），逐字段抄录寄存器配置到驱动 XML 中，过程繁琐且容易出错。本项目基于 Claude Code 打造了一套面向”驱动生成 → 设备部署 → 测试验证 → ISP 调优 → 结果比对”五阶段流程的智能辅助工具，目前驱动生成阶段已完成，设备部署、测试验证与调优阶段部分完成，结果比对阶段规划中。 核心工作1. RAG 驱动的传感器驱动 XML 自动生成引擎以 YAML 声明式规范定义字段提取策略，包括 const（常量）、retrieve（检索）、compute（计算）、derive（派生）、power_up&#x2F;power_down（上下电时序）、power_from_pdf（从 PDF 图像解析时序）共 7 种类型。引擎通过向量检索（Chroma）+ LLM 从传感器数据手册 ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/08/28/ai-agent-interview/" title="AI Agent 工程师面试详解手册（图解 + 30 道高频题）"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-28</div><div class="info-item-2">AI Agent 工程师面试详解手册（图解 + 30 道高频题）</div></div><div class="info-2"><div class="info-item-1">面向国内 AI 应用开发 &#x2F; 大模型应用 &#x2F; AI Agent 工程师岗位，按 6 个模块系统梳理核心概念，每个知识点配图讲解，并附 30+ 道高频面试题与参考答案（点击展开）。主框架 LangGraph，服务端 Python + FastAPI，模型入口 QGenie &#x2F; OpenAI-compatible API。   模块 0 · QGenie SDK 模型接入基线 在写任何 Agent 逻辑之前，先能独立、可靠地完成一次模型调用。这是所有 Agent 能力的地基。  0.1 一次 chat() 调用的数据流向最常用的接口是 client.chat()——任何模型（Claude &#x2F; GPT &#x2F; Gemini）都能用同一套 messages 格式调用。你把消息发给网关，网关调度模型推理，再把结果原路返回。  取值路径要背下来：response.choices[0].message.content。choices 是列表（可要求模型给多个候选），通常只看第一个。 12345response = client.chat(    m...</div></div></div></a><a class="pagination-related" href="/2026/09/24/camx-driver-claude-code/" title="项目介绍：CamX 摄像头传感器驱动智能生成与调优助手"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-24</div><div class="info-item-2">项目介绍：CamX 摄像头传感器驱动智能生成与调优助手</div></div><div class="info-2"><div class="info-item-1">基于 Claude Code 打造的高通 CamX 平台摄像头传感器驱动全生命周期辅助工具，用 RAG + 多模态 LLM 自动生成驱动配置，并配套设备部署、测试验证、ISP 调优的完整工具链。   项目背景高通 CamX 平台的摄像头传感器驱动开发，传统流程依赖工程师手动查阅传感器数据手册（PDF），逐字段抄录寄存器配置到驱动 XML 中，过程繁琐且容易出错。本项目基于 Claude Code 打造了一套面向”驱动生成 → 设备部署 → 测试验证 → ISP 调优 → 结果比对”五阶段流程的智能辅助工具，目前驱动生成阶段已完成，设备部署、测试验证与调优阶段部分完成，结果比对阶段规划中。 核心工作1. RAG 驱动的传感器驱动 XML 自动生成引擎以 YAML 声明式规范定义字段提取策略，包括 const（常量）、retrieve（检索）、compute（计算）、derive（派生）、power_up&#x2F;power_down（上下电时序）、power_from_pdf（从 PDF 图像解析时序）共 7 种类型。引擎通过向量检索（Chroma）+ LLM 从传感器数据手册 ...</div></div></div></a><a class="pagination-related" href="/2026/01/11/s11_error_recovery/" title="s11: Error Recovery — 错误不是结束"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/s11_error_recovery.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-11</div><div class="info-item-2">s11: Error Recovery — 错误不是结束</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s09 → s10 → s11 → s12 → s13 → … → s20  “错误不是终点, 是重试的起点” — 升级 token、压缩上下文、切换模型。 Harness 层: 韧性 — 主循环遇到错误时分类并恢复。   问题Agent 跑着跑着报错了： 1Error: 529 overloaded  Agent 崩溃了。它没有重试，没有换模型，没有减少上下文——直接崩溃。 生产环境中 API 错误是常态。三种最常见的故障模式：输出被截断（模型话说一半 token 用完了）、上下文超限（压缩后还是太长）、临时故障（429 限流 &#x2F; 529 过载）。一个不处理错误的 Agent 就像一个一碰就熄火的车。  解决方案 s10 的循环、prompt 组装全部保留。唯一的变动：LLM 调用包裹在 try&#x2F;except 里，根据错误类型走不同的恢复路径。恢复后 continue 回到循环开头重新调用 LLM。 三种最常见的恢复模式（教学版只处理 429&#x2F;529；真实系统还覆盖连接错误、超时、云厂商认证...</div></div></div></a><a class="pagination-related" href="/2026/01/19/s19_mcp_plugin/" title="s19: MCP Tools — 外接工具，标准协议"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/s19_mcp_tools.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-19</div><div class="info-item-2">s19: MCP Tools — 外接工具，标准协议</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s17 → s18 → s19 → s20  “外接工具, 标准协议” — 发现、组装、调用，Agent 不需要知道工具是谁写的。 Harness 层: 插件 — 外部能力通过标准协议接入。   问题s01 到 s18，Agent 的所有工具都是手写的——bash、read、write、task、worktree。每个工具的输入验证、执行逻辑、错误处理，都是你一行行写的。 现在你有 3 个外部服务想接入：公司的 Jira API（查 issue、建 ticket）、自建的部署系统（触发 deploy、看日志）、团队的 Notion 知识库（搜文档、建页面）。你不想为每个服务重写一套工具代码。 你需要一个标准协议——外部服务只要实现它，Agent 就能直接调用，不管服务用什么语言写的。  解决方案 MCP（Model Context Protocol）定义了 Agent 如何发现和调用外部工具。核心概念：    概念 作用    MCPClient Agent 端的客户端，连接 server、发现工具、调用工具   MCP ...</div></div></div></a><a class="pagination-related" href="/2026/01/01/s01_agent_loop/" title="s01: Agent Loop — 一个循环就够了"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/s01_agent_loop.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-01</div><div class="info-item-2">s01: Agent Loop — 一个循环就够了</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → s02 → s03 → s04 → … → s20  “One loop &amp; Bash is all you need” — 一个工具 + 一个循环 &#x3D; 一个 Agent。 Harness 层: 循环 — 模型与真实世界的第一道连接。   问题你提出了一个问题给大模型：“帮我读取下我的目录下有哪些文件，并且执行XXX.py”。 模型能输出一条 bash 命令，但输出完了就停了，它不会自己跑，也不会看到结果后继续推理。 你可以手动跑一遍，把输出粘贴回对话框，让它接着干。下一个命令出来，你再跑一遍、再贴回去。 每一个来回，你都在做中间层。而把它自动化，就是这一章要做的事。  解决方案 一个 while True 循环，模型调用工具就继续，不调用就停。整个过程只有两个信号：    信号 含义 循环动作    stop_reason == &quot;tool_use&quot; 模型举手说”我要用工具” 执行 → 结果喂回去 → 继续   stop_reason != &quot;tool_use&quot; 模型说”...</div></div></div></a><a class="pagination-related" href="/2026/01/18/s18_worktree_isolation/" title="s18: Worktree Isolation — 各干各的，互不干扰"><img class="cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/s18_worktree_isolation.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-18</div><div class="info-item-2">s18: Worktree Isolation — 各干各的，互不干扰</div></div><div class="info-2"><div class="info-item-1">中文 · English · 日本語 s01 → … → s16 → s17 → s18 → s19 → s20  “各干各的目录, 互不干扰” — 任务管目标, worktree 管目录, 按 ID 绑定。 Harness 层: 隔离 — 并行执行的目录隔离。   问题s17 中，Alice 和 Bob 都在同一个目录下工作。Alice 的任务是”重构认证模块”，Bob 的任务是”重构 UI 登录页”。 Alice write_file(&quot;config.py&quot;, ...)。Bob 也 write_file(&quot;config.py&quot;, ...)。两个人改同一个文件，互相覆盖。而且无法干净地回滚——分不清哪些改动是谁的。 s15-s17 解决了”谁干什么”（任务系统）和”怎么通信”（消息总线），但没解决”在哪干”。  解决方案 Git worktree 让你在同一仓库中创建多个独立的工作目录，每个有自己的分支。Alice 在 .worktrees/auth-refactor/ 下工作，Bob 在 .worktrees/ui-login/ 下工作...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/images/mine.jpg" onerror="this.onerror=null;this.src='/'" alt="avatar"/></div><div class="author-info-name">刘元</div><div class="author-info-description">高通 AI 工程师 | LLM Agent 开发者</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">31</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" href="/atom.xml"><i class="fas fa-rss"></i><span>订阅</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/LiuYuann" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1903554839@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%85%E8%AF%BB%E5%AF%BC%E8%88%AA"><span class="toc-number">1.</span> <span class="toc-text">阅读导航</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%87%E8%80%83%E6%80%BB%E8%A7%88%EF%BC%9A%E5%85%88%E6%8E%8C%E6%8F%A1%E4%B8%BB%E7%BA%BF%EF%BC%8C%E5%86%8D%E7%AA%81%E7%A0%B4%E9%9A%BE%E7%82%B9"><span class="toc-number">2.</span> <span class="toc-text">备考总览：先掌握主线，再突破难点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E5%85%88%E7%BA%A7%E4%B8%8E%E9%9A%BE%E5%BA%A6%E5%88%86%E5%88%AB%E6%80%8E%E4%B9%88%E7%9C%8B%EF%BC%9F"><span class="toc-number">2.1.</span> <span class="toc-text">优先级与难度分别怎么看？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E8%BD%AE%EF%BC%9A30-%E9%81%93%E6%A0%B8%E5%BF%83%E9%A2%98%E7%9A%84%E8%AE%B2%E8%BF%B0%E9%A1%BA%E5%BA%8F"><span class="toc-number">2.2.</span> <span class="toc-text">第一轮：30 道核心题的讲述顺序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E8%BD%AE%EF%BC%9A%E5%85%AB%E4%B8%AA%E9%9C%80%E8%A6%81%E6%B7%B1%E5%85%A5%E5%87%86%E5%A4%87%E7%9A%84%E9%9A%BE%E7%82%B9"><span class="toc-number">2.3.</span> <span class="toc-text">第二轮：八个需要深入准备的难点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E8%BD%AE%EF%BC%9A%E6%8C%89%E5%B2%97%E4%BD%8D%E6%96%B9%E5%90%91%E5%8A%A0%E6%B7%B1"><span class="toc-number">2.4.</span> <span class="toc-text">第三轮：按岗位方向加深</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%8D%E4%B9%A0%E5%AE%89%E6%8E%92%E4%B8%8E%E8%87%AA%E6%B5%8B%E6%A0%87%E5%87%86"><span class="toc-number">2.5.</span> <span class="toc-text">复习安排与自测标准</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9B%B6%E3%80%81%E7%8E%B0%E6%9C%89%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E4%B8%8E%E5%AE%8C%E6%95%B4%E9%A1%B9%E7%9B%AE%E5%8F%A3%E8%BF%B0"><span class="toc-number">3.</span> <span class="toc-text">零、现有执行流程与完整项目口述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9A%E4%B8%8D%E8%A6%81%E5%8F%AA%E8%AF%B4%E2%80%9C%E6%8E%A5%E4%B8%8A%E7%8E%B0%E6%9C%89%E6%B5%81%E7%A8%8B%E2%80%9D%EF%BC%8C%E5%90%8E%E9%9D%A2%E5%88%B0%E5%BA%95%E6%80%8E%E4%B9%88%E6%89%A7%E8%A1%8C%EF%BC%9F"><span class="toc-number">3.1.</span> <span class="toc-text">面试官问：不要只说“接上现有流程”，后面到底怎么执行？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%84%E9%98%B6%E6%AE%B5%E7%A9%B6%E7%AB%9F%E8%BE%93%E5%85%A5%E4%BB%80%E4%B9%88%E3%80%81%E8%BE%93%E5%87%BA%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">3.2.</span> <span class="toc-text">各阶段究竟输入什么、输出什么？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9A%E6%A8%A1%E5%9E%8B%E5%88%B0%E5%BA%95%E5%9C%A8%E5%93%AA%E5%87%A0%E5%A4%84%E5%8F%91%E6%8C%A5%E4%BD%9C%E7%94%A8%EF%BC%9F"><span class="toc-number">3.3.</span> <span class="toc-text">面试官问：模型到底在哪几处发挥作用？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#plan-JSON%E3%80%81%E6%AF%8F%E8%BD%AE%E8%AE%A1%E5%88%92%E5%92%8C%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81%E5%88%86%E5%88%AB%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">3.4.</span> <span class="toc-text">plan JSON、每轮计划和运行状态分别是什么？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E6%89%A7%E8%A1%8C%E4%BB%A3%E7%A0%81%E4%BE%9D%E6%8D%AE%E4%B8%8E%E5%8F%A3%E8%BF%B0%E8%BE%B9%E7%95%8C"><span class="toc-number">3.5.</span> <span class="toc-text">原执行代码依据与口述边界</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E9%A1%B9%E7%9B%AE%E5%AE%9A%E4%BD%8D%E3%80%81%E9%9C%80%E6%B1%82%E7%90%86%E8%A7%A3%E4%B8%8E-Agent-%E6%9E%B6%E6%9E%84"><span class="toc-number">4.</span> <span class="toc-text">一、项目定位、需求理解与 Agent 架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Q01%EF%BC%9A%E8%AF%B7%E7%94%A8%E4%B8%80%E5%88%86%E9%92%9F%E4%BB%8B%E7%BB%8D%E8%BF%99%E4%B8%AA%E9%A1%B9%E7%9B%AE%E3%80%82"><span class="toc-number">4.1.</span> <span class="toc-text">Q01：请用一分钟介绍这个项目。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q02%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%A8%A1%E5%9E%8B%E5%81%9A%E6%84%8F%E5%9B%BE%E8%AF%86%E5%88%AB%EF%BC%9F%E5%85%B3%E9%94%AE%E8%AF%8D%E5%8C%B9%E9%85%8D%E4%B8%8D%E8%83%BD%E5%81%9A%E5%90%97%EF%BC%9F"><span class="toc-number">4.2.</span> <span class="toc-text">Q02：为什么需要模型做意图识别？关键词匹配不能做吗？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q03%EF%BC%9A%E6%84%8F%E5%9B%BE%E8%AF%86%E5%88%AB%E8%BE%93%E5%87%BA%E4%BB%80%E4%B9%88%EF%BC%9F%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86%E6%A8%A1%E7%B3%8A%E9%9C%80%E6%B1%82%EF%BC%9F"><span class="toc-number">4.3.</span> <span class="toc-text">Q03：意图识别输出什么？如何处理模糊需求？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q04%EF%BC%9A%E6%9C%89-plan-JSON%EF%BC%8C%E6%98%AF%E5%90%A6%E5%8F%AF%E4%BB%A5%E8%AF%B4%E9%87%87%E7%94%A8-Plan-and-Execute-%E5%8A%A0-ReAct%EF%BC%9F"><span class="toc-number">4.4.</span> <span class="toc-text">Q04：有 plan JSON，是否可以说采用 Plan-and-Execute 加 ReAct？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q05%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89-LangGraph%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E6%99%AE%E9%80%9A-Python-%E5%BE%AA%E7%8E%AF%EF%BC%9F"><span class="toc-number">4.5.</span> <span class="toc-text">Q05：为什么选 LangGraph，而不是普通 Python 循环？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q06%EF%BC%9AState-%E6%80%8E%E4%B9%88%E8%AE%BE%E8%AE%A1%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%8F%AA%E7%94%A8-messages%EF%BC%9F"><span class="toc-number">4.6.</span> <span class="toc-text">Q06：State 怎么设计？为什么不只用 messages？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q07%EF%BC%9A%E8%BF%99%E6%98%AF%E5%8D%95-Agent-%E8%BF%98%E6%98%AF%E5%A4%9A-Agent%EF%BC%9F%E9%9C%80%E8%A6%81%E6%8B%86%E5%A4%9A%E4%B8%AA-Agent-%E5%90%97%EF%BC%9F"><span class="toc-number">4.7.</span> <span class="toc-text">Q07：这是单 Agent 还是多 Agent？需要拆多个 Agent 吗？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q40%EF%BC%9A%E5%A4%9A%E8%BD%AE%E5%AF%B9%E8%AF%9D%E4%B8%AD%EF%BC%8C%E7%94%A8%E6%88%B7%E7%BA%A0%E6%AD%A3%E4%BA%86%E5%9C%BA%E6%99%AF%EF%BC%8C%E4%BD%A0%E6%80%8E%E4%B9%88%E6%9B%B4%E6%96%B0%E6%84%8F%E5%9B%BE%EF%BC%9F"><span class="toc-number">4.8.</span> <span class="toc-text">Q40：多轮对话中，用户纠正了场景，你怎么更新意图？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q41%EF%BC%9A%E7%94%A8%E6%88%B7%E8%AF%B4%E7%9A%84%E6%98%AF%E7%8E%B0%E8%B1%A1%EF%BC%8C%E4%BD%A0%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AE%A4%E4%B8%BA%E5%B7%B2%E7%BB%8F%E7%9F%A5%E9%81%93%E6%A0%B9%E5%9B%A0%EF%BC%9F"><span class="toc-number">4.9.</span> <span class="toc-text">Q41：用户说的是现象，你为什么认为已经知道根因？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81GraphRAG-%E7%9F%A5%E8%AF%86%E5%BB%BA%E6%A8%A1%E4%B8%8E%E5%8F%82%E6%95%B0%E6%A3%80%E7%B4%A2"><span class="toc-number">5.</span> <span class="toc-text">二、GraphRAG 知识建模与参数检索</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Q15%EF%BC%9A%E4%BD%A0%E7%9A%84-GraphRAG-%E5%AD%98%E4%BB%80%E4%B9%88%EF%BC%8C%E6%8F%90%E4%BE%9B%E4%BB%80%E4%B9%88%E8%83%BD%E5%8A%9B%EF%BC%9F"><span class="toc-number">5.1.</span> <span class="toc-text">Q15：你的 GraphRAG 存什么，提供什么能力？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q16%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%94%A8%E6%99%AE%E9%80%9A%E5%90%91%E9%87%8F-RAG-%E6%88%96%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%9F"><span class="toc-number">5.2.</span> <span class="toc-text">Q16：为什么不用普通向量 RAG 或关系型数据库？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q17%EF%BC%9A%E6%96%B9%E6%A1%88%E3%80%81%E5%8F%82%E6%95%B0%E3%80%81%E6%8F%8F%E8%BF%B0%E5%A6%82%E4%BD%95%E5%BB%BA%E6%A8%A1%EF%BC%9F%E5%8F%82%E6%95%B0%E5%80%BC%E6%94%BE%E5%93%AA%E9%87%8C%EF%BC%9F"><span class="toc-number">5.3.</span> <span class="toc-text">Q17：方案、参数、描述如何建模？参数值放哪里？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q18%EF%BC%9A%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86%E5%8F%82%E6%95%B0%E9%87%8D%E5%90%8D%E3%80%81%E5%B9%B3%E5%8F%B0%E5%B7%AE%E5%BC%82%E5%92%8C%E7%89%88%E6%9C%AC%E5%8F%98%E5%8C%96%EF%BC%9F"><span class="toc-number">5.4.</span> <span class="toc-text">Q18：如何处理参数重名、平台差异和版本变化？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q19%EF%BC%9A%E7%9F%A5%E8%AF%86%E5%A6%82%E4%BD%95%E5%85%A5%E5%9B%BE%EF%BC%9F%E6%98%AF%E5%90%A6%E7%94%A8-LLM-%E6%8A%BD%E5%8F%96%EF%BC%9F"><span class="toc-number">5.5.</span> <span class="toc-text">Q19：知识如何入图？是否用 LLM 抽取？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q20%EF%BC%9A%E4%B8%80%E6%AC%A1-GraphRAG-%E6%9F%A5%E8%AF%A2%E5%85%B7%E4%BD%93%E6%80%8E%E4%B9%88%E6%89%A7%E8%A1%8C%EF%BC%9F"><span class="toc-number">5.6.</span> <span class="toc-text">Q20：一次 GraphRAG 查询具体怎么执行？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q21%EF%BC%9ALLM-%E7%9B%B4%E6%8E%A5%E7%94%9F%E6%88%90-Cypher-%E7%AD%89%E5%9B%BE%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5%E5%90%97%EF%BC%9F"><span class="toc-number">5.7.</span> <span class="toc-text">Q21：LLM 直接生成 Cypher 等图查询语句吗？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q22%EF%BC%9A%E6%80%8E%E4%B9%88%E9%81%BF%E5%85%8D%E5%9B%BE%E6%A3%80%E7%B4%A2%E5%86%85%E5%AE%B9%E5%A4%AA%E5%A4%9A%E6%88%96%E4%B8%8D%E7%9B%B8%E5%85%B3%EF%BC%9F"><span class="toc-number">5.8.</span> <span class="toc-text">Q22：怎么避免图检索内容太多或不相关？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q23%EF%BC%9A%E6%B2%A1%E5%8F%AC%E5%9B%9E%E5%88%B0%E5%8F%82%E6%95%B0%EF%BC%8C%E6%88%96%E5%8F%AC%E5%9B%9E%E4%BA%86%E4%B8%8D%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0%EF%BC%8C%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="toc-number">5.9.</span> <span class="toc-text">Q23：没召回到参数，或召回了不相关参数，怎么办？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q24%EF%BC%9A%E4%BD%A0%E7%94%A8%E7%9A%84%E6%98%AF-Microsoft-GraphRAG-%E5%90%97%EF%BC%9F%E6%9C%89%E6%B2%A1%E6%9C%89%E7%A4%BE%E5%8C%BA%E6%91%98%E8%A6%81%EF%BC%9F"><span class="toc-number">5.10.</span> <span class="toc-text">Q24：你用的是 Microsoft GraphRAG 吗？有没有社区摘要？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q34%EF%BC%9A%E5%8F%82%E6%95%B0%E5%90%8D%E6%98%AF%E8%8B%B1%E6%96%87%E7%BC%A9%E5%86%99%EF%BC%8C%E7%94%A8%E6%88%B7%E9%9C%80%E6%B1%82%E6%98%AF%E4%B8%AD%E6%96%87%EF%BC%8C%E6%80%8E%E4%B9%88%E6%A3%80%E7%B4%A2%EF%BC%9F"><span class="toc-number">5.11.</span> <span class="toc-text">Q34：参数名是英文缩写，用户需求是中文，怎么检索？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q35%EF%BC%9A%E6%96%87%E6%A1%A3%E6%80%8E%E4%B9%88%E5%88%87%E5%88%86%EF%BC%9F%E5%8F%82%E6%95%B0%E6%8F%8F%E8%BF%B0%E8%A2%AB%E5%88%87%E6%96%AD%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="toc-number">5.12.</span> <span class="toc-text">Q35：文档怎么切分？参数描述被切断怎么办？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q36%EF%BC%9Aembedding-%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%90%91%E9%87%8F%E7%B4%A2%E5%BC%95%E6%80%8E%E4%B9%88%E9%80%89%EF%BC%9F%E6%8D%A2%E6%A8%A1%E5%9E%8B%E5%A6%82%E4%BD%95%E8%BF%81%E7%A7%BB%EF%BC%9F"><span class="toc-number">5.13.</span> <span class="toc-text">Q36：embedding 模型和向量索引怎么选？换模型如何迁移？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q37%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%EF%BC%9F%E5%A4%9A%E8%B7%AF%E7%BB%93%E6%9E%9C%E5%A6%82%E4%BD%95%E8%9E%8D%E5%90%88%EF%BC%9F"><span class="toc-number">5.14.</span> <span class="toc-text">Q37：为什么混合检索？多路结果如何融合？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q38%EF%BC%9A%E5%8F%AC%E5%9B%9E%E4%B8%8E-rerank-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%AE%A9%E5%A4%A7%E6%A8%A1%E5%9E%8B%E7%9C%8B%E5%85%A8%E9%83%A8%E5%8F%82%E6%95%B0%EF%BC%9F"><span class="toc-number">5.15.</span> <span class="toc-text">Q38：召回与 rerank 有什么区别？为什么不让大模型看全部参数？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q39%EF%BC%9A%E5%9B%BE%E9%87%8C%E4%B8%8E%E7%9B%B8%E5%85%B3%E6%96%B9%E6%A1%88%E7%9B%B8%E8%BF%9E%E7%9A%84%E5%8F%82%E6%95%B0%EF%BC%8C%E5%B0%B1%E4%B8%80%E5%AE%9A%E9%80%82%E5%90%88%E5%BD%93%E5%89%8D%E9%9C%80%E6%B1%82%E5%90%97%EF%BC%9F"><span class="toc-number">5.16.</span> <span class="toc-text">Q39：图里与相关方案相连的参数，就一定适合当前需求吗？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q42%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8-RAG-%E8%80%8C%E4%B8%8D%E6%98%AF%E5%BE%AE%E8%B0%83%EF%BC%9F%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E8%80%83%E8%99%91%E5%BE%AE%E8%B0%83%EF%BC%9F"><span class="toc-number">5.17.</span> <span class="toc-text">Q42：为什么用 RAG 而不是微调？什么时候考虑微调？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q43%EF%BC%9A%E5%A6%82%E4%BD%95%E8%AF%81%E6%98%8E%E6%9F%90%E4%B8%AA%E5%8F%82%E6%95%B0%E5%BD%B1%E5%93%8D%E7%BB%93%E6%9E%9C%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E6%A8%A1%E5%9E%8B%E6%8A%8A%E7%9B%B8%E5%85%B3%E6%80%A7%E5%BD%93%E6%88%90%E5%9B%A0%E6%9E%9C%EF%BC%9F"><span class="toc-number">5.18.</span> <span class="toc-text">Q43：如何证明某个参数影响结果，而不是模型把相关性当成因果？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q44%EF%BC%9A%E6%8D%A2%E5%B9%B3%E5%8F%B0%E6%88%96%E6%8D%A2%E5%8F%82%E6%95%B0%E5%BA%93%EF%BC%8C%E5%93%AA%E4%BA%9B%E8%83%BD%E5%8A%9B%E5%8F%AF%E4%BB%A5%E5%A4%8D%E7%94%A8%EF%BC%9F"><span class="toc-number">5.19.</span> <span class="toc-text">Q44：换平台或换参数库，哪些能力可以复用？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q45%EF%BC%9A%E5%A6%82%E6%9E%9C%E9%87%8D%E6%96%B0%E5%81%9A%E4%B8%80%E6%AC%A1%EF%BC%8C%E4%BD%A0%E4%BC%9A%E7%AE%80%E5%8C%96%E5%93%AA%E4%B8%AA%E7%BB%84%E4%BB%B6%EF%BC%9F"><span class="toc-number">5.20.</span> <span class="toc-text">Q45：如果重新做一次，你会简化哪个组件？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%A8%A1%E5%9E%8B%E6%8E%A5%E5%85%A5%E3%80%81%E8%AE%A1%E5%88%92%E4%BA%A4%E6%8E%A5%E4%B8%8E%E5%B7%A5%E5%85%B7%E6%89%A7%E8%A1%8C"><span class="toc-number">6.</span> <span class="toc-text">三、模型接入、计划交接与工具执行</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Q08%EF%BC%9AQGenie-%E5%A6%82%E4%BD%95%E6%8E%A5%E5%85%A5%EF%BC%9F%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E6%A8%A1%E5%9E%8B%EF%BC%9F"><span class="toc-number">6.1.</span> <span class="toc-text">Q08：QGenie 如何接入？如何选择模型？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q09%EF%BC%9AFunction-Calling-%E7%9A%84%E5%AE%8C%E6%95%B4%E8%BF%87%E7%A8%8B%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">6.2.</span> <span class="toc-text">Q09：Function Calling 的完整过程是什么？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q10%EF%BC%9A%E5%B7%A5%E5%85%B7%E6%8E%A5%E5%8F%A3%E6%80%8E%E4%B9%88%E8%AE%BE%E8%AE%A1%EF%BC%9F%E7%B2%92%E5%BA%A6%E5%A4%9A%E5%A4%A7%E5%90%88%E9%80%82%EF%BC%9F"><span class="toc-number">6.3.</span> <span class="toc-text">Q10：工具接口怎么设计？粒度多大合适？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q11%EF%BC%9ARAG-%E5%8F%AC%E5%9B%9E%E5%8F%82%E6%95%B0%E4%BB%A5%E5%90%8E%EF%BC%8C%E6%80%8E%E6%A0%B7%E6%8E%A5%E4%B8%8A%E7%8E%B0%E6%9C%89%E6%B5%81%E7%A8%8B%EF%BC%9F"><span class="toc-number">6.4.</span> <span class="toc-text">Q11：RAG 召回参数以后，怎样接上现有流程？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q12%EF%BC%9A%E7%A1%AC%E4%BB%B6%E5%AE%9E%E9%AA%8C%E8%80%97%E6%97%B6%E8%BE%83%E9%95%BF%EF%BC%8CAgent-%E6%80%8E%E4%B9%88%E7%AD%89%E5%BE%85%EF%BC%9F"><span class="toc-number">6.5.</span> <span class="toc-text">Q12：硬件实验耗时较长，Agent 怎么等待？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q13%EF%BC%9A%E8%B6%85%E6%97%B6%E5%90%8E%E9%87%8D%E8%AF%95%EF%BC%8C%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%EF%BC%9F"><span class="toc-number">6.6.</span> <span class="toc-text">Q13：超时后重试，如何避免重复执行？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q14%EF%BC%9A%E7%8E%B0%E6%9C%89%E6%B5%81%E7%A8%8B%E7%9A%84%E8%AF%84%E6%B5%8B%E7%BB%93%E6%9E%9C%E5%A6%82%E4%BD%95%E8%BF%94%E5%9B%9E%EF%BC%9F%E4%BC%9A%E5%86%8D%E6%AC%A1%E8%BF%9B%E5%85%A5-RAG-%E5%90%97%EF%BC%9F"><span class="toc-number">6.7.</span> <span class="toc-text">Q14：现有流程的评测结果如何返回？会再次进入 RAG 吗？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q52%EF%BC%9A%E5%A6%82%E4%BD%95%E7%BB%9F%E4%B8%80%E6%8E%A5%E5%85%A5%E5%A4%9A%E4%B8%AA%E6%A8%A1%E5%9E%8B%EF%BC%8C%E5%A4%84%E7%90%86%E9%99%90%E6%B5%81%E4%B8%8E%E6%95%85%E9%9A%9C%E5%88%87%E6%8D%A2%EF%BC%9F"><span class="toc-number">6.8.</span> <span class="toc-text">Q52：如何统一接入多个模型，处理限流与故障切换？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q53%EF%BC%9A%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E3%80%81%E8%B0%83%E8%AF%95%E5%92%8C%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%EF%BC%9F"><span class="toc-number">6.9.</span> <span class="toc-text">Q53：提示词如何设计、调试和版本管理？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q54%EF%BC%9AFunction-Calling-%E5%92%8C-MCP-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F%E8%BF%99%E9%87%8C%E9%9C%80%E8%A6%81-MCP-%E5%90%97%EF%BC%9F"><span class="toc-number">6.10.</span> <span class="toc-text">Q54：Function Calling 和 MCP 有什么区别？这里需要 MCP 吗？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%8F%AF%E9%9D%A0%E6%80%A7%E4%B8%8E-HIL-%E4%BA%BA%E5%B7%A5%E4%BB%8B%E5%85%A5"><span class="toc-number">7.</span> <span class="toc-text">四、工作流可靠性与 HIL 人工介入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Q26%EF%BC%9AAgent-%E6%97%A0%E9%99%90%E5%BE%AA%E7%8E%AF%E3%80%81%E6%B2%A1%E6%9C%89%E8%BF%9B%E5%B1%95%E6%97%B6%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="toc-number">7.1.</span> <span class="toc-text">Q26：Agent 无限循环、没有进展时怎么办？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q27%EF%BC%9A%E5%B7%A5%E4%BD%9C%E6%B5%81%E4%B8%AD%E9%80%94%E9%87%8D%E5%90%AF%EF%BC%8C%E6%80%8E%E4%B9%88%E6%81%A2%E5%A4%8D%EF%BC%9F"><span class="toc-number">7.2.</span> <span class="toc-text">Q27：工作流中途重启，怎么恢复？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q28%EF%BC%9A%E6%80%8E%E4%B9%88%E9%98%B2%E6%AD%A2%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%B3%A8%E5%85%A5%E5%92%8C%E8%B6%8A%E6%9D%83%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%EF%BC%9F"><span class="toc-number">7.3.</span> <span class="toc-text">Q28：怎么防止提示词注入和越权工具调用？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q33%EF%BC%9AHIL-%E5%BA%94%E8%AF%A5%E6%8E%A5%E5%9C%A8%E5%93%AA%E9%87%8C%EF%BC%9F%E5%A6%82%E4%BD%95%E7%94%A8-LangGraph-%E5%AE%9E%E7%8E%B0%E4%BA%BA%E5%B7%A5%E4%BB%8B%E5%85%A5%EF%BC%9F"><span class="toc-number">7.4.</span> <span class="toc-text">Q33：HIL 应该接在哪里？如何用 LangGraph 实现人工介入？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%B8%8A%E4%B8%8B%E6%96%87%E3%80%81%E8%BF%90%E8%A1%8C%E6%97%B6%E5%86%85%E5%AD%98%E4%B8%8E%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86"><span class="toc-number">8.</span> <span class="toc-text">五、上下文、运行时内存与长期记忆</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Q70%EF%BC%9A%E5%86%85%E5%AD%98%E3%80%81%E4%B8%8A%E4%B8%8B%E6%96%87%E3%80%81State%E3%80%81%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E5%92%8C-KV-cache-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="toc-number">8.1.</span> <span class="toc-text">Q70：内存、上下文、State、长期记忆和 KV cache 有什么区别？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q25%EF%BC%9A%E5%8E%86%E5%8F%B2%E4%B8%8D%E6%96%AD%E5%A2%9E%E5%8A%A0%EF%BC%8C%E5%A6%82%E4%BD%95%E6%8E%A7%E5%88%B6%E4%B8%8A%E4%B8%8B%E6%96%87%EF%BC%9F"><span class="toc-number">8.2.</span> <span class="toc-text">Q25：历史不断增加，如何控制上下文？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q72%EF%BC%9A%E5%AF%B9%E8%AF%9D%E5%92%8C%E5%AE%9E%E9%AA%8C%E5%8E%86%E5%8F%B2%E8%B6%8A%E6%9D%A5%E8%B6%8A%E9%95%BF%EF%BC%8C%E6%80%8E%E4%B9%88%E6%8E%A7%E5%88%B6%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AA%97%E5%8F%A3%EF%BC%9F"><span class="toc-number">8.3.</span> <span class="toc-text">Q72：对话和实验历史越来越长，怎么控制上下文窗口？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q76%EF%BC%9ALangGraph-State%E3%80%81checkpoint-%E5%92%8C%E8%B7%A8%E4%BC%9A%E8%AF%9D%E8%AE%B0%E5%BF%86%E6%80%8E%E4%B9%88%E9%85%8D%E5%90%88%EF%BC%9F"><span class="toc-number">8.4.</span> <span class="toc-text">Q76：LangGraph State、checkpoint 和跨会话记忆怎么配合？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q73%EF%BC%9A%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E5%BA%94%E8%AF%A5%E5%AD%98%E4%BB%80%E4%B9%88%EF%BC%9F%E6%80%8E%E4%B9%88%E5%86%B3%E5%AE%9A%E5%86%99%E5%85%A5%E5%92%8C%E8%AF%BB%E5%8F%96%EF%BC%9F"><span class="toc-number">8.5.</span> <span class="toc-text">Q73：长期记忆应该存什么？怎么决定写入和读取？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q74%EF%BC%9A%E6%96%B0%E6%97%A7%E8%AE%B0%E5%BF%86%E5%86%B2%E7%AA%81%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F%E7%94%A8%E6%88%B7%E6%94%B9%E5%8F%A3%E4%BB%A5%E5%90%8E%E5%A6%82%E4%BD%95%E9%98%B2%E6%AD%A2%E6%97%A7%E8%AE%B0%E5%BF%86%E7%BB%A7%E7%BB%AD%E5%BD%B1%E5%93%8D%EF%BC%9F"><span class="toc-number">8.6.</span> <span class="toc-text">Q74：新旧记忆冲突怎么办？用户改口以后如何防止旧记忆继续影响？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q75%EF%BC%9A%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E5%A6%82%E4%BD%95%E5%81%9A%E9%9A%94%E7%A6%BB%E3%80%81%E8%BF%87%E6%9C%9F%E5%92%8C%E5%88%A0%E9%99%A4%EF%BC%9F"><span class="toc-number">8.7.</span> <span class="toc-text">Q75：长期记忆如何做隔离、过期和删除？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q77%EF%BC%9A%E5%A6%82%E4%BD%95%E8%AF%84%E4%BB%B7%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F%E6%9C%89%E6%95%88%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E2%80%9C%E5%AD%98%E5%BE%97%E8%B6%8A%E5%A4%9A%E8%B6%8A%E5%A5%BD%E2%80%9D%EF%BC%9F"><span class="toc-number">8.8.</span> <span class="toc-text">Q77：如何评价记忆系统有效，而不是“存得越多越好”？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q71%EF%BC%9AAgent-%E6%9C%8D%E5%8A%A1%E8%B7%91%E4%B9%85%E4%BA%86%E5%86%85%E5%AD%98%E6%8C%81%E7%BB%AD%E4%B8%8A%E6%B6%A8%EF%BC%8C%E6%80%8E%E4%B9%88%E5%AE%9A%E4%BD%8D%E5%92%8C%E5%A4%84%E7%90%86%EF%BC%9F"><span class="toc-number">8.9.</span> <span class="toc-text">Q71：Agent 服务跑久了内存持续上涨，怎么定位和处理？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q78%EF%BC%9A%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%E6%98%BE%E5%AD%98%E5%92%8C%E5%BA%94%E7%94%A8%E5%86%85%E5%AD%98%E5%A6%82%E4%BD%95%E6%8E%A7%E5%88%B6%EF%BC%9FKV-cache-%E7%AE%97%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E5%90%97%EF%BC%9F"><span class="toc-number">8.10.</span> <span class="toc-text">Q78：模型推理显存和应用内存如何控制？KV cache 算长期记忆吗？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q79%EF%BC%9A%E5%A6%82%E4%BD%95%E6%8A%8A%E5%86%85%E5%AD%98%E5%92%8C%E8%AE%B0%E5%BF%86%E7%AE%A1%E7%90%86%E5%BA%94%E7%94%A8%E5%88%B0-Camera-Agent-%E6%88%96-Hermes-%E4%BD%BF%E7%94%A8%E7%BB%8F%E9%AA%8C%E4%B8%AD%EF%BC%9F"><span class="toc-number">8.11.</span> <span class="toc-text">Q79：如何把内存和记忆管理应用到 Camera Agent 或 Hermes 使用经验中？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81Python-%E6%9C%8D%E5%8A%A1%E5%8C%96%E3%80%81%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%B7%A5%E7%A8%8B%E4%BA%A4%E4%BB%98"><span class="toc-number">9.</span> <span class="toc-text">六、Python 服务化、并发与工程交付</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Q46%EF%BC%9A%E5%A6%82%E4%BD%95%E6%8A%8A%E8%BF%99%E4%B8%AA%E7%B3%BB%E7%BB%9F%E5%81%9A%E6%88%90%E5%8F%AF%E4%BE%9B%E5%89%8D%E7%AB%AF%E8%B0%83%E7%94%A8%E7%9A%84%E6%9C%8D%E5%8A%A1%EF%BC%9F"><span class="toc-number">9.1.</span> <span class="toc-text">Q46：如何把这个系统做成可供前端调用的服务？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q47%EF%BC%9APython-async-await%E3%80%81%E7%BA%BF%E7%A8%8B%E5%92%8C%E8%BF%9B%E7%A8%8B%E6%80%8E%E4%B9%88%E9%80%89%EF%BC%9F"><span class="toc-number">9.2.</span> <span class="toc-text">Q47：Python async&#x2F;await、线程和进程怎么选？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q48%EF%BC%9A%E6%95%B0%E6%8D%AE%E5%BA%93%E5%86%99%E4%BB%BB%E5%8A%A1%E5%92%8C%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%8F%91%E4%BB%BB%E5%8A%A1%EF%BC%8C%E6%80%8E%E6%A0%B7%E4%BF%9D%E6%8C%81%E4%B8%80%E8%87%B4%EF%BC%9F"><span class="toc-number">9.3.</span> <span class="toc-text">Q48：数据库写任务和消息队列发任务，怎样保持一致？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q49%EF%BC%9A%E6%80%8E%E4%B9%88%E7%BB%99%E5%89%8D%E7%AB%AF%E5%AE%9E%E6%97%B6%E6%98%BE%E7%A4%BA%E8%BF%9B%E5%BA%A6%EF%BC%9FSSE-%E4%B8%8E-WebSocket-%E5%A6%82%E4%BD%95%E9%80%89%EF%BC%9F"><span class="toc-number">9.4.</span> <span class="toc-text">Q49：怎么给前端实时显示进度？SSE 与 WebSocket 如何选？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q50%EF%BC%9A%E5%A4%9A%E4%BA%BA%E4%BD%BF%E7%94%A8%E6%97%B6%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E5%92%8C%E4%BB%BB%E5%8A%A1%E6%9D%83%E9%99%90%E9%9A%94%E7%A6%BB%EF%BC%9F"><span class="toc-number">9.5.</span> <span class="toc-text">Q50：多人使用时如何保证数据和任务权限隔离？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q51%EF%BC%9A%E5%93%AA%E4%BA%9B%E5%86%85%E5%AE%B9%E5%8F%AF%E4%BB%A5%E7%BC%93%E5%AD%98%EF%BC%9F%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%91%BD%E4%B8%AD%E9%94%99%E8%AF%AF%E7%BB%93%E6%9E%9C%EF%BC%9F"><span class="toc-number">9.6.</span> <span class="toc-text">Q51：哪些内容可以缓存？如何避免命中错误结果？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q55%EF%BC%9A%E5%A6%82%E6%9E%9C%E8%AE%A9%E6%A8%A1%E5%9E%8B%E5%90%8C%E6%97%B6%E7%9C%8B%E5%9B%BE%E7%89%87%E5%92%8C-QCATS-%E6%8A%A5%E5%91%8A%EF%BC%8C%E6%80%8E%E4%B9%88%E8%AE%BE%E8%AE%A1%EF%BC%9F"><span class="toc-number">9.7.</span> <span class="toc-text">Q55：如果让模型同时看图片和 QCATS 报告，怎么设计？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q56%EF%BC%9A%E5%A6%82%E4%BD%95%E9%83%A8%E7%BD%B2%E3%80%81%E6%B5%8B%E8%AF%95%E5%B9%B6%E5%8F%91%E5%B8%83%E4%B8%80%E4%B8%AA-AI-%E5%BA%94%E7%94%A8%E7%89%88%E6%9C%AC%EF%BC%9F"><span class="toc-number">9.8.</span> <span class="toc-text">Q56：如何部署、测试并发布一个 AI 应用版本？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q57%EF%BC%9AAI-%E5%BA%94%E7%94%A8%E5%B7%A5%E7%A8%8B%E5%B8%88%E9%9C%80%E8%A6%81%E6%8E%8C%E6%8F%A1%E5%93%AA%E4%BA%9B%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%E5%9F%BA%E7%A1%80%EF%BC%9F"><span class="toc-number">9.9.</span> <span class="toc-text">Q57：AI 应用工程师需要掌握哪些模型推理基础？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%95%88%E6%9E%9C%E8%AF%84%E6%B5%8B%E3%80%81%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90%E4%B8%8E%E6%88%90%E6%9C%AC%E4%BC%98%E5%8C%96"><span class="toc-number">10.</span> <span class="toc-text">七、效果评测、性能分析与成本优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Q29%EF%BC%9A%E5%A6%82%E4%BD%95%E8%AF%81%E6%98%8E-GraphRAG-%E9%99%8D%E4%BD%8E%E5%B9%BB%E8%A7%89%E3%80%81%E6%8F%90%E9%AB%98%E5%87%86%E7%A1%AE%E6%80%A7%EF%BC%9F"><span class="toc-number">10.1.</span> <span class="toc-text">Q29：如何证明 GraphRAG 降低幻觉、提高准确性？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q30%EF%BC%9A%E5%A6%82%E4%BD%95%E8%AF%84%E6%B5%8B%E6%95%B4%E4%B8%AA-Agent%EF%BC%8C%E8%80%8C%E4%B8%8D%E4%BB%85%E6%98%AF-RAG%EF%BC%9F"><span class="toc-number">10.2.</span> <span class="toc-text">Q30：如何评测整个 Agent，而不仅是 RAG？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q31%EF%BC%9A%E5%87%BA%E9%97%AE%E9%A2%98%E5%A6%82%E4%BD%95%E6%8E%92%E6%9F%A5%EF%BC%9F%E6%A8%A1%E5%9E%8B%E5%8D%87%E7%BA%A7%E5%A6%82%E4%BD%95%E5%9B%9E%E5%BD%92%EF%BC%9F"><span class="toc-number">10.3.</span> <span class="toc-text">Q31：出问题如何排查？模型升级如何回归？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q32%EF%BC%9A%E6%80%8E%E4%B9%88%E9%99%8D%E4%BD%8E%E6%88%90%E6%9C%AC%E5%92%8C%E5%BB%B6%E8%BF%9F%EF%BC%9F%E9%A1%B9%E7%9B%AE%E9%9A%BE%E7%82%B9%E6%80%8E%E4%B9%88%E8%AE%B2%EF%BC%9F"><span class="toc-number">10.4.</span> <span class="toc-text">Q32：怎么降低成本和延迟？项目难点怎么讲？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#P01%EF%BC%9A%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%E2%80%9C%E4%BD%A0%E6%80%8E%E4%B9%88%E8%AF%84%E6%B5%8B%E6%95%B4%E4%B8%AA%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%80%A7%E8%83%BD%E2%80%9D%EF%BC%8C%E6%80%8E%E4%B9%88%E5%AE%8C%E6%95%B4%E5%9B%9E%E7%AD%94%EF%BC%9F"><span class="toc-number">10.5.</span> <span class="toc-text">P01：面试官问“你怎么评测整个系统的性能”，怎么完整回答？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#P02%EF%BC%9A%E8%BF%99%E4%BA%9B%E6%8C%87%E6%A0%87%E6%80%8E%E4%B9%88%E8%AE%A1%E7%AE%97%EF%BC%9F%E2%80%9C%E6%88%90%E5%8A%9F%E7%8E%87%E2%80%9D%E5%88%86%E6%AF%8D%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">10.6.</span> <span class="toc-text">P02：这些指标怎么计算？“成功率”分母是什么？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#P03%EF%BC%9A%E7%AB%AF%E5%88%B0%E7%AB%AF%E5%BB%B6%E8%BF%9F%E5%A6%82%E4%BD%95%E6%B5%8B%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E7%9C%8B-P95%EF%BC%9F"><span class="toc-number">10.7.</span> <span class="toc-text">P03：端到端延迟如何测？为什么看 P95？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#P04%EF%BC%9A%E6%80%8E%E4%B9%88%E5%81%9A%E5%B9%B6%E5%8F%91%E5%92%8C%E5%90%9E%E5%90%90%E9%87%8F%E6%B5%8B%E8%AF%95%EF%BC%9F%E7%A1%AC%E4%BB%B6%E4%B8%8D%E5%A4%9F%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="toc-number">10.8.</span> <span class="toc-text">P04：怎么做并发和吞吐量测试？硬件不够怎么办？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#P05%EF%BC%9A%E8%AF%84%E6%B5%8B%E6%95%B0%E6%8D%AE%E9%9B%86%E5%92%8C%E5%AF%B9%E7%85%A7%E5%AE%9E%E9%AA%8C%E6%80%8E%E4%B9%88%E8%AE%BE%E8%AE%A1%EF%BC%9F"><span class="toc-number">10.9.</span> <span class="toc-text">P05：评测数据集和对照实验怎么设计？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#P06%EF%BC%9A%E7%B3%BB%E7%BB%9F%E5%8F%AF%E9%9D%A0%E6%80%A7%E6%80%8E%E4%B9%88%E6%B5%8B%EF%BC%9F"><span class="toc-number">10.10.</span> <span class="toc-text">P06：系统可靠性怎么测？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#P07%EF%BC%9A%E6%80%8E%E4%B9%88%E7%BB%9F%E8%AE%A1%E6%88%90%E6%9C%AC%EF%BC%8C%E5%A6%82%E4%BD%95%E5%86%B3%E5%AE%9A%E5%85%88%E4%BC%98%E5%8C%96%E5%93%AA%E9%87%8C%EF%BC%9F"><span class="toc-number">10.11.</span> <span class="toc-text">P07：怎么统计成本，如何决定先优化哪里？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#P08%EF%BC%9A%E6%B2%A1%E6%9C%89%E5%AE%8C%E6%95%B4%E7%BA%BF%E4%B8%8A%E6%95%B0%E6%8D%AE%EF%BC%8C%E9%9D%A2%E8%AF%95%E6%97%B6%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E5%9B%9E%E7%AD%94%E2%80%9C%E6%95%88%E6%9E%9C%E6%80%8E%E4%B9%88%E6%A0%B7%E2%80%9D%EF%BC%9F"><span class="toc-number">10.12.</span> <span class="toc-text">P08：没有完整线上数据，面试时应该怎么回答“效果怎么样”？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81Harness-Engineering-%E9%A9%BE%E9%A9%AD%E5%B7%A5%E7%A8%8B"><span class="toc-number">11.</span> <span class="toc-text">八、Harness Engineering 驾驭工程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Q58%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AF-Harness-Engineering%EF%BC%9F%E5%92%8C%E5%86%99%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="toc-number">11.1.</span> <span class="toc-text">Q58：什么是 Harness Engineering？和写提示词有什么区别？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q59%EF%BC%9A%E4%BD%A0%E7%9A%84-Camera-Agent-%E9%A1%B9%E7%9B%AE%E6%9C%89%E5%93%AA%E4%BA%9B-Harness-Engineering-%E5%AE%9E%E8%B7%B5%EF%BC%9F"><span class="toc-number">11.2.</span> <span class="toc-text">Q59：你的 Camera Agent 项目有哪些 Harness Engineering 实践？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q60%EF%BC%9A%E5%90%8C%E4%B8%80%E4%B8%AA%E6%A8%A1%E5%9E%8B%E6%8D%A2%E4%BA%86-Harness%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A1%A8%E7%8E%B0%E4%BC%9A%E5%B7%AE%E5%BE%88%E5%A4%9A%EF%BC%9F%E6%80%8E%E4%B9%88%E8%AF%81%E6%98%8E%EF%BC%9F"><span class="toc-number">11.3.</span> <span class="toc-text">Q60：同一个模型换了 Harness，为什么表现会差很多？怎么证明？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q61%EF%BC%9A%E5%A6%82%E6%9E%9C%E7%94%A8-Agent-%E5%86%99%E4%BB%A3%E7%A0%81%EF%BC%8C%E6%80%8E%E6%A0%B7%E8%AE%BE%E8%AE%A1%E4%BB%93%E5%BA%93%E5%92%8C%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%EF%BC%9F"><span class="toc-number">11.4.</span> <span class="toc-text">Q61：如果用 Agent 写代码，怎样设计仓库和开发环境？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q62%EF%BC%9A%E6%80%8E%E6%A0%B7%E6%8A%8A%E4%B8%80%E6%AC%A1%E6%88%90%E5%8A%9F%E7%BB%8F%E9%AA%8C%E6%B2%89%E6%B7%80%E6%88%90%E5%8F%AF%E5%A4%8D%E7%94%A8%E8%83%BD%E5%8A%9B%EF%BC%9F"><span class="toc-number">11.5.</span> <span class="toc-text">Q62：怎样把一次成功经验沉淀成可复用能力？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q63%EF%BC%9A%E5%A6%82%E4%BD%95%E8%AF%84%E4%BB%B7%E8%87%AA%E5%B7%B1%E2%80%9C%E9%A9%BE%E9%A9%AD-Agent%E2%80%9D%E7%9A%84%E8%83%BD%E5%8A%9B%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E5%8F%AA%E8%AF%B4%E4%BC%9A%E7%94%A8%E5%B7%A5%E5%85%B7%EF%BC%9F"><span class="toc-number">11.6.</span> <span class="toc-text">Q63：如何评价自己“驾驭 Agent”的能力，而不是只说会用工具？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81Hermes-Agent-%E4%BD%BF%E7%94%A8%E4%B8%8E%E8%BF%81%E7%A7%BB%E7%BB%8F%E9%AA%8C"><span class="toc-number">12.</span> <span class="toc-text">九、Hermes Agent 使用与迁移经验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Q64%EF%BC%9AHermes-Agent-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F%E5%AE%83%E5%92%8C-LangGraph-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="toc-number">12.1.</span> <span class="toc-text">Q64：Hermes Agent 是什么？它和 LangGraph 有什么区别？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q65%EF%BC%9A%E4%BD%A0%E5%85%B7%E4%BD%93%E7%94%A8-Hermes-%E5%81%9A%E8%BF%87%E4%BB%80%E4%B9%88%EF%BC%9F%E4%BD%A0%E8%87%AA%E5%B7%B1%E7%9A%84%E8%B4%A1%E7%8C%AE%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">12.2.</span> <span class="toc-text">Q65：你具体用 Hermes 做过什么？你自己的贡献是什么？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q66%EF%BC%9AHermes-%E7%9A%84-Skills%E3%80%81%E8%AE%B0%E5%BF%86%E5%92%8C-RAG-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="toc-number">12.3.</span> <span class="toc-text">Q66：Hermes 的 Skills、记忆和 RAG 有什么区别？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q67%EF%BC%9AHermes-%E5%AE%A3%E7%A7%B0%E4%BC%9A%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0%EF%BC%8C%E6%98%AF%E5%90%A6%E6%84%8F%E5%91%B3%E7%9D%80%E5%AE%83%E5%9C%A8%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B%EF%BC%9F"><span class="toc-number">12.4.</span> <span class="toc-text">Q67：Hermes 宣称会持续学习，是否意味着它在训练模型？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q68%EF%BC%9AHermes-%E7%9A%84%E5%B7%A5%E5%85%B7%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%92%8C%E8%87%AA%E5%8A%A8%E5%8C%96%E8%83%BD%E5%8A%9B%EF%BC%8C%E4%BD%A0%E4%BC%9A%E6%80%8E%E4%B9%88%E8%AF%84%E4%BC%B0%EF%BC%9F"><span class="toc-number">12.5.</span> <span class="toc-text">Q68：Hermes 的工具执行环境和自动化能力，你会怎么评估？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q69%EF%BC%9A%E5%A6%82%E6%9E%9C%E5%B0%86-Hermes-%E7%9A%84%E7%BB%8F%E9%AA%8C%E5%BC%95%E5%85%A5-Camera-Agent%EF%BC%8C%E4%BD%A0%E4%BC%9A%E6%80%8E%E4%B9%88%E5%81%9A%EF%BC%9F"><span class="toc-number">12.6.</span> <span class="toc-text">Q69：如果将 Hermes 的经验引入 Camera Agent，你会怎么做？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E9%9D%A2%E8%AF%95%E5%89%8D%E9%9C%80%E8%A6%81%E8%A1%A5%E9%BD%90%E7%9A%84%E8%AF%81%E6%8D%AE"><span class="toc-number">13.</span> <span class="toc-text">十、面试前需要补齐的证据</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E8%BF%99%E4%BB%BD%E8%AF%81%E6%8D%AE%E6%B8%85%E5%8D%95"><span class="toc-number">13.1.</span> <span class="toc-text">如何使用这份证据清单</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E4%B8%AA%E5%AE%B9%E6%98%93%E6%B7%B7%E6%B7%86%E7%9A%84%E8%A1%A8%E8%BF%B0"><span class="toc-number">13.2.</span> <span class="toc-text">三个容易混淆的表述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8E%E5%BD%93%E5%89%8D%E9%93%BE%E8%B7%AF%E4%B8%80%E8%87%B4%E7%9A%84%E7%AE%80%E5%8E%86%E8%A1%A8%E8%BF%B0"><span class="toc-number">13.3.</span> <span class="toc-text">与当前链路一致的简历表述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E5%90%8E%E8%87%AA%E6%B5%8B%E9%A2%98"><span class="toc-number">13.4.</span> <span class="toc-text">最后自测题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E5%B2%97%E4%BD%8D%E8%A6%81%E6%B1%82%E4%B8%8E%E5%A4%87%E8%80%83%E8%AF%81%E6%8D%AE%E5%AF%B9%E7%85%A7"><span class="toc-number">14.</span> <span class="toc-text">十一、岗位要求与备考证据对照</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81-JD-%E6%96%B9%E5%90%91%E4%B8%8E%E6%9C%AC%E6%89%8B%E5%86%8C%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB"><span class="toc-number">14.1.</span> <span class="toc-text">常见 JD 方向与本手册对应关系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E6%8C%89-JD-%E8%B0%83%E6%95%B4%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-number">14.2.</span> <span class="toc-text">如何按 JD 调整优先级</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%BA%E8%AE%AE%E5%87%86%E5%A4%87%E7%9A%84%E5%9B%9B%E4%B8%AA%E5%8F%AF%E6%BC%94%E7%A4%BA%E4%BB%BB%E5%8A%A1"><span class="toc-number">14.3.</span> <span class="toc-text">建议准备的四个可演示任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94%E6%97%B6%E7%9A%84%E7%BB%9F%E4%B8%80%E7%BB%93%E6%9E%84"><span class="toc-number">14.4.</span> <span class="toc-text">回答时的统一结构</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/10/07/camera-tuning-agent-interview/" title="Camera Tuning Agent 面试问答：LangGraph、GraphRAG 与全流程性能评测（87 题）"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="Camera Tuning Agent 面试问答：LangGraph、GraphRAG 与全流程性能评测（87 题）"/></a><div class="content"><a class="title" href="/2026/10/07/camera-tuning-agent-interview/" title="Camera Tuning Agent 面试问答：LangGraph、GraphRAG 与全流程性能评测（87 题）">Camera Tuning Agent 面试问答：LangGraph、GraphRAG 与全流程性能评测（87 题）</a><time datetime="2026-10-07T04:00:00.000Z" title="发表于 2026-10-07 12:00:00">2026-10-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/24/camx-driver-claude-code/" title="项目介绍：CamX 摄像头传感器驱动智能生成与调优助手"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="项目介绍：CamX 摄像头传感器驱动智能生成与调优助手"/></a><div class="content"><a class="title" href="/2026/09/24/camx-driver-claude-code/" title="项目介绍：CamX 摄像头传感器驱动智能生成与调优助手">项目介绍：CamX 摄像头传感器驱动智能生成与调优助手</a><time datetime="2026-09-24T02:00:00.000Z" title="发表于 2026-09-24 10:00:00">2026-09-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/08/28/ai-agent-interview/" title="AI Agent 工程师面试详解手册（图解 + 30 道高频题）"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="AI Agent 工程师面试详解手册（图解 + 30 道高频题）"/></a><div class="content"><a class="title" href="/2026/08/28/ai-agent-interview/" title="AI Agent 工程师面试详解手册（图解 + 30 道高频题）">AI Agent 工程师面试详解手册（图解 + 30 道高频题）</a><time datetime="2026-08-28T07:00:00.000Z" title="发表于 2026-08-28 15:00:00">2026-08-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="大模型（LLMs）面试题全集精选"/></a><div class="content"><a class="title" href="/2026/06/04/llm-interview-questions/" title="大模型（LLMs）面试题全集精选">大模型（LLMs）面试题全集精选</a><time datetime="2026-06-04T12:00:00.000Z" title="发表于 2026-06-04 20:00:00">2026-06-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&amp;q=80" onerror="this.onerror=null;this.src='/'" alt="互联网公司面试题合集"/></a><div class="content"><a class="title" href="/2026/06/04/interview-questions/" title="互联网公司面试题合集">互联网公司面试题合集</a><time datetime="2026-06-04T08:00:00.000Z" title="发表于 2026-06-04 16:00:00">2026-06-04</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2018 - 2026 By 刘元</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.iife.min.js"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="0, 180, 216" opacity="0.6" zIndex="-1" count="99" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
